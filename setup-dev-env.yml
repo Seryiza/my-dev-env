@@ -1,0 +1,19 @@
+- hosts: all
+  tasks:
+    - name: Update apt packages
+      become: true
+      apt:
+        update_cache: true
+        upgrade: true
+
+    - name: Install Pacstall
+      become: true
+      shell:
+        # Don't install axel
+        stdin: n
+        creates: /usr/bin/pacstall
+        cmd: bash -c "$(curl -fsSL https://git.io/JsADh || wget -q https://git.io/JsADh -O -)"
+
+    - name: Install NeoVim
+      command:
+        cmd: pacstall -I neovim
