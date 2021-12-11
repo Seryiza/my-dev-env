@@ -1,4 +1,8 @@
 - hosts: all
+  vars:
+    brew_bin_dir: /home/linuxbrew/.linuxbrew/bin
+    brew: '{{brew_bin_dir}}/brew'
+
   tasks:
     - name: Update apt packages
       become: true
@@ -6,14 +10,12 @@
         update_cache: true
         upgrade: true
 
-    - name: Install Pacstall
-      become: true
+    - name: Install Homebrew
       shell:
-        # Don't install axel
-        stdin: n
-        creates: /usr/bin/pacstall
-        cmd: bash -c "$(curl -fsSL https://git.io/JsADh || wget -q https://git.io/JsADh -O -)"
+        creates: '{{brew_bin_dir}}/brew'
+        cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     - name: Install NeoVim
       command:
-        cmd: pacstall -I neovim
+        creates: '{{brew_bin_dir}}/nvim'
+        cmd: '{{brew}} install neovim'
