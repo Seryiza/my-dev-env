@@ -4,7 +4,7 @@ My developer environment based on Ansible, Ubuntu.
 ## Setup
 ```bash
 # if you don't have ansible, the script will install it
-./install.sh
+./sync-dev-env.sh
 ```
 
 ## Developer environment development
