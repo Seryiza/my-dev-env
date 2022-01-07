@@ -4,7 +4,9 @@
     brew: '{{brew_bin_dir}}/brew'
 
   roles:
+    - homebrew
     - chrome
+    - neovim
 
   tasks:
     - name: Update apt packages
@@ -12,13 +14,4 @@
       apt:
         update_cache: true
         upgrade: true
-
-    - name: Install Homebrew
-      shell:
-        creates: '{{brew_bin_dir}}/brew'
-        cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    - name: Install NeoVim
-      command:
-        creates: '{{brew_bin_dir}}/nvim'
-        cmd: '{{brew}} install neovim'
+    
