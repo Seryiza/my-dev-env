@@ -3,6 +3,9 @@
     brew_bin_dir: /home/linuxbrew/.linuxbrew/bin
     brew: '{{brew_bin_dir}}/brew'
 
+  roles:
+    - chrome
+
   tasks:
     - name: Update apt packages
       become: true
@@ -19,20 +22,3 @@
       command:
         creates: '{{brew_bin_dir}}/nvim'
         cmd: '{{brew}} install neovim'
-
-    - name: Add Google Chrome key
-      become: true
-      apt_key:
-        url: https://dl.google.com/linux/linux_signing_key.pub
-        keyring: /etc/apt/trusted.gpg.d/google-chrome.gpg
-
-    - name: Add Google Chrome apt repository
-      become: true
-      apt_repository:
-        repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
-        filename: google-chrome
-
-    - name: Install Google Chrome
-      become: true
-      apt:
-        name: google-chrome-stable

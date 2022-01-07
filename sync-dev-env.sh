@@ -14,9 +14,9 @@ fi
 if [ -f ./passwords.yml ] && [ -f ./vault-password ]
 then
     # Run playbook with passwords from vault
-    ansible-playbook -i hosts -e @passwords.yml --vault-password-file vault-password dev-env.yml
+    ansible-playbook -i hosts -e @passwords.yml --vault-password-file vault-password dev-env/playbook.yml
 else
     # Run playbook with password from prompt
-    ansible-playbook -i hosts --ask-become-pass dev-env.yml
+    ansible-playbook -i hosts --ask-become-pass dev-env/playbook.yml
 fi
 
