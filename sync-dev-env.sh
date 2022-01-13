@@ -6,9 +6,9 @@ cd `dirname "$0"`
 if !command -v ansible &> /dev/null
 then
     sudo apt update
-	sudo apt install software-properties-common
-	sudo add-apt-repository --yes --update ppa:ansible/ansible
-	sudo apt install -y ansible
+    sudo apt install software-properties-common
+    sudo add-apt-repository --yes --update ppa:ansible/ansible
+    sudo apt install -y ansible
 fi
 
 if [ -f ./passwords.yml ] && [ -f ./vault-password ]
