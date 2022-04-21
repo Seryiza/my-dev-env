@@ -15,8 +15,9 @@ My developer environment based on Ansible, Ubuntu.
 ./sync-dev-env.sh
 ```
 
-## Boormarked Dotfiles
-[NeoVim](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/neovim/files)
+## Dotfiles
+[neovim](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/neovim/files)
+[tmux](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/tmux/files)
 
 ## Developer environment development
 (interesting phrase 🤔)
