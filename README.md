@@ -18,6 +18,8 @@ My developer environment based on Ansible, Ubuntu.
 ## Dotfiles
 [neovim](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/neovim/files)
 [tmux](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/tmux/files)
+[bash](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/bash/files)
+[starship](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/starship/files)
 
 ## Developer environment development
 (interesting phrase 🤔)
