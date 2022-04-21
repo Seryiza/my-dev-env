@@ -1,13 +1,21 @@
-local map = vim.api.nvim_set_keymap
-local default_opts = {noremap = true, silent = true}
+local keymap = function (key, cmd, mode, opts)
+  mode = mode or 'n'
+  opts = opts or {noremap = true, silent = true}
+  vim.api.nvim_set_keymap(mode, key, cmd, opts)
+end
 
-map('n', '<C-n>', ':NvimTreeToggle<CR>', default_opts)
-map('n', '<A-,>', ':BufferPrevious<CR>', default_opts)
-map('n', '<A-.>', ':BufferNext<CR>', default_opts)
-map('n', '<A-;>', ':BufferClose<CR>', default_opts)
+-- Files tree
+keymap('<C-n>', ':NvimTreeToggle<CR>')
 
-map('n', '<leader>do', ':DiffviewOpen<CR>', default_opts)
-map('n', '<leader>dc', ':DiffviewClose<CR>', default_opts)
+-- Tabs
+keymap('<A-.>', ':tabnext<CR>')
+keymap('<A-,>', ':tabprevious<CR>')
+keymap('<A-;>', ':tabclose<CR>')
 
--- Find files using Telescope command-line sugar.
-map('n', '<leader>fg', "<CMD>lua require('telescope.builtin').live_grep({additional_args = function() return { '--fixed-strings' } end})<CR>", default_opts)
+-- Git diff view
+keymap('<leader>do', ':DiffviewOpen<CR>')
+keymap('<leader>dc', ':DiffviewClose<CR>')
+
+-- Find files using Telescope command-line sugar
+keymap('<leader>fg', "<CMD>lua require('telescope.builtin').live_grep({additional_args = function() return { '--fixed-strings' } end})<CR>")
+keymap('<leader>ff', "<cmd>lua require('telescope.builtin').find_files()<CR>")

@@ -1,45 +1,49 @@
-require('packer').startup(function()
-	use 'wbthomason/packer.nvim'
-    use 'nvim-lualine/lualine.nvim'
-    use 'kyazdani42/nvim-tree.lua'
-    use 'nvim-treesitter/nvim-treesitter'
-    use 'neovim/nvim-lspconfig'
-    use 'williamboman/nvim-lsp-installer'
-    use 'hrsh7th/nvim-cmp'
-    use 'hrsh7th/cmp-nvim-lsp'
-    use 'L3MON4D3/LuaSnip'
-    use 'saadparwaiz1/cmp_luasnip'
-    use 'nvim-treesitter/playground'
-    use 'romgrk/barbar.nvim'
-    use 'Olical/conjure'
-    use 'tpope/vim-dispatch'
-    use 'clojure-vim/vim-jack-in'
-    use 'steelsojka/pears.nvim'
-    use 'lyokha/vim-xkbswitch'
-    use 'tjdevries/colorbuddy.vim'
-    use 'Th3Whit3Wolf/onebuddy'
-    use 'Pocco81/AutoSave.nvim'
-    use {
-        'nvim-telescope/telescope.nvim',
-        requires = {'nvim-lua/plenary.nvim'},
-    }
-    use 'wlangstroth/vim-racket'
-    use 'mattn/emmet-vim'
-    use {
-        'sindrets/diffview.nvim',
-        requires = {'nvim-lua/plenary.nvim'},
-    }
-end)
+local packer = require('packer')
 
-require('plugin-configs.autosave')
-require('plugin-configs.bufferline')
-require('plugin-configs.cmp')
-require('plugin-configs.conjure')
-require('plugin-configs.diffview')
-require('plugin-configs.lsp')
-require('plugin-configs.lualine')
-require('plugin-configs.nvim-tree')
-require('plugin-configs.pears')
-require('plugin-configs.onebuddy')
-require('plugin-configs.treesitter')
-require('plugin-configs.xkb-switch')
+local is_file_exist = function (filename)
+  local file = io.open(filename, "r")
+  return file ~= nil and io.close(file)
+end
+
+local plugin = function (package)
+  packer.use(package)
+
+  local package_full_name = package[1]
+  local package_short_name = string.lower(string.match(package_full_name, "/(.+)$"))
+  local package_short_safe_name = string.gsub(package_short_name, "%.", "-")
+
+  -- Safe require: ignore errors if the module isn't exist
+  local config_module = "plugins/" .. package_short_safe_name
+  pcall(require, config_module)
+end
+
+packer.startup(function()
+	plugin {'wbthomason/packer.nvim'}
+  plugin {'nvim-lualine/lualine.nvim'}
+  plugin {'kyazdani42/nvim-tree.lua'}
+  plugin {'nvim-treesitter/nvim-treesitter',
+          run = ':TSUpdate'}
+  plugin {'nvim-treesitter/nvim-treesitter-textobjects'}
+  plugin {'neovim/nvim-lspconfig'}
+  plugin {'williamboman/nvim-lsp-installer'}
+  plugin {'hrsh7th/nvim-cmp'}
+  plugin {'hrsh7th/cmp-nvim-lsp'}
+  plugin {'L3MON4D3/LuaSnip'}
+  plugin {'saadparwaiz1/cmp_luasnip'}
+  plugin {'nvim-treesitter/playground'}
+  plugin {'crispgm/nvim-tabline'}
+  plugin {'Olical/conjure'}
+  plugin {'tpope/vim-dispatch'}
+  plugin {'clojure-vim/vim-jack-in'}
+  plugin {'steelsojka/pears.nvim'}
+  plugin {'lyokha/vim-xkbswitch'}
+  plugin {'Th3Whit3Wolf/onebuddy',
+          requires = {'tjdevries/colorbuddy.vim'}}
+  plugin {'Pocco81/AutoSave.nvim'}
+  plugin {'nvim-telescope/telescope.nvim',
+          requires = {'nvim-lua/plenary.nvim'}}
+  plugin {'wlangstroth/vim-racket'}
+  plugin {'mattn/emmet-vim'}
+  plugin {'sindrets/diffview.nvim',
+          requires = {'nvim-lua/plenary.nvim'}}
+end)

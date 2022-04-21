@@ -13,8 +13,10 @@ opt.updatetime = 250
 opt.splitbelow = true
 opt.splitright = true
 opt.expandtab = true
-opt.shiftwidth = 4
-opt.tabstop = 4
+opt.shiftwidth = 2
+opt.tabstop = 2
+opt.compatible = false
+opt.completeopt = 'menuone,noselect'
 
 -- Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })

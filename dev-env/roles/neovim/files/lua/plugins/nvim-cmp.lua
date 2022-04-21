@@ -1,10 +1,4 @@
-local opt = vim.opt
-local capabilities = vim.lsp.protocol.make_client_capabilities()
 local cmp = require('cmp')
-local cmp_neovim_lsp = require('cmp_nvim_lsp')
-
-opt.completeopt = 'menuone,noselect'
-capabilities = cmp_neovim_lsp.update_capabilities(capabilities)
 
 cmp.setup {
     snippet = {
@@ -34,6 +28,6 @@ cmp.setup {
             else
                 fallback()
             end
-        end, {"i","s","c",}),
+        end, {"i","s"}),
     },
 }
