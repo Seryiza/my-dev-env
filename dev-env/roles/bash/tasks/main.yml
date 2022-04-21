@@ -1,5 +1,8 @@
 - name: Setup config
+  loop:
+    - '.bashrc'
+    - '.profile'
   file:
-    path: '~/.bashrc'
-    src: '{{ role_path }}/files/.bashrc'
+    path: '~/{{ item }}'
+    src: '{{ role_path }}/files/{{ item }}'
     state: link

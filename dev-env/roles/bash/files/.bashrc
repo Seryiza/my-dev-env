@@ -139,9 +139,6 @@ alias tt="tmuxinator"
 alias nvi="neovide --frameless"
 alias th="tmux new -As $(basename $(pwd)) -c ."
 
-# Asdf version manager
-. $HOME/.asdf/completions/asdf.bash
-
 # Autojump
 . /usr/share/autojump/autojump.sh
 
