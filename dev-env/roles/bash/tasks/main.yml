@@ -1,0 +1,5 @@
+- name: Setup config
+  file:
+    path: '~/.bashrc'
+    src: '{{ role_path }}/files/.bashrc'
+    state: link
