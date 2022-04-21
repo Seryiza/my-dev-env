@@ -8,5 +8,6 @@
     - homebrew
     - chrome
     - bash
+    - starship
     - neovim
     - tmux
