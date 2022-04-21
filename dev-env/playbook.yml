@@ -4,10 +4,18 @@
     brew: '{{brew_bin_dir}}/brew'
 
   roles:
+    # Package managers
     - apt
     - homebrew
-    - chrome
+    - asdf
+
+    # Core utils
     - bash
     - starship
+
+    # Development
     - neovim
     - tmux
+
+    # Other
+    - chrome

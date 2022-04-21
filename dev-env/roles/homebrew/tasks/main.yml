@@ -3,3 +3,8 @@
     creates: '{{brew_bin_dir}}/brew'
     cmd: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+- name: Update Homebrew and formulaes
+  shell:
+    cmd: '{{brew_bin_dir}}/brew update'
+  register: brew_result
+  changed_when: "'Already up-to-date' not in brew_result.stdout"
