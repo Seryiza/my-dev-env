@@ -1,0 +1,10 @@
+- name: Install Tmux
+  command:
+    creates: '{{brew_bin_dir}}/tmux'
+    cmd: '{{brew}} install tmux'
+
+- name: Setup config
+  file:
+    path: '~/.tmux.conf'
+    src: '{{ role_path }}/files/.tmux.conf'
+    state: link
