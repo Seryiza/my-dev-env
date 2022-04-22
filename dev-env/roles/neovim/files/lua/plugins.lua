@@ -1,10 +1,5 @@
 local packer = require('packer')
 
-local is_file_exist = function (filename)
-  local file = io.open(filename, "r")
-  return file ~= nil and io.close(file)
-end
-
 local plugin = function (package)
   packer.use(package)
 
