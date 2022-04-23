@@ -12,6 +12,7 @@
     # Core utils
     - bash
     - starship
+    - kitty
 
     # Development
     - neovim
