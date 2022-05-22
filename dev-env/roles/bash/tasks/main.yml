@@ -1,3 +1,8 @@
+- name: Install autojump
+  command:
+    creates: "{{usr_bin}}/autojump"
+    cmd: "{{yay}} autojump"
+
 - name: Setup config
   loop:
     - '.bashrc'
@@ -5,4 +10,5 @@
   file:
     path: '~/{{ item }}'
     src: '{{ role_path }}/files/{{ item }}'
+    force: true
     state: link

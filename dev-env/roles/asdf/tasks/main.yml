@@ -1,5 +1,12 @@
 - name: Install asdf
   command:
-    creates: '{{brew_bin_dir}}/asdf'
-    cmd: '{{brew}} install asdf'
+    cmd: '{{yay}} asdf-vm'
+    creates: '/opt/asdf-vm/asdf.sh'
+
+- name: Install plugins
+  loop:
+    - {name: "java", git: "https://github.com/halcyon/asdf-java.git"}
+  command:
+    cmd: "{{asdf}} plugin add {{item.name}} {{item.git}}"
+    creates: "{{asdf_home}}/plugins/{{item.name}}"
 

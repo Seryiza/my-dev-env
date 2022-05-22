@@ -1,7 +1,7 @@
 - name: Install Kitty
   command:
-    creates: '{{brew_bin_dir}}/kitty'
-    cmd: '{{brew}} install brew install seryiza/linuxtap/kitty-binary'
+    creates: '{{usr_bin}}/kitty'
+    cmd: '{{yay}} kitty'
 
 - name: Create config directory
   file:

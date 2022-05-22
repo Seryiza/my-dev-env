@@ -1,7 +1,18 @@
 - name: Install NeoVim
   command:
-    creates: '{{brew_bin_dir}}/nvim'
-    cmd: '{{brew}} install neovim'
+    creates: '{{usr_bin}}/nvim'
+    cmd: '{{yay}} neovim'
+
+- name: Install Packer
+  command:
+    creates: '{{usr_share}}/nvim/site/pack/packer'
+    cmd: '{{yay}} nvim-packer-git'
+
+- name: Update nvim packages
+  command:
+    cmd: "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
+  register: "nvim_result"
+  changed_when: "nvim_result.rc != 0"
 
 - name: Create config directory
   file:
