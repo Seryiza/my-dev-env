@@ -16,7 +16,8 @@ opt.expandtab = true
 opt.shiftwidth = 2
 opt.tabstop = 2
 opt.compatible = false
-opt.completeopt = 'menuone,noselect'
+opt.completeopt = 'menu,menuone,noselect'
+opt.timeoutlen = 2000
 
 -- Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
