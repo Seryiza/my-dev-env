@@ -59,9 +59,18 @@ packer.startup(function(use)
   use {'neovim/nvim-lspconfig',
        config = function ()
          local config = {
+           -- Can I drop it? (or move it to project-specific settings)
            init_options = {
              ['source-aliases'] = {":dev", ":test", ":backend-deps"},
            },
+
+           vim.diagnostic.config({
+             signs = false,
+             virtual_text = {
+               prefix = '--',
+             }
+           }),
+
            on_attach = function (client, bufnr)
              local bufopts = { noremap=true, silent=true, buffer=bufnr }
              vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
@@ -190,11 +199,11 @@ packer.startup(function(use)
        end}
   use {'p00f/alabaster.nvim',
        config = function ()
-         --vim.cmd('colorscheme alabaster')
+         vim.cmd('colorscheme alabaster')
        end}
   use {'mcchrish/zenbones.nvim',
        requires = "rktjmp/lush.nvim",
        config = function ()
-         vim.cmd('colorscheme zenbones')
+         --vim.cmd('colorscheme zenbones')
        end}
 end)
