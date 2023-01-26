@@ -14,10 +14,10 @@
 
     # Core utils
     - bash
-    - kitty
+    # - kitty
 
     # Development
-    - emacs
+    # - emacs
     - neovim
     - tmux
 
