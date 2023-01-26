@@ -80,6 +80,7 @@ export EDITOR="nvim"
 
 # Custom aliases
 alias gst="git status"
+alias gs="git status"
 alias ga="git add"
 alias gd="git diff"
 alias gdca="git diff --staged"
@@ -91,11 +92,13 @@ alias gco="git checkout"
 alias gcmsg="git commit -m"
 alias gcl="git clone"
 alias glo="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gsu="git submodule update"
 alias dc="docker-compose"
 alias ubup="sudo apt-get update && sudo apt-get upgrade"
 alias tt="tmuxinator"
 alias nvi="neovide --frameless"
 alias e="emacs -nw"
+alias httphere="http-server -c5"
 
 # Tmux here
 function th() {
@@ -104,8 +107,14 @@ function th() {
     tmux new -As $currentdirname -c $currentdir
 }
 
+function asdfig() {
+    asdf install $1 $2 && asdf global $1 $2
+}
+
 # Autojump
 . /usr/share/autojump/autojump.bash
 
 # Asdf
 . /opt/asdf-vm/asdf.sh
+
+. /etc/profile.d/google-cloud-sdk.sh
