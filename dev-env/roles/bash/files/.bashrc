@@ -98,6 +98,7 @@ alias ubup="sudo apt-get update && sudo apt-get upgrade"
 alias tt="tmuxinator"
 alias nvi="neovide --frameless"
 alias e="emacs -nw"
+alias n="nvim"
 alias httphere="http-server -c5"
 
 # Tmux here

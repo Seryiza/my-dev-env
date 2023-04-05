@@ -10,6 +10,7 @@ opt.wrap = false
 opt.background = 'light'
 opt.guifont = 'Iosevka:h22'
 opt.updatetime = 250
+-- opt.incsearch = false
 opt.splitbelow = true
 opt.splitright = true
 opt.expandtab = true

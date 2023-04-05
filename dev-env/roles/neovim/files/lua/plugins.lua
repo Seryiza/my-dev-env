@@ -1,12 +1,12 @@
 local packer = require('packer')
 
 -- update packer when something changes here
-vim.cmd([[
-  augroup packer_user_config
-    autocmd!
-    autocmd BufWritePost plugins.lua source <afile> | PackerCompile
-  augroup end
-]])
+--vim.cmd([[
+--  augroup packer_user_config
+--    autocmd!
+--    autocmd BufWritePost plugins.lua source <afile> | PackerCompile
+--  augroup end
+--]])
 
 packer.startup(function(use)
 	use {'wbthomason/packer.nvim'}
@@ -32,8 +32,7 @@ packer.startup(function(use)
                  folder = false,
                  file = false,
                  folder_arrow = false,
-               }
-             }
+               } }
            }
          })
        end}
@@ -91,7 +90,7 @@ packer.startup(function(use)
            end
          }
 
-         require('lspconfig').sumneko_lua.setup(config)
+         require('lspconfig').lua_ls.setup(config)
          require('lspconfig').clojure_lsp.setup(config)
          require('lspconfig').tsserver.setup(config)
          require('lspconfig').jsonls.setup(config)
@@ -112,6 +111,8 @@ packer.startup(function(use)
            mapping = {
              ["<CR>"] = cmp.mapping.confirm({select = true}),
              ["<Tab>"] = cmp.mapping.select_next_item(),
+             ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+             ["<q>"] = cmp.mapping.abort(),
            },
            snippet = {
              expand = function (args)
@@ -125,6 +126,29 @@ packer.startup(function(use)
          local capabilities = require('cmp_nvim_lsp').default_capabilities()
          --require('lspconfig').lua_language_server.setup({capabilities = capabilities})
        end}
+  --[[use {'ms-jpq/coq_nvim',
+       config = function ()
+         vim.g.coq_settings = {
+           auto_start = true,
+           clients = {
+             lsp = {
+               always_on_top = {},
+             },
+           },
+           keymap = {
+             manual_complete = '<c-k>',
+           },
+           display = {
+             icons = {
+               mode = 'none',
+             },
+           },
+           limits = {
+             completion_auto_timeout = 0.30,
+           },
+         }
+       end}
+       ]]--
   use {'L3MON4D3/LuaSnip'}
   use {'saadparwaiz1/cmp_luasnip'}
   use {'Olical/conjure',
@@ -179,6 +203,8 @@ packer.startup(function(use)
         require('telescope').load_extension('fzf')
       end
   }
+  use {'ThePrimeagen/harpoon',
+       requires = {'nvim-lua/plenary.nvim'}}
   use {'nvim-telescope/telescope-fzf-native.nvim',
        run = 'make'}
   use {'wlangstroth/vim-racket'}
@@ -206,4 +232,27 @@ packer.startup(function(use)
        config = function ()
          --vim.cmd('colorscheme zenbones')
        end}
+  use {'tanvirtin/vgit.nvim',
+       requires = {'nvim-lua/plenary.nvim'},
+       config = function ()
+         require('vgit').setup({
+           settings = {
+             live_blame = {
+               enabled = false,
+             },
+             live_gutter = {
+               enabled = false,
+             },
+             authorship_code_lens = {
+               enabled = false,
+             },
+             scene = {
+               keymaps = {
+                 quit = 'q',
+               }
+             },
+           },
+         })
+       end}
+  use {'gpanders/editorconfig.nvim'}
 end)
