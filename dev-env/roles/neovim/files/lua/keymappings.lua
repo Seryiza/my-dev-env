@@ -14,7 +14,7 @@ keymap('<C-k>', '<C-w>k')
 keymap('<C-l>', '<C-w>l')
 
 -- Files tree
-keymap('<leader>ft', ':NvimTreeToggle<CR>')
+keymap('<leader>ft', ':NvimTreeFindFileToggle<CR>')
 
 -- Tabs
 keymap('<A-.>', ':tabnext<CR>')
@@ -31,7 +31,7 @@ keymap('<leader>gb', "<cmd>lua require('vgit').buffer_blame_preview()<CR>")
 -- Find files using Telescope command-line sugar
 keymap('<leader>fg', "<CMD>lua require('telescope.builtin').live_grep({additional_args = function() return { '--fixed-strings' } end, layout_strategy = 'vertical', layout_config = {preview_height = 15, height = 40, preview_cutoff = 1}})<CR>")
 keymap('<leader>ff', "<cmd>lua require('telescope.builtin').find_files()<CR>")
-keymap('<leader>bb', "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_ivy({previewer = false}))<CR>")
+keymap('<leader>bb', "<cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_ivy({previewer = false, sort_mru = true}))<CR>")
 keymap('<leader>fl', "<cmd>lua require('telescope.builtin').resume()<CR>")
 
 -- Harpoon

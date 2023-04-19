@@ -1,4 +1,8 @@
 local packer = require('packer')
+local autocmd = vim.api.nvim_create_autocmd
+
+-- close lsp references buffer after leaving
+autocmd({ "BufLeave" }, { pattern = { "*" }, command = "if &buftype == 'quickfix'|q|endif" })
 
 -- update packer when something changes here
 --vim.cmd([[
@@ -16,6 +20,14 @@ packer.startup(function(use)
            options = {
              component_separators = '',
              section_separators = '',
+           },
+           sections = {
+             lualine_a = {'mode'},
+             lualine_b = {},
+             lualine_c = {'filename'},
+             lualine_x = {},
+             lualine_y = {},
+             lualine_z = {'location'}
            },
          })
        end}
@@ -109,7 +121,17 @@ packer.startup(function(use)
              {name = 'luasnip'},
            },
            mapping = {
-             ["<CR>"] = cmp.mapping.confirm({select = true}),
+             ["<CR>"] = cmp.mapping({
+               i = function(fallback)
+                 if cmp.visible() and cmp.get_active_entry() then
+                   cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+                 else
+                   fallback()
+                 end
+               end,
+               s = cmp.mapping.confirm({ select = true }),
+               c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+             }),
              ["<Tab>"] = cmp.mapping.select_next_item(),
              ["<S-Tab>"] = cmp.mapping.select_prev_item(),
              ["<q>"] = cmp.mapping.abort(),
@@ -187,6 +209,8 @@ packer.startup(function(use)
   use {'nvim-telescope/telescope.nvim',
        requires = {'nvim-lua/plenary.nvim'},
        config = function ()
+         local actions = require('telescope.actions')
+
          require('telescope').setup({
            defaults = {
              mappings = {
@@ -196,6 +220,15 @@ packer.startup(function(use)
                },
                n = {
                  ["q"] = "close",
+               },
+             },
+           },
+           pickers = {
+             buffers = {
+               mappings = {
+                 i = {
+                   ["<c-d>"] = actions.delete_buffer + actions.move_to_top,
+                 },
                },
              },
            },
@@ -254,5 +287,5 @@ packer.startup(function(use)
            },
          })
        end}
-  use {'gpanders/editorconfig.nvim'}
+  -- use {'gpanders/editorconfig.nvim'}
 end)
