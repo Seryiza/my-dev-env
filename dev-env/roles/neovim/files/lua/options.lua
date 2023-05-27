@@ -19,7 +19,7 @@ opt.tabstop = 2
 opt.compatible = false
 opt.completeopt = 'menu,menuone,noselect'
 opt.timeoutlen = 2000
-opt.showcmd = false
+-- opt.showcmd = false
 
 -- Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })

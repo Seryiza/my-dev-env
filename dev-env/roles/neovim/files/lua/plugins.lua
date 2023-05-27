@@ -72,7 +72,11 @@ packer.startup(function(use)
          local config = {
            -- Can I drop it? (or move it to project-specific settings)
            init_options = {
-             ['source-aliases'] = {":dev", ":test", ":backend-deps"},
+             ['analysis-paths-ignore-regex'] = {'target.*', 'node_modules', 'jars', 'db_dumps', '.shadow-cljs'},
+             ['java'] = {
+               ['decompile-jar-as-project?'] = false
+             },
+             ['semantic-tokens?'] = false,
            },
 
            vim.diagnostic.config({
@@ -103,7 +107,7 @@ packer.startup(function(use)
          }
 
          require('lspconfig').lua_ls.setup(config)
-         require('lspconfig').clojure_lsp.setup(config)
+         --require('lspconfig').clojure_lsp.setup(config)
          require('lspconfig').tsserver.setup(config)
          require('lspconfig').jsonls.setup(config)
        end}
