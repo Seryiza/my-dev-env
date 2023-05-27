@@ -77,7 +77,7 @@ fi
 # Custom envvars
 export PATH="$PATH:/home/seryiza/.local/bin"
 export EDITOR="nvim"
-export LEDGER_FILE="/home/seryiza/code/sfinances/2023.journal"
+export LEDGER_FILE="/home/seryiza/code/sfinances/main.journal"
 
 # Custom aliases
 alias gst="git status"
