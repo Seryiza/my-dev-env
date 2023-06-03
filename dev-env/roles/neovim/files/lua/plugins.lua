@@ -107,7 +107,7 @@ packer.startup(function(use)
          }
 
          require('lspconfig').lua_ls.setup(config)
-         --require('lspconfig').clojure_lsp.setup(config)
+         require('lspconfig').clojure_lsp.setup(config)
          require('lspconfig').tsserver.setup(config)
          require('lspconfig').jsonls.setup(config)
        end}
