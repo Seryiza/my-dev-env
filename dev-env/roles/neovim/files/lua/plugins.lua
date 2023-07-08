@@ -72,7 +72,6 @@ packer.startup(function(use)
          local config = {
            -- Can I drop it? (or move it to project-specific settings)
            init_options = {
-             ['analysis-paths-ignore-regex'] = {'target.*', 'node_modules', 'jars', 'db_dumps', '.shadow-cljs'},
              ['java'] = {
                ['decompile-jar-as-project?'] = false
              },
