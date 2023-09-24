@@ -75,9 +75,10 @@ if ! shopt -oq posix; then
 fi
 
 # Custom envvars
-export PATH="$PATH:/home/seryiza/.local/bin"
+export PATH="$PATH:/home/seryiza/.local/bin:/home/seryiza/.nix-profile/bin"
 export EDITOR="nvim"
 export LEDGER_FILE="/home/seryiza/code/sfinances/main.journal"
+#export NIX_PATH=${NIX_PATH:+$NIX_PATH:}$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels
 
 # Custom aliases
 alias gst="git status"
