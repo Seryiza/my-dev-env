@@ -21,6 +21,9 @@ opt.completeopt = 'menu,menuone,noselect'
 opt.timeoutlen = 2000
 -- opt.showcmd = false
 
+-- TODO: fix it
+-- g.editorconfig = false
+
 -- Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
 g.mapleader = ' '

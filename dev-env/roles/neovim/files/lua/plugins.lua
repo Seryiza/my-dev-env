@@ -49,12 +49,12 @@ packer.startup(function(use)
          })
        end}
   use {'nvim-treesitter/nvim-treesitter',
-       run = ':TSUpdate',
        config = function ()
          require "nvim-treesitter.configs".setup {
-           ensure_installed = "all",
+           ensure_installed = { "lua", "clojure", "javascript", "vim", "vimdoc", "query", "bash", "gitignore", "java", "nix", "yaml", "json" },
            highlight = {
              enable = true,
+             additional_vim_regex_highlighting = false
            },
          }
        end}
@@ -191,7 +191,7 @@ packer.startup(function(use)
        config = function ()
          require 'pears'.setup()
        end}
-  use {'lyokha/vim-xkbswitch',
+  --[[use {'lyokha/vim-xkbswitch',
        config = function ()
          vim.g.XkbSwitchEnabled = 1
          vim.g.XkbSwitchLib = '/usr/local/lib/libg3kbswitch.so'
@@ -199,6 +199,7 @@ packer.startup(function(use)
          vim.g.XkbSwitchIMappings = {'ru'}
          vim.g.XkbSwitchAssistNKeymap = 1
        end}
+  --]]
   use {'Pocco81/auto-save.nvim',
        config = function ()
          require('auto-save').setup({
@@ -259,9 +260,31 @@ packer.startup(function(use)
            }
          }
        end}
-  use {'p00f/alabaster.nvim',
+ -- use {'p00f/alabaster.nvim',
+ --      config = function ()
+ --        vim.cmd('colorscheme alabaster')
+ --      end}
+  use {'catppuccin/nvim',
        config = function ()
-         vim.cmd('colorscheme alabaster')
+         require('catppuccin').setup({
+           transparent_background = false,
+           no_italic = false,
+           no_bold = true,
+           --no_underline = false,
+           integrations = {
+             cmp = true,
+             nvimtree = true,
+             treesitter = true,
+             native_lsp = {
+               enabled = true
+             },
+             telescope = {
+               enabled = true
+             }
+           }
+         })
+
+         vim.cmd.colorscheme("catppuccin-latte")
        end}
   use {'mcchrish/zenbones.nvim',
        requires = "rktjmp/lush.nvim",
@@ -288,6 +311,28 @@ packer.startup(function(use)
                }
              },
            },
+         })
+       end}
+  use {'ggandor/leap.nvim',
+       requires = {'tpope/vim-repeat'},
+       config = function ()
+         require('leap').add_default_mappings()
+
+         vim.api.nvim_create_autocmd(
+         "User",
+         { callback = function()
+             vim.cmd.hi("Cursor", "blend=100")
+             vim.opt.guicursor:append { "a:Cursor/lCursor" }
+           end,
+           pattern = "LeapEnter"
+         })
+         vim.api.nvim_create_autocmd(
+         "User",
+         { callback = function()
+             vim.cmd.hi("Cursor", "blend=0")
+             vim.opt.guicursor:remove { "a:Cursor/lCursor" }
+           end,
+           pattern = "LeapLeave"
          })
        end}
   -- use {'gpanders/editorconfig.nvim'}
