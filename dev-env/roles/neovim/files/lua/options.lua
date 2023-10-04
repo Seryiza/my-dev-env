@@ -4,7 +4,7 @@ local g = vim.g
 opt.termguicolors = true
 opt.cursorline = true
 opt.number = true
-opt.relativenumber = true
+--opt.relativenumber = true
 opt.ignorecase = true
 opt.wrap = false
 opt.background = 'light'
@@ -20,9 +20,10 @@ opt.compatible = false
 opt.completeopt = 'menu,menuone,noselect'
 opt.timeoutlen = 2000
 -- opt.showcmd = false
+--opt.smartindent = true
 
 -- TODO: fix it
--- g.editorconfig = false
+--g.editorconfig = false
 
 -- Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
