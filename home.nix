@@ -70,6 +70,8 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  xsession.enable = true;
+
   programs.tmux = {
     enable = true;
     escapeTime = 10;
@@ -94,7 +96,7 @@
 
     # Fix colors
     #set -g default-terminal "screen-256color"
-    #set -g default-terminal "tmux"
+    set -g default-terminal "tmux"
     set -as terminal-features ",xterm-256color*:RGB"
     set -ga terminal-overrides ",xterm-256color*:Tc"
 
@@ -129,4 +131,5 @@
     set -g window-status-current-style fg=$color_black
     '';
   };
+
 }
