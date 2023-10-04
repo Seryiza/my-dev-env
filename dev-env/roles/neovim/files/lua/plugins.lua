@@ -56,9 +56,14 @@ packer.startup(function(use)
              enable = true,
              additional_vim_regex_highlighting = false
            },
+           --indent = {
+           --  enable = true
+           --},
          }
        end}
-  use {'nvim-treesitter/nvim-treesitter-textobjects'}
+  use {'nvim-treesitter/nvim-treesitter-textobjects',
+       after = "nvim-treesitter",
+       requires = "nvim-treesitter/nvim-treesitter"}
   use {'williamboman/mason.nvim',
        config = function ()
          require('mason').setup()
@@ -200,12 +205,12 @@ packer.startup(function(use)
          vim.g.XkbSwitchAssistNKeymap = 1
        end}
   --]]
-  use {'Pocco81/auto-save.nvim',
+  use {'okuuva/auto-save.nvim',
        config = function ()
          require('auto-save').setup({
            enabled = true,
            execution_message = {
-             message = function () return "" end,
+             enabled = false
            },
            debounce_delay = 5000,
          })
