@@ -102,6 +102,7 @@ alias nvi="neovide --frameless"
 alias e="emacs -nw"
 alias n="nvim"
 alias httphere="http-server -c5"
+alias m="make"
 
 # Tmux here
 function th() {
