@@ -69,10 +69,12 @@ packer.startup(function(use)
          require('mason').setup()
        end}
   use {'williamboman/mason-lspconfig.nvim',
+       after = "mason.nvim",
        config = function ()
          require('mason-lspconfig').setup()
        end}
   use {'neovim/nvim-lspconfig',
+       after = "mason-lspconfig.nvim",
        config = function ()
          local config = {
            -- Can I drop it? (or move it to project-specific settings)
@@ -89,25 +91,6 @@ packer.startup(function(use)
                prefix = '--',
              }
            }),
-
-           on_attach = function (client, bufnr)
-             local bufopts = { noremap=true, silent=true, buffer=bufnr }
-             vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-             vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-             vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-             vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-             vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-             vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-             vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-             vim.keymap.set('n', '<space>wl', function()
-               print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-             end, bufopts)
-             vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-             vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-             vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-             vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-             vim.keymap.set({'n', 'v', 'x'}, '<leader>f', function() vim.lsp.buf.format { async = true } end, bufopts)
-           end
          }
 
          require('lspconfig').lua_ls.setup(config)
@@ -125,7 +108,7 @@ packer.startup(function(use)
              {name = 'nvim_lsp'},
              --{name = 'conjure'},
              --{name = 'path'},
-             {name = 'buffer'},
+             --{name = 'buffer'},
              {name = 'luasnip'},
            },
            mapping = {
@@ -192,9 +175,12 @@ packer.startup(function(use)
   use {'PaterJason/cmp-conjure'}
   use {'tpope/vim-dispatch'}
   use {'clojure-vim/vim-jack-in'}
-  use {'steelsojka/pears.nvim',
+  use {'windwp/nvim-autopairs',
        config = function ()
-         require 'pears'.setup()
+         require('nvim-autopairs').setup({
+           check_ts = true,
+           enable_check_bracket_line = false
+         })
        end}
   --[[use {'lyokha/vim-xkbswitch',
        config = function ()
@@ -341,4 +327,44 @@ packer.startup(function(use)
          })
        end}
   -- use {'gpanders/editorconfig.nvim'}
+  use { '/home/seryiza/code/mkdnflow.nvim',
+    config = function()
+      require('mkdnflow').setup({
+        modules = {
+          conceal = false,
+          bib = false,
+          cursor = false,
+          links = false,
+          paths = false
+        },
+        to_do = {
+          symbols = {' ', 'x'},
+          update_parents = false
+        },
+        mappings = {
+          MkdnNewListItem = {'i', '<CR>'},
+          MkdnToggleToDo = {{'n', 'v'}, '<C-j>'}
+        }
+      })
+    end
+  }
+  use { 'mickael-menu/zk-nvim',
+    config = function()
+      require('zk').setup({
+        picker = 'telescope'
+      })
+    end }
+
+  --[[use { 'nfrid/markdown-togglecheck',
+    requires = { 'nfrid/treesitter-utils' },
+    -- TODO: fix keymapping for markdown files
+    --ft = { 'markdown' },
+    config = function()
+      require('markdown-togglecheck').setup()
+    end}]]--
+
+  use { 'chrishrb/gx.nvim',
+    config = function()
+      require('gx').setup()
+    end}
 end)

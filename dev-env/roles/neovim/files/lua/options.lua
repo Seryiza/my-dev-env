@@ -29,3 +29,6 @@ opt.timeoutlen = 2000
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
 g.mapleader = ' '
 g.maplocalleader = ' '
+
+-- ensure that changes to buffers are saved when you navigate away from that buffer, e.g. by following a link to another file. See :h awa
+vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
