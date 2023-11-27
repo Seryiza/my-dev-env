@@ -3,8 +3,7 @@
 # for examples
 
 # If not running interactively, don't do anything
-case $- in
-    *i*) ;;
+case $- in *i*) ;;
       *) return;;
 esac
 
@@ -96,6 +95,7 @@ alias gcl="git clone"
 alias glo="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias gsu="git submodule update"
 alias dc="docker-compose"
+alias docker-compose="docker compose"
 alias ubup="sudo apt-get update && sudo apt-get upgrade"
 alias tt="tmuxinator"
 alias nvi="neovide --frameless"
@@ -119,6 +119,6 @@ function asdfig() {
 . /usr/share/autojump/autojump.bash
 
 # Asdf
-. /opt/asdf-vm/asdf.sh
+# . /opt/asdf-vm/asdf.sh
 
-. /etc/profile.d/google-cloud-sdk.sh
+# . /etc/profile.d/google-cloud-sdk.sh
