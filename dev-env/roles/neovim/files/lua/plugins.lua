@@ -202,7 +202,7 @@ packer.startup(function(use)
          })
        end}
   use {'nvim-telescope/telescope.nvim',
-       requires = {'nvim-lua/plenary.nvim'},
+       requires = {'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-fzf-native.nvim'},
        config = function ()
          local actions = require('telescope.actions')
 
@@ -233,8 +233,8 @@ packer.startup(function(use)
   }
   use {'ThePrimeagen/harpoon',
        requires = {'nvim-lua/plenary.nvim'}}
-  use {'nvim-telescope/telescope-fzf-native.nvim',
-       run = 'make'}
+  use { 'nvim-telescope/telescope-fzf-native.nvim',
+        run = 'make' }
   use {'wlangstroth/vim-racket'}
   use {'mattn/emmet-vim'}
   use {'sindrets/diffview.nvim',
@@ -327,27 +327,27 @@ packer.startup(function(use)
          })
        end}
   -- use {'gpanders/editorconfig.nvim'}
-  use { '/home/seryiza/code/mkdnflow.nvim',
-    config = function()
-      require('mkdnflow').setup({
-        modules = {
-          conceal = false,
-          bib = false,
-          cursor = false,
-          links = false,
-          paths = false
-        },
-        to_do = {
-          symbols = {' ', 'x'},
-          update_parents = false
-        },
-        mappings = {
-          MkdnNewListItem = {'i', '<CR>'},
-          MkdnToggleToDo = {{'n', 'v'}, '<C-j>'}
-        }
-      })
-    end
-  }
+--use { '/home/seryiza/code/mkdnflow.nvim',
+--  config = function()
+--    require('mkdnflow').setup({
+--      modules = {
+--        conceal = false,
+--        bib = false,
+--        cursor = false,
+--        links = false,
+--        paths = false
+--      },
+--      to_do = {
+--        symbols = {' ', 'x'},
+--        update_parents = false
+--      },
+--      mappings = {
+--        MkdnNewListItem = {'i', '<CR>'},
+--        MkdnToggleToDo = {{'n', 'v'}, '<C-j>'}
+--      }
+--    })
+--  end
+--}
   use { 'mickael-menu/zk-nvim',
     config = function()
       require('zk').setup({
