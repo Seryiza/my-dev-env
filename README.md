@@ -7,26 +7,4 @@
 ```
 
 # My Dev Env
-My developer environment based on Ansible, Ubuntu.
-
-## Setup
-```bash
-# if you don't have ansible, the script will install it
-./sync-dev-env.sh
-```
-
-## Dotfiles
-[neovim](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/neovim/files)
-[tmux](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/tmux/files)
-[bash](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/bash/files)
-[starship](https://github.com/Seryiza/my-dev-env/tree/master/dev-env/roles/starship/files)
-
-## Developer environment development
-(interesting phrase 🤔)
-
-```bash
-vagrant up
-vagrant ssh
-cd /vagrant
-# test changes...
-```
+My developer environment based on Nix.

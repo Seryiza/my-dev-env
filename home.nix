@@ -1,5 +1,4 @@
 { config, pkgs, ... }:
-
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -13,7 +12,13 @@
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
-  home.stateVersion = "23.05"; # Please read the comment before changing.
+  home.stateVersion = "23.11"; # Please read the comment before changing.
+
+  nixpkgs.overlays = [
+    (final: previous: {
+      openjdk17 = pkgs.zulu17;
+    })
+  ];
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -34,8 +39,10 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
-
-    pkgs.tldr
+    pkgs.htop
+    pkgs.clojure
+    pkgs.babashka
+    pkgs.epiphany
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -53,8 +60,10 @@
     # '';
   };
 
-  # You can also manage environment variables but you will have to manually
-  # source
+  # Home Manager can also manage your environment variables through
+  # 'home.sessionVariables'. If you don't want to manage your shell through Home
+  # Manager then you have to manually source 'hm-session-vars.sh' located at
+  # either
   #
   #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
   #
@@ -62,7 +71,6 @@
   #
   #  /etc/profiles/per-user/seryiza/etc/profile.d/hm-session-vars.sh
   #
-  # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
     # EDITOR = "emacs";
   };
@@ -70,66 +78,23 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  xsession.enable = true;
-
   programs.tmux = {
     enable = true;
-    escapeTime = 10;
-    keyMode = "vi";
-    prefix = "C-n";
-    terminal = "tmux";
-    baseIndex = 1;
-    clock24 = true;
-
-    extraConfig = ''
-    # Colors
-    color_grey='#BBBBBB'
-    color_black='#000000'
-
-    # Common options
-    #set -g base-index 1
-    #set -g mouse off
-    #set -g mode-keys vi
-    #set -sg escape-time 10        # make it 0?
-    set -g status-interval 10     # redraw status line every 10 seconds
-    set -g status-position top
-
-    # Fix colors
-    #set -g default-terminal "screen-256color"
-    set -g default-terminal "tmux"
-    set -as terminal-features ",xterm-256color*:RGB"
-    set -ga terminal-overrides ",xterm-256color*:Tc"
-
-    # Change prefix
-    #set-option -g prefix C-n
-    #unbind C-b
-    #bind C-n send-prefix
-
-    # Bindings
-    bind r source-file ~/.tmux.conf
-    bind | split-window -h
-    bind - split-window -v
-    bind m set -g mouse on
-    bind M set -g mouse off
-    unbind '"'
-    unbind %
-
-    bind -n M-l next-window
-    bind -n M-h previous-window
-
-    bind -n M-д next-window
-    bind -n M-р previous-window
-
-    # Status options
-    set -g status-justify centre
-    set -g status-left '''
-    set -g status-right '''
-    set -g status-style 'none'
-    set -g window-status-style fg=$color_grey
-    set -g window-status-format " #I: #W "
-    set -g window-status-current-format " #I: #W "
-    set -g window-status-current-style fg=$color_black
-    '';
+    extraConfig = builtins.readFile ./tmux.conf;
   };
 
+  programs.neovim = {
+    enable = false;
+    extraLuaConfig = builtins.readFile ./neovim/init.lua;
+    plugins = [
+      pkgs.vimPlugins.packer-nvim
+    ];
+  };
+
+  programs.java = {
+    enable = true;
+    package = pkgs.zulu17;
+  };
+
+  xdg.configFile."nvim/lua".source = config.lib.file.mkOutOfStoreSymlink "/home/seryiza/code/my-dev-env/neovim/lua";
 }

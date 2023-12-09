@@ -1,5 +1,0 @@
-- name: Install Google Chrome
-  become: true
-  command:
-    cmd: "{{yay}} google-chrome"
-    creates: "/usr/bin/google-chrome-stable"
