@@ -4,6 +4,10 @@ env:
 window:
   decorations: none
 
+  dimensions:
+    columns: 60
+    lines: 60
+
 font:
   size: 18
   normal:
