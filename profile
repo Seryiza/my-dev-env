@@ -26,3 +26,5 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
+export GAMEMODERUNEXEC="env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only"
