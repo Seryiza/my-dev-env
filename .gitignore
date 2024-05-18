@@ -1,0 +1,20 @@
+/passwords.yml
+/vault-password
+
+/.vagrant
+/*.log
+
+# Emacs
+/emacs/.cache
+/emacs/.lsp-session-v1
+/emacs/eln-cache
+/emacs/elpa
+/emacs/tree-sitter
+/emacs/emacs-backup
+/emacs/auto-save-list
+/emacs/projectile-bookmarks.eld
+/emacs/history
+/emacs/projects
+
+# NixOS
+/result
