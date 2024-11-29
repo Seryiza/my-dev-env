@@ -5,16 +5,18 @@
 /*.log
 
 # Emacs
-/emacs/.cache
-/emacs/.lsp-session-v1
-/emacs/eln-cache
-/emacs/elpa
-/emacs/tree-sitter
-/emacs/emacs-backup
-/emacs/auto-save-list
-/emacs/projectile-bookmarks.eld
-/emacs/history
-/emacs/projects
+/dotfiles/emacs/.cache
+/dotfiles/emacs/.lsp-session-v1
+/dotfiles/emacs/eln-cache
+/dotfiles/emacs/elpa
+/dotfiles/emacs/quelpa
+/dotfiles/emacs/tree-sitter
+/dotfiles/emacs/emacs-backup
+/dotfiles/emacs/auto-save-list
+/dotfiles/emacs/projectile-bookmarks.eld
+/dotfiles/emacs
+/dotfiles/emacs/eshell/history
+/dotfiles/emacs/projects
 
 # NixOS
 /result
