@@ -14,9 +14,15 @@
 /dotfiles/emacs/emacs-backup
 /dotfiles/emacs/auto-save-list
 /dotfiles/emacs/projectile-bookmarks.eld
-/dotfiles/emacs
-/dotfiles/emacs/eshell/history
 /dotfiles/emacs/projects
+
+# Org Roam
+.org-id-locations
+org-roam.db
+
+# History
+history
+history.el
 
 # NixOS
 /result
