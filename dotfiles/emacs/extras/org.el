@@ -41,11 +41,10 @@
 ;;; Phase 2 variables
 
 ;; Agenda variables
-(setq org-directory "~/org") ; Non-absolute paths for agenda and
+(setq org-directory "~/nazarick") ; Non-absolute paths for agenda and
                                  ; capture templates will look here.
 
-(setq org-agenda-files '("~/org"
-			 "~/org/notes/2024/"))
+(setq org-agenda-files '("~/nazarick"))
 
 ;(setq org-agenda-files (append
 ;                        '("~/orglife")
@@ -177,7 +176,9 @@
   (setq org-capture-templates
         '(("t" "INBOX TODO" entry (file "inbox.org")
            "* SOMEDAY %?\n%i")
-		  ("m" "MY (ME)")
+	  ("b" "BOOKMARK" entry (file "bookmarks.org") "* %?\n:PROPERTIES:\n:Captured: %t\n:Link: \n:END:")
+	  ("l" "LIFEHACK" entry (file "lifehacks.org") "* %?\n:PROPERTIES:\n:Discovored: %t\n:Source: \n:END:")
+	  ("m" "MY (ME)")
 	      ("mt" "MY TODO" entry (file+headline "me.org" "TASKS")
            "** TODO %?\nSCHEDULED: %t")
           ;; Capture and keep an org-link to the thing we're currently working with
