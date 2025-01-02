@@ -233,4 +233,5 @@
 
 (use-package nix-mode
   :ensure t
-  :mode "\\.nix\\'")
+  :mode "\\.nix^\\'"
+  :hook (before-save . nix-format-before-save))
