@@ -365,6 +365,7 @@ If the new path's directories does not exist, create them."
 
 (use-package emacs
  :config
+ (setq shr-use-fonts nil)
  (load-theme 'modus-operandi))
 
 (use-package doom-modeline
@@ -491,6 +492,29 @@ If the new path's directories does not exist, create them."
   :config
   (meow-setup)
 
+  (setq meow-paren-keymap (make-keymap))
+
+  (meow-define-state paren
+    "meow state for interacting with paredit"
+    :lighter " [P]"
+    :keymap meow-paren-keymap)
+
+  ;; meow-define-state creates the variable
+  (setq meow-cursor-type-paren 'hollow)
+
+  (meow-define-keys 'paren
+  '("<escape>" . meow-normal-mode)
+  '("i" . meow-insert-mode)
+  '("l" . paredit-forward)
+  '("h" . paredit-backward)
+  '("j" . paredit-forward-down)
+  '("k" . paredit-backward-up)
+  '("n" . paredit-forward-slurp-sexp)
+  '("b" . paredit-forward-barf-sexp)
+  '("v" . paredit-backward-barf-sexp)
+  '("c" . paredit-backward-slurp-sexp)
+  '("u" . meow-undo))
+
   (setq meow-expand-hint-counts '((word . 0)
                                   (line . 30)
                                   (block . 30)
@@ -592,7 +616,7 @@ If the new path's directories does not exist, create them."
  '(auto-save-visited-mode t)
  '(global-eldoc-mode nil)
  '(package-selected-packages
-   '(zprint-mode yaml-mode which-key vterm vertico stimmung-themes smartparens rg reverse-im quelpa-use-package popup paredit org-timeblock org-roam orderless nix-mode nano-theme nano-modeline meow marginalia magit lua-mode kind-icon json-mode howm helm-rg helm-projectile helm-lsp evil embark-consult eglot-booster doom-themes doom-modeline corfu-terminal clojure-ts-mode cider catppuccin-theme cape avy))
+   '(elfeed-org elfeed zprint-mode yaml-mode which-key vterm vertico stimmung-themes smartparens rg reverse-im quelpa-use-package popup paredit org-timeblock org-roam orderless nix-mode nano-theme nano-modeline meow marginalia magit lua-mode kind-icon json-mode howm helm-rg helm-projectile helm-lsp evil embark-consult eglot-booster doom-themes doom-modeline corfu-terminal clojure-ts-mode cider catppuccin-theme cape avy))
  '(wgrep-auto-save-buffer t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -618,3 +642,12 @@ If the new path's directories does not exist, create them."
   (interactive)
   (save-buffer)
   (eval-expression (load-file user-init-file)))
+
+(use-package elfeed
+  :ensure t)
+
+(use-package elfeed-org
+  :ensure t
+  :config
+  (setq rmh-elfeed-org-files (list "~/nazarick/rss.org"))
+  (elfeed-org))

@@ -14,16 +14,17 @@
     pkgs.emacs29-pgtk
     pkgs.sops
     pkgs.clapper
+    pkgs.zotero
 
     # gnome extensions
     pkgs.gnomeExtensions.blur-my-shell
     pkgs.gnomeExtensions.paperwm
-    pkgs.gnomeExtensions.switcher
-    pkgs.gnomeExtensions.rounded-window-corners
-    pkgs.gnomeExtensions.colorblind-filters
-    pkgs.gnomeExtensions.colortint
-    pkgs.gnomeExtensions.dash-to-dock
-    pkgs.gnomeExtensions.transparent-top-bar-adjustable-transparency
+    #pkgs.gnomeExtensions.switcher
+    #pkgs.gnomeExtensions.rounded-window-corners
+    #pkgs.gnomeExtensions.colorblind-filters
+    #pkgs.gnomeExtensions.colortint
+    #pkgs.gnomeExtensions.dash-to-dock
+    #pkgs.gnomeExtensions.transparent-top-bar-adjustable-transparency
     pkgs.gnomeExtensions.quick-lang-switch
 
     (pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
@@ -162,6 +163,9 @@
         };
         init = {
           defaultBranch = "master";
+        };
+        push = {
+          autoSetupRemote = "true";
         };
       };
 

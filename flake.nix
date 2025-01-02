@@ -3,10 +3,10 @@
 
   inputs = {
     # NixOS official package source, using the nixos-23.11 branch here
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-24.11";
       # The `follows` keyword in inputs is used for inheritance.
       # Here, `inputs.nixpkgs` of home-manager is kept consistent with
       # the `inputs.nixpkgs` of the current flake,
@@ -16,6 +16,7 @@
 
     nur = {
       url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     emacs-overlay = {
@@ -30,12 +31,9 @@
       system = "x86_64-linux";
       specialArgs = inputs;
       modules = [
-        nur.nixosModules.nur
-        nur.hmModules.nur
-
         {
           nixpkgs.overlays = [
-            nur.overlay
+            nur.overlays.default
             inputs.emacs-overlay.overlay
             emacs-lsp-booster.overlays.default
           ];
@@ -62,6 +60,8 @@
           home-manager.useUserPackages = true;
 	        home-manager.users.seryiza = import ./home.nix;
         }
+
+        nur.modules.nixos.default
       ];
     };
   };

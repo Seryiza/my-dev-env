@@ -122,7 +122,7 @@ in {
     services.gvfs.enable = true;
 
     # Enable sound with pipewire.
-    sound.enable = false;
+    # sound.enable = false;
     hardware.pulseaudio.enable = false;
 
     security.rtkit.enable = true;
@@ -143,6 +143,11 @@ in {
     security.sudo.extraConfig = ''
       Defaults timestamp_timeout=-1
     '';
+
+    services.clamav = {
+      daemon.enable = true;
+      updater.enable = true;
+    };
 
     programs.dconf.enable = true;
     programs.autojump.enable = true;
@@ -177,7 +182,8 @@ in {
       description = "Sergey Zaborovsky";
       extraGroups = [ "audio" "input" "networkmanager" "wheel" "docker" ];
       packages = [
-        pkgs.firefox
+        #pkgs.firefox
+        pkgs.firefox-bin
         pkgs.google-chrome
         pkgs.kubectl
         pkgs.telegram-desktop
@@ -221,11 +227,13 @@ in {
         pkgs.appimage-run 
         pkgs.lsb-release
         pkgs.dmidecode
+        pkgs.monocraft
+        pkgs.qbittorrent
 
         # gnome
-        pkgs.gnome.gnome-tweaks
-        pkgs.gnome.dconf-editor
-        pkgs.gnome.gnome-terminal
+        pkgs.gnome-tweaks
+        pkgs.dconf-editor
+        pkgs.gnome-terminal
         pkgs.clojure-lsp
         pkgs.lua-language-server
         pkgs.nil
@@ -272,7 +280,7 @@ in {
 
     environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-    hardware.opengl = {
+    hardware.graphics = {
       enable = true;
       extraPackages = [
         pkgs.intel-media-driver
