@@ -294,6 +294,16 @@ in {
       powerOnBoot = true;
     };
 
+    zramSwap = {
+      enable = true;
+      memoryPercent = 200;
+    };
+
+    boot.kernel.sysctl = {
+      "vm.swappiness" = 180;
+      "vm.page-cluster" = 0;
+    };
+
 
     # Some programs need SUID wrappers, can be configured further or are
     # started in user sessions.
