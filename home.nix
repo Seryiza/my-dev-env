@@ -43,6 +43,19 @@
     };
   };
 
+  dconf.settings = {
+    "org/gnome/desktop/background" = {
+      "picture-uri" = "/home/seryiza/Pictures/Bierstadt_Sierra_-_1920-1080.jpg";
+      "picture-options" = "zoom";
+    };
+    "org/gnome/desktop/screensaver" = {
+      "picture-uri" = "/home/seryiza/Pictures/Bierstadt_Sierra_-_1920-1080.jpg";
+      "picture-options" = "zoom";
+    };
+  };
+  
+  home.file."Pictures/Bierstadt_Sierra_-_1920-1080.jpg".source = ./wallpapers/Bierstadt_Sierra_-_1920-1080.jpg;
+
   gtk.enable = true;
 
   xdg.enable = true;
