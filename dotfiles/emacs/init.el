@@ -19,8 +19,7 @@
 ;;;  - Optional extras
 ;;;  - Built-in customization framework
 
-;;; Guardrail
-
+;;; Guard
 (when (< emacs-major-version 29)
   (error (format "Emacs Bedrock only works with Emacs 29 and newer; you have version ~a" emacs-major-version)))
 
@@ -161,8 +160,8 @@ If the new path's directories does not exist, create them."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Mode line information
-(setopt line-number-mode t)                        ; Show current line in modeline
-(setopt column-number-mode t)                      ; Show column as well
+;; (setopt line-number-mode t)                        ; Show current line in modeline
+;; (setopt column-number-mode t)                      ; Show column as well
 
 (setopt x-underline-at-descent-line nil)           ; Prettier underlines
 (setopt switch-to-buffer-obey-display-actions t)   ; Make switching buffers more consistent
@@ -182,9 +181,14 @@ If the new path's directories does not exist, create them."
 ;; Misc. UI tweaks
 (blink-cursor-mode -1)                                ; Steady cursor
 (pixel-scroll-precision-mode)                         ; Smooth scrolling
+(setopt pixel-scroll-precision-interpolate-mice t)
+(setopt pixel-scroll-precision-interpolation-factor 1.5)
+(setopt pixel-scroll-precision-use-momentum t)
+(setopt pixel-scroll-precision-interpolate-page t)
+(setq scroll-preserve-screen-position t)
 
 ;; TODO: check org-timeblock with scrollbars and 1:1
-(scroll-bar-mode -1)
+;; (scroll-bar-mode -1)
 
 ;; Use common keystrokes by default
 (cua-mode)
@@ -199,9 +203,11 @@ If the new path's directories does not exist, create them."
 ;; Nice line wrapping when working with text
 (add-hook 'text-mode-hook 'visual-line-mode)
 
+;; TODO: check it with nano-modeline (1px bug with prog-mode)?
 ;; Modes to highlight the current line with
-(let ((hl-line-hooks '(text-mode-hook prog-mode-hook)))
-  (mapc (lambda (hook) (add-hook hook 'hl-line-mode)) hl-line-hooks))
+;; (let ((hl-line-hooks '(text-mode-hook prog-mode-hook)))
+;;   (mapc (lambda (hook) (add-hook hook 'hl-line-mode)) hl-line-hooks))
+(global-hl-line-mode 1)
 
 ;; Disable the small delay before parenthesis highlighting
 (setq show-paren-delay 0)
@@ -214,7 +220,7 @@ If the new path's directories does not exist, create them."
 ;(tool-bar-mode -1)
 
 ;; Hide fringe bar
-(set-fringe-mode 0)
+;; (set-fringe-mode 0)
 
 ;; TODO: think about bell sound / flash
 ;; https://www.emacswiki.org/emacs/AlarmBell
@@ -222,7 +228,7 @@ If the new path's directories does not exist, create them."
 
 ;; Enable autopair
 
-;; (electric-pair-mode t)
+(electric-pair-mode t)
 ;; (setq electric-pair-preserve-balance nil)
 
 ;; (use-package smartparens
@@ -278,76 +284,95 @@ If the new path's directories does not exist, create them."
   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
   )
 
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold nil   ; if nil, bold is universally disabled
-        doom-themes-enable-italic nil) ; if nil, italics is universally disabled
-  ;(load-theme 'doom-bluloco-light t)
-  ;(load-theme 'doom-one-light t)
-  ;(load-theme 'doom-solarized-light t)
+;; (use-package doom-themes
+;;   :ensure t
+;;   :config
+;;   ;; Global settings (defaults)
+;;   (setq doom-themes-enable-bold nil   ; if nil, bold is universally disabled
+;;         doom-themes-enable-italic nil) ; if nil, italics is universally disabled
+;;   ;(load-theme 'doom-bluloco-light t)
+;;   ;(load-theme 'doom-one-light t)
+;;   ;(load-theme 'doom-solarized-light t)
 
-  ;; Enable flashing mode-line on errors
-  ;(doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;(doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  ;(doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  ;(doom-themes-org-config)
-  )
+;;   ;; Enable flashing mode-line on errors
+;;   ;(doom-themes-visual-bell-config)
+;;   ;; Enable custom neotree theme (all-the-icons must be installed!)
+;;   ;(doom-themes-neotree-config)
+;;   ;; or for treemacs users
+;;   ;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+;;   ;(doom-themes-treemacs-config)
+;;   ;; Corrects (and improves) org-mode's native fontification.
+;;   ;(doom-themes-org-config)
+;;   )
 
 ;; (use-package stimmung-themes
 ;;   :demand t
 ;;   :ensure t
 ;;   :config (stimmung-themes-load-light)) ; or (stimmung-themes-load-dark)
 
-;; (use-package nano-theme
-;;   :quelpa (nano-theme
-;;            :fetcher github
-;;            :repo "rougier/nano-theme")
-;;   :config
-;;   (nano-light)
+(use-package nano-theme
+  :quelpa (nano-theme
+           :fetcher github
+           :repo "rougier/nano-theme")
+  :config
+  (nano-light)
 
-;;   ;; TODO: use custom-theme-set-faces
-;;   ;(with-eval-after-load "nano-theme"
-;;   ;  (custom-theme-set-faces
-;;   ;   'nano
-;;   ;   ;; TODO: fix weight only for TODO items
-;;   ;   '(org-level-2 ((t (:weight normal))))
-;;   ;   '(org-level-3 ((t (:weight normal))))
-;;   ;   '(org-level-4 ((t (:weight normal))))
-;;   ;   '(org-level-5 ((t (:weight normal))))))
+  ;; TODO: use custom-theme-set-faces
+  ;(with-eval-after-load "nano-theme"
+  ;  (custom-theme-set-faces
+  ;   'nano
+  ;   ;; TODO: fix weight only for TODO items
+  ;   '(org-level-2 ((t (:weight normal))))
+  ;   '(org-level-3 ((t (:weight normal))))
+  ;   '(org-level-4 ((t (:weight normal))))
+  ;   '(org-level-5 ((t (:weight normal))))))
 
-;;   :custom-face
-;;   (vertical-border ((t (:foreground "black"))))
-
-;;   )
+  ;; :custom-face
+  ;; (vertical-border ((t (:foreground "black"))))
+  )
 
 ;; (use-package nano-modeline
 ;;   :ensure t
 
 ;;   :config
-;;   (setq nano-modeline-position 'nano-modeline-footer)  
-;;   ;; (setq nano-modeline-position 'nano-modeline-header)
-
-;;   (add-hook 'prog-mode-hook #'nano-modeline-prog-mode)
+;;   (setq nano-modeline-position 'nano-modeline-footer)
+;;   ;;(setq nano-modeline-position 'nano-modeline-header)
+;;   ;;(setq mode-line-format nil)
+  
+;;   (nano-modeline-text-mode t)
+  
 ;;   (add-hook 'text-mode-hook #'nano-modeline-text-mode)
-;;   (add-hook 'org-mode-hook #'nano-modeline-org-mode)
-
-;;   (nano-modeline-text-mode t))
-
-					;(use-package doom-modeline
-					;  :ensure t
-					;  :init (doom-modeline-mode 1))
+;;   (add-hook 'prog-mode-hook #'nano-modeline-prog-mode))
+  
+  ;; (add-hook 'org-mode-hook #'nano-modeline-org-mode)
+					;; (use-package doom-modeline
+					;;  :ensure t
+					;;  :init (doom-modeline-mode 1))
 
 ;; Treesitter
 
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
 	(css "https://github.com/tree-sitter/tree-sitter-css")
+	(c "https://github.com/tree-sitter/tree-sitter-c")
+	(c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+	(csv "https://github.com/tree-sitter-grammars/tree-sitter-csv")
+	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+	(editorconfig "https://github.com/ValdezFOmar/tree-sitter-editorconfig")
+	(elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+	(erlang "https://github.com/WhatsApp/tree-sitter-erlang")
+	(fennel "https://github.com/TravonteD/tree-sitter-fennel")
+	(gitignore "https://github.com/shunsambongi/tree-sitter-gitignore")
+	(haxe "https://github.com/vantreeseba/tree-sitter-haxe")
+	(java "https://github.com/tree-sitter/tree-sitter-java")
+	(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+	(nix "https://github.com/nix-community/tree-sitter-nix")
+	(org "https://github.com/milisims/tree-sitter-org")
+	(python "https://github.com/tree-sitter/tree-sitter-python")
+	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+	(sql "https://github.com/DerekStride/tree-sitter-sql")
+	(xml "https://github.com/tree-sitter-grammars/tree-sitter-xml")
+	(zig "https://github.com/tree-sitter-grammars/tree-sitter-zig")
 	(clojure "https://github.com/sogaiu/tree-sitter-clojure")
 	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
 	(html "https://github.com/tree-sitter/tree-sitter-html")
@@ -363,19 +388,32 @@ If the new path's directories does not exist, create them."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-package emacs
- :config
- (setq shr-use-fonts nil)
- (load-theme 'modus-operandi))
+;; (defun my-modus-themes-custom-faces (&rest _)
+;;       (modus-themes-with-colors
+;; 	(custom-set-faces
+;; 	 ;; Add "padding" to the mode lines
+;; 	 `(mode-line ((,c :box (:line-width 10 :color ,bg-mode-line-active))))
+;; 	 `(mode-line-inactive ((,c :box (:line-width 10 :color ,bg-mode-line-inactive)))))))
 
-(use-package doom-modeline
-  :ensure t
+;; (use-package modus-themes
+;;   :ensure t
 
-  :config
-  (setq doom-modeline-icon nil)
+;;   :config
   
-  :init
-  (doom-modeline-mode 1))
+;;   (setq shr-use-fonts nil)
+
+;;   ;; (add-hook 'modus-themes-after-load-theme-hook #'my-modus-themes-custom-faces)
+  
+;;   (load-theme 'modus-operandi :no-confirm))
+
+;; (use-package doom-modeline
+;;   :ensure t
+
+;;   :config
+;;   (setq doom-modeline-icon nil)
+  
+;;   :init
+;;   (doom-modeline-mode 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -480,11 +518,11 @@ If the new path's directories does not exist, create them."
    '("'" . repeat)
    '("<escape>" . ignore)))
 
-(defun +translate-input-event (event)
-  "Use reverse-im to translate input EVENT."
-  (if (numberp event)
-      (reverse-im--translate-char event t)
-    event))
+;; (defun +translate-input-event (event)
+;;   "Use reverse-im to translate input EVENT."
+;;   (if (numberp event)
+;;       (reverse-im--translate-char event t)
+;;     event))
 
 (use-package meow
   :ensure t
@@ -527,13 +565,7 @@ If the new path's directories does not exist, create them."
 	  (meow-cancel-selection . keyboard-quit)
 	  (meow-pop-selection . meow-pop-grab)
 	  (meow-beacon-change . meow-beacon-change-char)))
-
-  (when window-system
-    (define-key input-decode-map (kbd "C-[") [control-bracketleft])
-    ;; NOTE: it's a russian "х"
-    (define-key input-decode-map (kbd "C-х") [control-bracketleft])
-    (define-key meow-insert-state-keymap [control-bracketleft] 'meow-insert-exit))
-
+  
   (add-hook 'meow-insert-exit-hook 'corfu-quit)
 
   ;; TODO: refactor normal & motion shared binds
@@ -556,6 +588,7 @@ If the new path's directories does not exist, create them."
 
     '("M-n" . next-buffer)
     '("M-m" . previous-buffer))
+
   
   (meow-define-keys
       'motion
@@ -564,25 +597,33 @@ If the new path's directories does not exist, create them."
     '("l" . meow-right)
 
     '("C-q" . delete-other-windows)
-
     '("M-h" . windmove-left)
     '("M-j" . windmove-down)
     '("M-k" . windmove-up)
     '("M-l" . windmove-right)
 
-	'("M-n" . next-buffer)
+    '("M-n" . next-buffer)
     '("M-m" . previous-buffer))
 
   (meow-leader-define-key
    'normal
    '("s" . save-buffer))
 
+  (meow-leader-define-key
+   'insert
+   '("<ESCAPE>" . meow-normal-mode))
+
   (setq meow-visit-sanitize-completion nil)
   (setq meow-use-clipboard t)
 
+  ;; (define-key input-decode-map (kbd "C-[") [control-bracketleft])
+  ;; NOTE: it's a cyrillic "х"
+  ;; (define-key input-decode-map (kbd "C-х") [control-bracketleft])
+  ;; (define-key meow-insert-state-keymap [control-bracketleft] 'meow-insert-exit)
+
   ;; workaround to fix meow + reverse-im
   ;; see https://github.com/meow-edit/meow/discussions/211
-  (advice-add 'meow--event-key :filter-return #'+translate-input-event)
+  ;; (advice-add 'meow--event-key :filter-return #'+translate-input-event)
   (meow-global-mode 1))
 
 ;; Vim-bindings in Emacs (evil-mode configuration)
@@ -596,10 +637,10 @@ If the new path's directories does not exist, create them."
 ;; Email configuration in Emacs
 ;; WARNING: needs the `mu' program installed; see the elisp file for more
 ;; details.
-;(load-file (expand-file-name "extras/email.el" user-emacs-directory))
+										;(load-file (expand-file-name "extras/email.el" user-emacs-directory))
 
 ;; Tools for academic researchers
-;(load-file (expand-file-name "extras/researcher.el" user-emacs-directory))
+										;(load-file (expand-file-name "extras/researcher.el" user-emacs-directory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -614,9 +655,20 @@ If the new path's directories does not exist, create them."
  ;; If there is more than one, they won't work right.
  '(auto-save-visited-interval 5)
  '(auto-save-visited-mode t)
+ '(custom-safe-themes
+   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c"
+     default))
  '(global-eldoc-mode nil)
  '(package-selected-packages
-   '(elfeed-org elfeed zprint-mode yaml-mode which-key vterm vertico stimmung-themes smartparens rg reverse-im quelpa-use-package popup paredit org-timeblock org-roam orderless nix-mode nano-theme nano-modeline meow marginalia magit lua-mode kind-icon json-mode howm helm-rg helm-projectile helm-lsp evil embark-consult eglot-booster doom-themes doom-modeline corfu-terminal clojure-ts-mode cider catppuccin-theme cape avy))
+   '(avy cape catppuccin-theme cider clojure-ts-mode corfu-terminal
+	 doom-modeline doom-themes eglot-booster elfeed elfeed-org
+	 embark-consult evil flycheck-clj-kondo helm-ag helm-lsp
+	 helm-projectile helm-rg howm json-mode kind-icon lua-mode
+	 magit marginalia meow modus-themes nano-modeline nano-theme
+	 nix-mode orderless org-download org-drill org-roam
+	 org-timeblock paredit popup quelpa-use-package reverse-im rg
+	 smartparens stimmung-themes ultra-scroll vertico vterm
+	 which-key yaml-mode zprint-mode))
  '(wgrep-auto-save-buffer t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -649,5 +701,5 @@ If the new path's directories does not exist, create them."
 (use-package elfeed-org
   :ensure t
   :config
-  (setq rmh-elfeed-org-files (list "~/nazarick/rss.org"))
+  (setq rmh-elfeed-org-files (list "~/org/rss.org"))
   (elfeed-org))

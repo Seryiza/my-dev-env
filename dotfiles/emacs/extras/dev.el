@@ -74,13 +74,24 @@
 
 ;; Clojure tooling
 
+(use-package flycheck
+  :ensure t
+
+  :config
+  (global-flycheck-mode))
+
+(use-package flycheck-clj-kondo
+  :ensure t)
+
 (use-package clojure-mode
   :ensure t
 
   :config
   (setq clojure-indent-style 'always-indent
         clojure-indent-keyword-style 'always-indent
-        clojure-enable-indent-specs nil))
+        clojure-enable-indent-specs nil)
+
+  (require 'flycheck-clj-kondo))
 
 ;(use-package clojure-ts-mode
 ;  :ensure t)
@@ -105,7 +116,8 @@
 
   :config
   (setq cider-save-file-on-load t)
-  (setq cider-use-xref nil))
+  (setq cider-use-xref nil)
+  (setq cider-font-lock-reader-conditionals nil))
 
 (use-package lua-mode
   :ensure t)
@@ -124,8 +136,8 @@
   ;; no :ensure t here because it's built-in
 
   ;; Configure hooks to automatically turn-on eglot for selected modes
-  :hook
-  (((clojure-mode clojurec-mode clojurescript-mode lua-mode) . eglot-ensure))
+  ;; :hook
+  ;; (((clojure-mode clojurec-mode clojurescript-mode lua-mode) . eglot-ensure))
 
   :custom
   (eglot-send-changes-idle-time 0.1)
@@ -201,13 +213,16 @@
   :ensure t
 
   :bind
-  ("C-c f C-g" . helm-projectile-rg)
+  ("C-c f C-g" . helm-projectile-ag)
   ("C-c f C-l" . helm-resume)
 
   :config
   (require 'helm-autoloads))
 
 (use-package helm-rg
+  :ensure t)
+
+(use-package helm-ag
   :ensure t)
 
 (use-package helm-lsp

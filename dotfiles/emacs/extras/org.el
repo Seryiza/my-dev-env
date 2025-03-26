@@ -41,14 +41,16 @@
 ;;; Phase 2 variables
 
 ;; Agenda variables
-(setq org-directory "~/nazarick") ; Non-absolute paths for agenda and
+(setq org-directory "~/org") ; Non-absolute paths for agenda and
                                  ; capture templates will look here.
 
-(setq org-agenda-files '("~/nazarick"))
+; (setq org-agenda-files '("~/org"))
 
 ;(setq org-agenda-files (append
 ;                        '("~/orglife")
 ;                        (directory-files-recursively "~/orglife/howm" "\\.org\\'")))
+
+(setq org-agenda-files (directory-files-recursively "~/org" "\\.org\\'"))
 
 ;; Default tags
 (setq org-tag-alist '(
@@ -95,6 +97,14 @@
   (interactive)
   (org-agenda nil "n"))
 
+(defun my-work-agenda ()
+  (interactive)
+  (org-agenda nil "w"))
+
+(defun todo-agenda ()
+  (interactive)
+  (org-agenda nil "t"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;   Phase 1: editing and exporting files
@@ -114,7 +124,9 @@
   :bind
   (("C-c . C-a" . org-agenda-list)
    ("C-c . ." . org-capture)
-   ("C-c . C-j" . my-today-agenda))
+   ("C-c . C-j" . my-today-agenda)
+   ("C-c . C-w" . my-work-agenda)
+   ("C-c . C-t" . todo-agenda))
   
   :config
 					;(require 'oc-csl)                     ; citation support
@@ -127,10 +139,10 @@
   (setq org-export-with-smart-quotes t)
 
   (setq org-agenda-prefix-format
-	'(;(agenda . " %i %-12:c%?-12t% s")
-	  ;(agenda . "  %?-12t% s")
+	'(			     ;(agenda . " %i %-12:c%?-12t% s")
+					;(agenda . "  %?-12t% s")
 	  (agenda . " %?-12t% s")
-	  ;(todo . " %i %-12:c")
+					;(todo . " %i %-12:c")
 	  (todo . " %i")
 	  (tags . " %i %-12:c")
 	  (search . " %i %-12:c")))
@@ -151,32 +163,39 @@
   ;; Instead of just two states (TODO, DONE) we set up a few different states
   ;; that a task can be in.
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "STARTED(s)" "WAITING(w)" "PICKUP(p)" "SOMEDAY(m)" "NEXT(n)" "WANT(n)" "HAVE(h)" "MEETING(e)" "TIMEBLOCK(b)" "REMEMBER(r)" "|" "DONE(d)" "CANCELED(c)")))
+        '((sequence "TODO(t)" "STARTED(s!)" "WAITING(w!)" "NEXT(n)" "MEETING(e)" "TIMEBLOCK(b)" "|" "DONE(d)" "CANCELED(c)")))
 
   ;; Refile configuration
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-use-outline-path 'file)
+  (setq org-link-descriptive nil)
   ;; TODO: improve it
   (setq org-M-RET-may-split-line '((default . nil)))
   ;; (setq org-M-RET-may-split-line '((item . t)))
   ;; TODO: change formatting for LOGBOOK entries
   (setq org-log-into-drawer "LOGBOOK")
   (setq org-log-repeat 'time)
-  ;; (setq org-log-done 'time)
+  (setq org-log-done 'time)
+  (setq org-agenda-window-setup 'current-window)
+  ;(setq org-agenda-include-inactive-timestamps t)
+  ;(setq org-agenda-log-mode-items '(closed clock state))
+  ;(setq org-agenda-start-with-log-mode '(closed clock state))
+
+  (setq org-image-actual-width 600) 
 
   (setq org-blank-before-new-entry
-		'((heading . nil)
-		  (plain-list-item . nil)))
+	'((heading . nil)
+	  (plain-list-item . nil)))
   
   ;; showall
-  (setq org-startup-folded t)
+  ;(setq org-startup-folded t)
 
   (setq org-startup-indented t)
 
   (setq org-capture-templates
-        '(("t" "INBOX TODO" entry (file "inbox.org")
-           "* SOMEDAY %?\n%i")
-	  ("b" "BOOKMARK" entry (file "bookmarks.org") "* %?\n:PROPERTIES:\n:Captured: %t\n:Link: \n:END:")
+        '(("i" "INBOX TODO" entry (file "inbox.org")
+           "* %?\n%i")
+	  ("b" "BOOKMARK" entry (file "bookmarks.org") "* %?\n:PROPERTIES:\n:Created: %t\n:END:")
 	  ("l" "LIFEHACK" entry (file "lifehacks.org") "* %?\n:PROPERTIES:\n:Discovored: %t\n:Source: \n:END:")
 	  ("m" "MY (ME)")
 	      ("mt" "MY TODO" entry (file+headline "me.org" "TASKS")
@@ -185,23 +204,21 @@
           ("r" "Capture with Reference" entry (file "inbox.org")
            "* TODO %?\n%U\n%i\n%a")
           ;; Define a section
-          ("w" "Work")
-          ("wm" "Work meeting" entry (file+headline "work.org" "Meetings")
-           "** TODO %?\n%U\n%i\n%a")
-          ("wr" "Work report" entry (file+headline "work.org" "Reports")
-           "** TODO %?\n%U\n%i\n%a")))
+          
+          ("w" "Work" entry (file+headline "health-samurai.org" "INBOX")
+           "* %?\n%i")))
 
     (setq org-agenda-custom-commands
           '(("n" "Agenda and All Todos"
          ((todo "STARTED")
-		  (agenda)
-	      (todo "NEXT"))
-	     ((org-agenda-show-log t)
-	      (org-agenda-span 1)
-	      ;(org-agenda-log-mode-items '(state))
+		  (todo "NEXT")
+		  (agenda))
+	     (;(org-agenda-show-log t)
+	      (org-agenda-span 3)
+	      (org-agenda-skip-entry-if 'todo 'done)
+	      (org-agenda-log-mode-items '(state))
 	      (org-agenda-skip-scheduled-if-done t)
-	      ;(org-agenda-skip-timestamp-if-done t)
-	      ;(org-agenda-skip-entry-if 'todo 'done)
+	      (org-agenda-skip-timestamp-if-done t)
 	      ;(org-agenda-sorting-strategy '((agenda priority-down time-up todo-state-up)))
 	      ))
 	    ("a" "All TODO items"
@@ -211,9 +228,9 @@
 	     ((todo "TIMEBLOCK"))
 	     ())
         ("w" "Work" agenda ""
-         ((org-agenda-files '("work.org"))))))
+         ((org-agenda-files '("health-samurai.org"))))))
 
-    (setq org-agenda-use-time-grid t))
+    (setq org-agenda-use-time-grid nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -266,3 +283,19 @@
   :config
   ;(add-hook 'org-timeblock-mode-hook (lambda () (scroll-bar-mode -1)))
   )
+
+(use-package org-drill
+  :ensure t
+
+  :config
+  (setq org-drill-scope 'agenda)
+  (setq org-drill-spaced-repetition-algorithm 'sm2))
+
+(use-package org-download
+  :ensure t
+
+  :bind
+  (("C-c . i" . org-download-clipboard))
+
+  :config
+  (setq-default org-download-image-dir "~/org/images"))

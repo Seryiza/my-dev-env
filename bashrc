@@ -130,3 +130,7 @@ function th() {
 # . /opt/asdf-vm/asdf.sh
 
 # . /etc/profile.d/google-cloud-sdk.sh
+
+if [[ "$INSIDE_EMACS" ]]; then   
+    export PAGER=less # Emacs overrides PAGER on startup. Revert it back.
+fi

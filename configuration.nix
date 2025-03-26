@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, zen-browser, ... }:
 let
   my-obsidian = pkgs.symlinkJoin {
     name = "obsidian";
@@ -71,21 +71,28 @@ in {
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "ru_RU.UTF-8";
-    LC_IDENTIFICATION = "ru_RU.UTF-8";
-    LC_MEASUREMENT = "ru_RU.UTF-8";
-    LC_MONETARY = "ru_RU.UTF-8";
-    LC_NAME = "ru_RU.UTF-8";
-    LC_NUMERIC = "ru_RU.UTF-8";
-    LC_PAPER = "ru_RU.UTF-8";
-    LC_TELEPHONE = "ru_RU.UTF-8";
-    LC_TIME = "ru_RU.UTF-8";
-  };
+  #  i18n.extraLocaleSettings = {
+  #    LC_ADDRESS = "ru_RU.UTF-8";
+  #    LC_IDENTIFICATION = "ru_RU.UTF-8";
+  #    LC_MEASUREMENT = "ru_RU.UTF-8";
+  #    LC_MONETARY = "ru_RU.UTF-8";
+  #    LC_NAME = "ru_RU.UTF-8";
+  #    LC_NUMERIC = "ru_RU.UTF-8";
+  #    LC_PAPER = "ru_RU.UTF-8";
+  #    LC_TELEPHONE = "ru_RU.UTF-8";
+  #    LC_TIME = "ru_RU.UTF-8";
+  #  };
+
+  i18n.supportedLocales = [
+    "all"
+    #"C.UTF-8/UTT-8"
+    #"en_US.UTF-8/UTF-8"
+    #"ru_RU.UTF-8/UTF-8"
+  ];
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-
+  #
   services.xserver.displayManager.lightdm.enable = false;
   services.xserver.displayManager.lightdm.greeters.gtk.enable = false;
 
@@ -115,6 +122,11 @@ in {
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+
+  services.emacs = {
+    enable = true;
+    package = pkgs.emacs-pgtk;
+  };
 
   # Samba
   services.samba = { enable = true; };
@@ -162,7 +174,34 @@ in {
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  services.input-remapper.enable = true;
+  services.input-remapper.enable = false;
+
+  hardware.uinput.enable = true;
+  services.udev = {
+    # NOTE: Xremap requires the following:
+    # https://github.com/xremap/xremap?tab=readme-ov-file#running-xremap-without-sudo
+    extraRules = ''
+      KERNEL=="uinput", GROUP="input", TAG+="uaccess"
+    '';
+  };
+
+  services.xremap = {
+    enable = true;
+    serviceMode = "user";
+    withGnome = true;
+    userName = "seryiza";
+    watch = true;
+
+    config.modmap = [{
+      name = "Global";
+      remap = { "CapsLock" = "Control_L"; };
+    }];
+
+    config.keymap = [{
+      name = "Escape on Ctrl+[";
+      remap = { "C-KEY_LEFTBRACE" = "Esc"; };
+    }];
+  };
 
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
@@ -178,7 +217,8 @@ in {
   users.users.seryiza = {
     isNormalUser = true;
     description = "Sergey Zaborovsky";
-    extraGroups = [ "audio" "input" "networkmanager" "wheel" "docker" ];
+    extraGroups =
+      [ "audio" "input" "uinput" "networkmanager" "wheel" "docker" ];
     packages = [
       #pkgs.firefox
       pkgs.firefox-bin
@@ -207,6 +247,7 @@ in {
       pkgs.wireguard-tools
       pkgs.tangram
       pkgs.python3
+      pkgs.python312Packages.pip
       pkgs.logseq
       pkgs.libvterm
       pkgs.cmake
@@ -227,6 +268,10 @@ in {
       pkgs.dmidecode
       pkgs.monocraft
       pkgs.qbittorrent
+      pkgs.rclone
+      pkgs.wl-clipboard
+      pkgs.silver-searcher
+      pkgs.clj-kondo
 
       # gnome
       pkgs.gnome-tweaks
@@ -239,6 +284,7 @@ in {
       pkgs.jdk
       pkgs.zprint
       pkgs.geckodriver
+      pkgs.amberol
 
       pkgs.dconf2nix
       pkgs.gcc
@@ -256,6 +302,7 @@ in {
       pkgs.ulauncher
       pkgs.chntpw
       pkgs.nixfmt-classic
+      zen-browser.packages."x86_64-linux".default
       #my-obsidian
 
       #  thunderbird
@@ -264,11 +311,14 @@ in {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs;
-    [
-      #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-      #  wget
-    ];
+  environment.systemPackages = with pkgs; [
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
+    glibcLocales
+
+    busybox
+    iputils
+  ];
 
   environment.variables = {
     XCURSOR_SIZE = "40";

@@ -2,21 +2,23 @@
   xsession.enable = true;
 
   home.packages = [
-    pkgs.busybox
-    pkgs.iputils
+
     pkgs.httpie
     pkgs.vlc
     pkgs.epiphany
     pkgs.iosevka
     pkgs.gnumake
-    pkgs.emacs29-pgtk
     pkgs.sops
     pkgs.clapper
     pkgs.zotero
+    pkgs.flowtime
+    pkgs.ngrok
 
     # gnome extensions
     pkgs.gnomeExtensions.blur-my-shell
     pkgs.gnomeExtensions.paperwm
+    pkgs.gnomeExtensions.just-perfection
+    pkgs.gnomeExtensions.xremap
     #pkgs.gnomeExtensions.switcher
     #pkgs.gnomeExtensions.rounded-window-corners
     #pkgs.gnomeExtensions.colorblind-filters
@@ -29,6 +31,9 @@
       [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
   ];
 
+  home.sessionVariables.LOCALES_ARCHIVE =
+    "${pkgs.glibcLocales}/lib/locale/locale-archive";
+
   dconf.settings = {
     "org/gnome/shell" = {
       disable-user-extensions = false;
@@ -38,6 +43,7 @@
         "launch-new-instance@gnome-shell-extensions.gcampax.github.com"
         "light-style@gnome-shell-extensions.gcampax.github.com"
         pkgs.gnomeExtensions.quick-lang-switch.extensionUuid
+        pkgs.gnomeExtensions.just-perfection.extensionUuid
       ];
     };
   };

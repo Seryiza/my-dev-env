@@ -202,6 +202,12 @@
         completion-category-overrides '((eglot (styles orderless))
                                         (eglot-capf (styles orderless)))))
 
+(use-package emacs
+  :custom
+  ;; Emacs 30 and newer: Disable Ispell completion function.
+  ;; Try `cape-dict' as an alternative.
+  (text-mode-ispell-word-completion nil))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;   Misc. editing enhancements
@@ -214,10 +220,10 @@
   :config
   (setq wgrep-auto-save-buffer t))
 
-(use-package reverse-im
-  :ensure t
-  :config
-  (reverse-im-activate "russian-computer"))
+;; (use-package reverse-im
+;;   :ensure t
+;;   :config
+;;   (reverse-im-activate "russian-computer"))
 
 ;;; Other
 

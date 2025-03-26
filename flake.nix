@@ -19,50 +19,55 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    emacs-overlay = {
-      url = "github:nix-community/emacs-overlay";
-    };
+    emacs-overlay = { url = "github:nix-community/emacs-overlay"; };
 
     emacs-lsp-booster.url = "github:slotThe/emacs-lsp-booster-flake";
+
+    xremap = { url = "github:xremap/nix-flake"; };
+
+    zen-browser = { url = "github:0xc000022070/zen-browser-flake"; };
   };
 
-  outputs = { self, nixpkgs, home-manager, nur, emacs-lsp-booster, ... }@inputs: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = inputs;
-      modules = [
-        {
-          nixpkgs.overlays = [
-            nur.overlays.default
-            inputs.emacs-overlay.overlay
-            emacs-lsp-booster.overlays.default
-          ];
-        }
+  outputs = { self, nixpkgs, home-manager, nur, emacs-lsp-booster, xremap, ...
+    }@inputs: {
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = inputs;
+        modules = [
+          {
+            nixpkgs.overlays = [
+              nur.overlays.default
+              #inputs.emacs-overlay.overlay
+              emacs-lsp-booster.overlays.default
+            ];
+          }
 
-	      ({ pkgs, ... }:
-	      let
-	        nur-no-pkgs = import nur {
-            nurpkgs = import nixpkgs { system = "x86_64-linux"; };
-          };
-	      in {
-          imports = [
-            #nur-no-pkgs.repos.dukzcry.modules.logitech-k380
-          ];
-	      })
+          xremap.nixosModules.default
 
-        # Import the previous configuration.nix we used,
-        # so the old configuration file still takes effect
-        ./configuration.nix
+          ({ pkgs, ... }:
+            let
+              nur-no-pkgs = import nur {
+                nurpkgs = import nixpkgs { system = "x86_64-linux"; };
+              };
+            in {
+              imports = [
+                #nur-no-pkgs.repos.dukzcry.modules.logitech-k380
+              ];
+            })
 
-	      home-manager.nixosModules.home-manager
-        {
-	        home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-	        home-manager.users.seryiza = import ./home.nix;
-        }
+          # Import the previous configuration.nix we used,
+          # so the old configuration file still takes effect
+          ./configuration.nix
 
-        nur.modules.nixos.default
-      ];
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.seryiza = import ./home.nix;
+          }
+
+          nur.modules.nixos.default
+        ];
+      };
     };
-  };
 }
