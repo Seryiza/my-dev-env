@@ -2,8 +2,9 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, zen-browser, ... }:
+{ config, pkgs, nixpkgs-unstable, lib, zen-browser, ... }:
 let
+  unstable-pkgs = nixpkgs-unstable.legacyPackages."x86_64-linux";
   my-obsidian = pkgs.symlinkJoin {
     name = "obsidian";
     paths = [ pkgs.obsidian ];
@@ -14,28 +15,37 @@ let
     '';
   };
 in {
-  nixpkgs.config.permittedInsecurePackages = [
-    #"electron-25.9.0"
-    #"electron-24.8.6"
-    "electron-27.3.11"
-  ];
+  nixpkgs.config.permittedInsecurePackages = [ ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # TODO: delete it after sound fix
-  # https://github.com/NixOS/nixpkgs/issues/330685
-  #boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_10;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_15;
+
+  boot.kernelParams = [
+    "i915.enable_dpcd_backlight=1"
+    "nvidia.NVreg_EnableBacklightHandler=0"
+    "nvidia.NVreg_RegistryDwords=EnableBrightnessControl=0"
+    "amd_pstate=guided"
+    "disable_aspm=1"
+    "amdgpu"
+    "snd-intel-dspcfg.dsp_driver=1"
+  ];
+
+  boot.initrd.kernelModules = [ "amdgpu" ];
+
+  boot.supportedFilesystems = [ "ntfs" ];
+
+  hardware.cpu.amd.updateMicrocode = true;
+  hardware.enableRedistributableFirmware = true;
+  services.fwupd.enable = true;
 
   nixpkgs.overlays = [
     (final: prev: {
       jdk = pkgs.zulu21;
       clojure = prev.clojure.override { jdk = pkgs.zulu21; };
-      #obsidian-wayland = prev.obsidian.override {electron = final.electron_24;};
     })
   ];
-
-  #hardware.logitech-k380.enable = true;
 
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -63,6 +73,10 @@ in {
 
   # Enable networking
   networking.networkmanager.enable = true;
+  services.nscd.enableNsncd = true;
+
+  systemd.tmpfiles.rules =
+    [ "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}" ];
 
   # Set your time zone.
   time.timeZone = "Asia/Bishkek";
@@ -92,7 +106,8 @@ in {
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  #
+  services.xserver.videoDrivers = [ "amdgpu" ];
+
   services.xserver.displayManager.lightdm.enable = false;
   services.xserver.displayManager.lightdm.greeters.gtk.enable = false;
 
@@ -133,9 +148,17 @@ in {
 
   services.gvfs.enable = true;
 
+  networking.wireless.iwd.settings = {
+    General = {
+      RoamThreshold = -75;
+      RoamThreshold5G = -80;
+      RoamRetryInterval = 20;
+    };
+  };
+
   # Enable sound with pipewire.
   # sound.enable = false;
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
 
   security.rtkit.enable = true;
   services.pipewire = {
@@ -158,7 +181,8 @@ in {
 
   services.clamav = {
     daemon.enable = true;
-    updater.enable = true;
+    updater.enable = false;
+    updater.interval = "yearly";
   };
 
   programs.dconf.enable = true;
@@ -185,16 +209,22 @@ in {
     '';
   };
 
+  services.asusd.enable = true;
+
   services.xremap = {
     enable = true;
     serviceMode = "user";
     withGnome = true;
     userName = "seryiza";
     watch = true;
+    debug = false;
 
     config.modmap = [{
       name = "Global";
-      remap = { "CapsLock" = "Control_L"; };
+      remap = {
+        "CapsLock" = "Control_L";
+        "KEY_F23" = "Control_R";
+      };
     }];
 
     config.keymap = [{
@@ -209,7 +239,11 @@ in {
     setSocketVariable = true;
   };
 
-  fonts.packages = [ pkgs.nerdfonts ];
+  fonts.packages = [ ] ++ builtins.filter lib.attrsets.isDerivation
+    (builtins.attrValues pkgs.nerd-fonts);
+
+  # Outdated:
+  #fonts.packages = [ pkgs.nerdfonts ];
 
   services.flatpak.enable = true;
 
@@ -220,14 +254,14 @@ in {
     extraGroups =
       [ "audio" "input" "uinput" "networkmanager" "wheel" "docker" ];
     packages = [
-      #pkgs.firefox
-      pkgs.firefox-bin
+      pkgs.firefox
+      #pkgs.firefox-bin
       pkgs.google-chrome
       pkgs.kubectl
       pkgs.telegram-desktop
       pkgs.enpass
       pkgs.google-cloud-sdk
-      pkgs.postgresql
+      pkgs.postgresql_17
       pkgs.onlyoffice-bin
       pkgs.masterpdfeditor
       pkgs.gh
@@ -236,7 +270,7 @@ in {
       pkgs.comfortaa
       pkgs.less
       pkgs.delta
-      pkgs.planify
+      #pkgs.planify
       pkgs.dbeaver-bin
       pkgs.p7zip
       pkgs.unrar
@@ -271,7 +305,13 @@ in {
       pkgs.rclone
       pkgs.wl-clipboard
       pkgs.silver-searcher
-      pkgs.clj-kondo
+      unstable-pkgs.clj-kondo
+      unstable-pkgs.cljfmt
+      pkgs.mediawriter
+      pkgs.easyeffects
+      pkgs.ntfs3g
+      #pkgs.linux-firmware
+      pkgs.iw
 
       # gnome
       pkgs.gnome-tweaks
@@ -332,8 +372,15 @@ in {
 
   hardware.graphics = {
     enable = true;
-    extraPackages =
-      [ pkgs.intel-media-driver pkgs.intel-vaapi-driver pkgs.libvdpau-va-gl ];
+    #extraPackages = [ pkgs.intel-media-driver pkgs.intel-vaapi-driver pkgs.libvdpau-va-gl ];
+    extraPackages = with pkgs; [
+      libvdpau-va-gl
+      vaapiVdpau
+      rocmPackages.clr
+      rocmPackages.clr.icd
+      #amdvlk
+    ];
+    #extraPackages32 = with pkgs; [ driversi686Linux.amdvlk ];
   };
 
   hardware.bluetooth = {
@@ -343,11 +390,11 @@ in {
 
   zramSwap = {
     enable = true;
-    memoryPercent = 200;
+    memoryPercent = 50;
   };
 
   boot.kernel.sysctl = {
-    "vm.swappiness" = 180;
+    "vm.swappiness" = 100;
     "vm.page-cluster" = 0;
   };
 

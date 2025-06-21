@@ -106,11 +106,13 @@ alias m="make"
 alias vinix="sudo $EDITOR /home/seryiza/code/my-dev-env/configuration.nix"
 alias nr="sudo nixos-rebuild"
 alias nrs="sudo nixos-rebuild switch --flake /home/seryiza/code/my-dev-env"
+alias nrr="nix flake update --flake /home/seryiza/code/my-dev-env && sudo nixos-rebuild switch --flake /home/seryiza/code/my-dev-env"
 alias nc="sudo nix-channel"
 alias ncu="sudo nix-channel --update"
 alias ncg7="sudo nix-collect-garbage --delete-older-than 7d"
 alias ghpr="gh pr create -a @me && gh pr merge --auto --delete-branch --rebase"
 alias xobsidian="WAYLAND_DISPLAY= obsidian"
+alias winfocus_by_wmclass="gdbus call --session --dest org.gnome.Shell --object-path /de/lucaswerkmeister/ActivateWindowByTitle --method de.lucaswerkmeister.ActivateWindowByTitle.activateByWmClass"
 
 # Tmux here
 function th() {

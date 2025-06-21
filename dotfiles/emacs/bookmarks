@@ -2,16 +2,22 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("home.org"
+(("org-refile-last-stored"
+ (filename . "~/org/work/health-samurai.org")
+ (front-context-string . "** Today's Quest")
+ (rear-context-string . "2025-04-21 Mon>\n")
+ (position . 23813)
+ (last-modified 26676 7445 831781 165000))
+("home.org"
  (filename . "~/org/home.org")
  (front-context-string . "#+STARTUP: overv")
  (rear-context-string)
  (position . 1)
  (last-modified 26336 52436 575192 990000))
 ("org-capture-last-stored"
- (filename . "~/org/me.org")
- (front-context-string . "** TODO clean th")
- (rear-context-string . "<2024-10-08 Вт>\n")
- (position . 8057)
- (last-modified 26373 41785 704331 151000))
+ (filename . "~/org/work/health-samurai.org")
+ (front-context-string . "** TODO hospice ")
+ (rear-context-string . "note/issues/920\n")
+ (position . 6881)
+ (last-modified 26676 10249 814556 323000))
 )

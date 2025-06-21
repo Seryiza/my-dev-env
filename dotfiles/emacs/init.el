@@ -36,9 +36,9 @@
 ;; at if you want more packages. MELPA in particular is very popular. See
 ;; instructions at:
 ;;
-;;    https://melpa.org/#/getting-started
-;;
-;; You can simply uncomment the following if you'd like to get started with
+;;    https://melpa.org/#/getting-started;
+;
+;; Yo ucan simply uncomment the following if you'd like to get started with
 ;; MELPA packages quickly:
 ;;
 (with-eval-after-load 'package
@@ -122,6 +122,10 @@ If the new path's directories does not exist, create them."
   :config
   (which-key-mode))
 
+(use-package dired
+  :bind (:map dired-mode-map
+			  ("," . make-directory)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;;   Minibuffer/completion settings
@@ -191,9 +195,9 @@ If the new path's directories does not exist, create them."
 ;; (scroll-bar-mode -1)
 
 ;; Use common keystrokes by default
-(cua-mode)
+;; (cua-mode)
 
-(define-key cua-global-keymap [C-return] nil)
+;; (define-key cua-global-keymap [C-return] nil)
 
 ;; Display line numbers in programming mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -248,7 +252,10 @@ If the new path's directories does not exist, create them."
 
 ;; TODO: move font name to variable / constant
 (add-to-list 'default-frame-alist '(font . "Iosevka-15" ))
-(set-face-attribute 'default t :font "Iosevka-15" )
+(set-face-attribute 'default t :font "Iosevka-15")
+
+;; (setq-default line-spacing 20)
+;; (setq default-text-properties '(line-spacing 0.15 line-height 1.15))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -268,21 +275,21 @@ If the new path's directories does not exist, create them."
 
 ;; My packages
 
-;(use-package catppuccin-theme
-;  :demand t
-;  :ensure t
-;  :config
-;  (setq catppuccin-flavor 'latte)
-;  (load-theme 'catppuccin :no-confirm)
-;  (catppuccin-reload))
+										;(use-package catppuccin-theme
+										;  :demand t
+										;  :ensure t
+										;  :config
+										;  (setq catppuccin-flavor 'latte)
+										;  (load-theme 'catppuccin :no-confirm)
+										;  (catppuccin-reload))
 
-(use-package nerd-icons
-  ;; :custom
-  ;; The Nerd Font you want to use in GUI
-  ;; "Symbols Nerd Font Mono" is the default and is recommended
-  ;; but you can use any other Nerd Font if you want
-  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-  )
+;; (use-package nerd-icons
+;;   ;; :custom
+;;   ;; The Nerd Font you want to use in GUI
+;;   ;; "Symbols Nerd Font Mono" is the default and is recommended
+;;   ;; but you can use any other Nerd Font if you want
+;;   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+;;   )
 
 ;; (use-package doom-themes
 ;;   :ensure t
@@ -318,14 +325,14 @@ If the new path's directories does not exist, create them."
   (nano-light)
 
   ;; TODO: use custom-theme-set-faces
-  ;(with-eval-after-load "nano-theme"
-  ;  (custom-theme-set-faces
-  ;   'nano
-  ;   ;; TODO: fix weight only for TODO items
-  ;   '(org-level-2 ((t (:weight normal))))
-  ;   '(org-level-3 ((t (:weight normal))))
-  ;   '(org-level-4 ((t (:weight normal))))
-  ;   '(org-level-5 ((t (:weight normal))))))
+										;(with-eval-after-load "nano-theme"
+										;  (custom-theme-set-faces
+										;   'nano
+										;   ;; TODO: fix weight only for TODO items
+										;   '(org-level-2 ((t (:weight normal))))
+										;   '(org-level-3 ((t (:weight normal))))
+										;   '(org-level-4 ((t (:weight normal))))
+										;   '(org-level-5 ((t (:weight normal))))))
 
   ;; :custom-face
   ;; (vertical-border ((t (:foreground "black"))))
@@ -576,10 +583,22 @@ If the new path's directories does not exist, create them."
     '("C-q" . delete-other-windows)
 
     ;; org-mode items
-    '("C-h" . org-promote-subtree)
-    '("C-j" . org-move-subtree-down)
-    '("C-k" . org-move-subtree-up)
-    '("C-l" . org-demote-subtree)
+    '("C-h" . (lambda ()
+				(interactive)
+				(when (eq major-mode 'org-mode)
+				  (org-promote-subtree))))
+    '("C-l" . (lambda ()
+				(interactive)
+				(when (eq major-mode 'org-mode)
+				  (org-demote-subtree))))
+    '("C-j" . (lambda ()
+				(interactive)
+				(when (eq major-mode 'org-mode)
+				  (org-move-subtree-down))))
+    '("C-k" . (lambda ()
+				(interactive)
+				(when (eq major-mode 'org-mode)
+				  (org-move-subtree-up))))
 
     '("M-h" . windmove-left)
     '("M-j" . windmove-down)
@@ -660,15 +679,13 @@ If the new path's directories does not exist, create them."
      default))
  '(global-eldoc-mode nil)
  '(package-selected-packages
-   '(avy cape catppuccin-theme cider clojure-ts-mode corfu-terminal
-	 doom-modeline doom-themes eglot-booster elfeed elfeed-org
-	 embark-consult evil flycheck-clj-kondo helm-ag helm-lsp
+   '(avy cape cider corfu-terminal eglot-booster elfeed-org
+	 embark-consult flycheck-clj-kondo helm-ag helm-lsp
 	 helm-projectile helm-rg howm json-mode kind-icon lua-mode
-	 magit marginalia meow modus-themes nano-modeline nano-theme
-	 nix-mode orderless org-download org-drill org-roam
-	 org-timeblock paredit popup quelpa-use-package reverse-im rg
-	 smartparens stimmung-themes ultra-scroll vertico vterm
-	 which-key yaml-mode zprint-mode))
+	 magit marginalia meow nano-theme nix-mode orderless
+	 org-download org-drill org-modern org-timeblock paredit
+	 quelpa-use-package rg tempel vertico vterm yaml-mode
+	 zprint-mode))
  '(wgrep-auto-save-buffer t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -695,11 +712,17 @@ If the new path's directories does not exist, create them."
   (save-buffer)
   (eval-expression (load-file user-init-file)))
 
-(use-package elfeed
-  :ensure t)
+;; (use-package elfeed
+;;   :ensure t)
 
-(use-package elfeed-org
-  :ensure t
-  :config
-  (setq rmh-elfeed-org-files (list "~/org/rss.org"))
-  (elfeed-org))
+;; (use-package elfeed-org
+;;   :ensure t
+;;   :config
+;;   (setq rmh-elfeed-org-files (list "~/org/rss.org"))
+;;   (elfeed-org))
+
+(set-default 'mode-line-format
+			 '("%e" mode-line-front-space
+			   (:eval (meow-indicator))
+			   " "
+			   "[%+] %b"))

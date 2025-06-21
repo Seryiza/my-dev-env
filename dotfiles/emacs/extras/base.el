@@ -44,23 +44,26 @@
 (use-package consult
   :ensure t
   :bind (
-         ;; Drop-in replacements
          ("C-x b" . consult-buffer)     ; orig. switch-to-buffer
          ("C-c b C-b" . consult-buffer)
-         ("M-y"   . consult-yank-pop)   ; orig. yank-pop
-         ;; Searching
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)       ; Alternative: rebind C-s to use
-         ("M-s s" . consult-line)       ; consult-line instead of isearch, bind
-         ("M-s L" . consult-line-multi) ; isearch to M-s s
-         ("M-s o" . consult-outline)
-         ;; Isearch integration
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)   ; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history) ; orig. isearch-edit-string
-         ("M-s l" . consult-line)            ; needed by consult-line to detect isearch
-	 ("C-c b C-r" . rename-buffer)
-         ("M-s L" . consult-line-multi)      ; needed by consult-line to detect isearch
+	 ("C-c f C-g" . consult-ripgrep)
+	 ("C-c f C-l" . consult-isearch-history)
+
+         ;; Drop-in replacements
+         ;; ("M-y"   . consult-yank-pop)   ; orig. yank-pop
+         ;; ;; Searching
+         ;; ("M-s r" . consult-ripgrep)
+         ;; ("M-s l" . consult-line)       ; Alternative: rebind C-s to use
+         ;; ("M-s s" . consult-line)       ; consult-line instead of isearch, bind
+         ;; ("M-s L" . consult-line-multi) ; isearch to M-s s
+         ;; ("M-s o" . consult-outline)
+         ;; ;; Isearch integration
+         ;; :map isearch-mode-map
+         ;; ("M-e" . consult-isearch-history)   ; orig. isearch-edit-string
+         ;; ("M-s e" . consult-isearch-history) ; orig. isearch-edit-string
+         ;; ("M-s l" . consult-line)            ; needed by consult-line to detect isearch
+	 ;; ("C-c b C-r" . rename-buffer)
+         ;; ("M-s L" . consult-line-multi)      ; needed by consult-line to detect isearch
          )
   :config
   ;; Narrowing lets you restrict results to certain groups of candidates
@@ -122,6 +125,8 @@
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.05)
   ;; (corfu-separator ?\s)          ;; Orderless field separator
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
@@ -169,7 +174,7 @@
 (use-package cape
   :ensure t
   :init
-  ;(add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-abbrev)
   (add-to-list 'completion-at-point-functions #'cape-file))
 
 ;; Pretty icons for corfu
@@ -207,6 +212,40 @@
   ;; Emacs 30 and newer: Disable Ispell completion function.
   ;; Try `cape-dict' as an alternative.
   (text-mode-ispell-word-completion nil))
+
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  ;; :custom
+  ;; (tempel-trigger-prefix "<")
+  :ensure t
+
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  (global-tempel-abbrev-mode)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

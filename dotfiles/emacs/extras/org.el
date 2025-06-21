@@ -46,11 +46,15 @@
 
 ; (setq org-agenda-files '("~/org"))
 
+;; TODO: fix howm directory
+(setq org-agenda-files '("~/org"
+			 "~/org/notes/2025"))
+
 ;(setq org-agenda-files (append
 ;                        '("~/orglife")
 ;                        (directory-files-recursively "~/orglife/howm" "\\.org\\'")))
 
-(setq org-agenda-files (directory-files-recursively "~/org" "\\.org\\'"))
+					;(setq org-agenda-files (directory-files-recursively "~/org" "\\.org\\'"))
 
 ;; Default tags
 (setq org-tag-alist '(
@@ -72,8 +76,9 @@
                       ("review")
                       ("reading")))
 
-;; Org-refile: where should org-refile look?
-(setq org-refile-targets 'FIXME)
+(setq org-refile-targets '(;("personal.org" :maxlevel . 1)
+                           (nil :level . 1)))
+(setq org-archive-location "archive/%s::")
 
 ;;; Phase 3 variables
 
@@ -101,9 +106,13 @@
   (interactive)
   (org-agenda nil "w"))
 
-(defun todo-agenda ()
+(defun work-todos ()
   (interactive)
-  (org-agenda nil "t"))
+  (org-agenda nil "q"))
+
+(defun personal-todos ()
+  (interactive)
+  (org-agenda nil "p"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -126,7 +135,8 @@
    ("C-c . ." . org-capture)
    ("C-c . C-j" . my-today-agenda)
    ("C-c . C-w" . my-work-agenda)
-   ("C-c . C-t" . todo-agenda))
+   ("C-c . C-p" . personal-todos)
+   ("C-c . C-q" . work-todos))
   
   :config
 					;(require 'oc-csl)                     ; citation support
@@ -162,8 +172,8 @@
   :config
   ;; Instead of just two states (TODO, DONE) we set up a few different states
   ;; that a task can be in.
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "STARTED(s!)" "WAITING(w!)" "NEXT(n)" "MEETING(e)" "TIMEBLOCK(b)" "|" "DONE(d)" "CANCELED(c)")))
+  ; (setq org-todo-keywords '((sequence "TODO(t)" "STARTED(s!)" "WAITING(w!)" "NEXT(n)" "MEET(m)" "TIMEBLOCK(b)" "|" "DONE(d)" "CANCELED(c)")))
+  (setq org-todo-keywords '((sequence "TODO(t)" "ONGO(o!)" "WAIT(w!)" "NEXT(n!)" "MEET(m)" "|" "DONE(d)" "SKIP(s)")))
 
   ;; Refile configuration
   (setq org-outline-path-complete-in-steps nil)
@@ -181,54 +191,67 @@
   ;(setq org-agenda-log-mode-items '(closed clock state))
   ;(setq org-agenda-start-with-log-mode '(closed clock state))
 
-  (setq org-image-actual-width 600) 
+  (setq org-image-actual-width 400)
+  (setq org-startup-with-inline-images t)
 
   (setq org-blank-before-new-entry
-	'((heading . nil)
-	  (plain-list-item . nil)))
+		'((heading . nil)
+		  (plain-list-item . nil)))
   
   ;; showall
   ;(setq org-startup-folded t)
 
   (setq org-startup-indented t)
+  (setq org-indent-indentation-per-level 6)
 
   (setq org-capture-templates
-        '(("i" "INBOX TODO" entry (file "inbox.org")
+        '(("p" "Personal")
+		  ("pp" "Inbox Item" entry (file+headline "personal.org" "Inbox")
            "* %?\n%i")
-	  ("b" "BOOKMARK" entry (file "bookmarks.org") "* %?\n:PROPERTIES:\n:Created: %t\n:END:")
-	  ("l" "LIFEHACK" entry (file "lifehacks.org") "* %?\n:PROPERTIES:\n:Discovored: %t\n:Source: \n:END:")
-	  ("m" "MY (ME)")
-	      ("mt" "MY TODO" entry (file+headline "me.org" "TASKS")
-           "** TODO %?\nSCHEDULED: %t")
-          ;; Capture and keep an org-link to the thing we're currently working with
-          ("r" "Capture with Reference" entry (file "inbox.org")
-           "* TODO %?\n%U\n%i\n%a")
-          ;; Define a section
-          
-          ("w" "Work" entry (file+headline "health-samurai.org" "INBOX")
-           "* %?\n%i")))
+		  
+		  ("pt" "Today Todo" entry (file+headline "personal.org" "Tasks")
+		   "** TODO %?\nSCHEDULED: %t")
+
+		  ("h" "Health Samurai")
+          ("hh" "Inbox Item" entry (file+headline "work/health-samurai.org" "Inbox")
+           "* %?\n%i")
+		  ("ht" "Today Todo" entry (file+headline "work/health-samurai.org" "Tasks")
+		   "** TODO %?\nSCHEDULED: %t")
+
+		  ("e" "English")
+		  ("ee" "Two-Direction English Card" entry (file "decks/english.org")
+		   "* %\\1 :drill:\n** English\n%^{prompt}\n** Definition\n%^{prompt}\n%?\n** Notes\n")))
 
     (setq org-agenda-custom-commands
           '(("n" "Agenda and All Todos"
-         ((todo "STARTED")
+         ((todo "ONGO")
 		  (todo "NEXT")
 		  (agenda))
 	     (;(org-agenda-show-log t)
-	      (org-agenda-span 3)
+	      ;(org-agenda-files (append org-agenda-files '("work/health-samurai.org")))
+	      (org-agenda-prefix-format '((agenda . " %-12t")
+									  (todo . " %i")))
+	      (org-agenda-span 1)
 	      (org-agenda-skip-entry-if 'todo 'done)
 	      (org-agenda-log-mode-items '(state))
 	      (org-agenda-skip-scheduled-if-done t)
 	      (org-agenda-skip-timestamp-if-done t)
 	      ;(org-agenda-sorting-strategy '((agenda priority-down time-up todo-state-up)))
 	      ))
-	    ("a" "All TODO items"
+
+	    ("p" "Personal Todos"
 	     ((todo "TODO"))
-	     ())
-		("b" "All TIMEBLOCK items"
-	     ((todo "TIMEBLOCK"))
-	     ())
-        ("w" "Work" agenda ""
-         ((org-agenda-files '("health-samurai.org"))))))
+	     ((org-agenda-todo-ignore-scheduled 'all)))
+		
+	    ("w" "Work" agenda ""
+	     ((org-agenda-files '("work/health-samurai.org"))
+		  ; (agenda . " %?-12t% s")
+	      (org-agenda-prefix-format " %i%-20:c%-12t")))
+
+		("q" "Work Queue"
+	     ((todo "TODO"))
+	     ((org-agenda-files '("work/health-samurai.org"))
+		  (org-agenda-todo-ignore-scheduled 'all)))))
 
     (setq org-agenda-use-time-grid nil))
 
@@ -288,14 +311,35 @@
   :ensure t
 
   :config
-  (setq org-drill-scope 'agenda)
+  ;(setq org-drill-scope 'agenda)
   (setq org-drill-spaced-repetition-algorithm 'sm2))
 
 (use-package org-download
   :ensure t
 
   :bind
-  (("C-c . i" . org-download-clipboard))
+  (("C-c . c" . org-download-clipboard)
+   ("C-c . i" . org-download-image))
 
   :config
   (setq-default org-download-image-dir "~/org/images"))
+
+(use-package org-modern
+  :ensure t
+
+  :config
+  (setq
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-agenda-tags-column 0
+   org-ellipsis "…")
+  
+  (with-eval-after-load 'org (global-org-modern-mode)))

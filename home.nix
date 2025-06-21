@@ -19,6 +19,8 @@
     pkgs.gnomeExtensions.paperwm
     pkgs.gnomeExtensions.just-perfection
     pkgs.gnomeExtensions.xremap
+    pkgs.gnomeExtensions.advanced-alttab-window-switcher
+    pkgs.gnomeExtensions.activate-window-by-title
     #pkgs.gnomeExtensions.switcher
     #pkgs.gnomeExtensions.rounded-window-corners
     #pkgs.gnomeExtensions.colorblind-filters
@@ -44,6 +46,8 @@
         "light-style@gnome-shell-extensions.gcampax.github.com"
         pkgs.gnomeExtensions.quick-lang-switch.extensionUuid
         pkgs.gnomeExtensions.just-perfection.extensionUuid
+        pkgs.gnomeExtensions.xremap.extensionUuid
+        pkgs.gnomeExtensions.activate-window-by-title.extensionUuid
       ];
     };
   };
@@ -136,7 +140,7 @@
 
     profiles = {
       default = {
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           violentmonkey
         ];

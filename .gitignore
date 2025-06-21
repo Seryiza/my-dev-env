@@ -17,6 +17,7 @@
 /dotfiles/emacs/projects
 /dotfiles/emacs/tramp
 /dotfiles/emacs/url
+/dotfiles/emacs/bookmarks
 
 # Org Roam
 .org-id-locations

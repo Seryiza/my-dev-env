@@ -87,20 +87,28 @@
   :ensure t
 
   :config
-  (setq clojure-indent-style 'always-indent
-        clojure-indent-keyword-style 'always-indent
-        clojure-enable-indent-specs nil)
+  ;; (setq clojure-indent-style 'always-indent
+  ;;       clojure-indent-keyword-style 'always-indent
+  ;;       clojure-enable-indent-specs nil)
 
   (require 'flycheck-clj-kondo))
 
 ;(use-package clojure-ts-mode
 ;  :ensure t)
 
-(use-package zprint-mode
-  :ensure t
-  :hook ((clojure-mode . zprint-mode)
-	 (clojurec-mode . zprint-mode)
-	 (clojurescript-mode . zprint-mode)))
+;; (use-package zprint-mode
+;;   :ensure t
+;;   :hook ((clojure-mode . zprint-mode)
+;; 		 (clojurec-mode . zprint-mode)
+;; 	 (clojurescript-mode . zprint-mode)))
+
+(defun format-clojure ()
+  (when (or (eq major-mode 'clojure-mode)
+	        (eq major-mode 'clojurec-mode)
+            (eq major-mode 'clojurescript-mode))
+    (shell-command-to-string (format "cljfmt fix --config %s %s"
+      				(concat (projectile-project-root buffer-file-name) ".cljfmt.edn")							 buffer-file-name))
+    (revert-buffer :ignore-auto :noconfirm)))
 
 (use-package cider
   :ensure t
@@ -117,7 +125,15 @@
   :config
   (setq cider-save-file-on-load t)
   (setq cider-use-xref nil)
-  (setq cider-font-lock-reader-conditionals nil))
+  (setq cider-font-lock-reader-conditionals nil)
+
+  ;; (setq cider-format-code-options
+  ;;     '(("sort-ns-references?" (("true")))))
+  
+  (add-hook 'after-save-hook #'format-clojure
+			;t
+			;t
+			))
 
 (use-package lua-mode
   :ensure t)
@@ -154,7 +170,7 @@
   )
 
 (use-package eglot-booster
-  ;; :ensure t
+  :ensure t
   :quelpa (eglot-booster
             :fetcher github
             :repo "jdtsmith/eglot-booster")
@@ -212,9 +228,9 @@
 (use-package helm
   :ensure t
 
-  :bind
-  ("C-c f C-g" . helm-projectile-ag)
-  ("C-c f C-l" . helm-resume)
+  ;; :bind
+  ;; ("C-c f C-g" . helm-projectile-ag)
+  ;; ("C-c f C-l" . helm-resume)
 
   :config
   (require 'helm-autoloads))
