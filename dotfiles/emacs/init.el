@@ -20,8 +20,11 @@
 ;;;  - Built-in customization framework
 
 ;;; Guard
-(when (< emacs-major-version 29)
-  (error (format "Emacs Bedrock only works with Emacs 29 and newer; you have version ~a" emacs-major-version)))
+;; (when (< emacs-major-version 29)
+;;   (error
+;;    (format
+;;     "Emacs Bedrock only works with Emacs 29 and newer; you have version ~a"
+;;     emacs-major-version)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -37,26 +40,34 @@
 ;; instructions at:
 ;;
 ;;    https://melpa.org/#/getting-started;
-;
+										;
 ;; Yo ucan simply uncomment the following if you'd like to get started with
 ;; MELPA packages quickly:
 ;;
 (with-eval-after-load 'package
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+
+
+  ;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  ;; (add-to-list 'package-pinned-packages '(telega . "melpa-stable"))
+  )
 
 (customize-set-variable 'package-archive-priorities
-			  '(("gnu"    . 30)
-                ("nongnu" . 40)
-                ("melpa"  . 50)))
+						'(("gnu"    . 30)
+						  ("nongnu" . 40)
+						  ("melpa"  . 50)))
 
 (use-package quelpa
-  :ensure t)
+  :ensure
+  t)
 
 (use-package quelpa-use-package
-  :ensure t)
+  :ensure
+  t)
 
 ;; If you want to turn off the welcome screen, uncomment this
-;(setopt inhibit-splash-screen t)
+										;(setopt inhibit-splash-screen t)
 
 (setopt initial-major-mode 'fundamental-mode)  ; default mode for the *scratch* buffer
 (setopt display-time-default-load-average nil) ; this information is useless for most
@@ -70,7 +81,7 @@
 (global-auto-revert-mode)
 
 ;;  history of minibuffer
-(savehist-mode)
+;; (savehist-mode)
 
 ;; Move through windows with Ctrl-<arrow keys>
 ;; (windmove-default-keybindings 'control) ; You can use other modifiers here
@@ -94,13 +105,17 @@
 If the new path's directories does not exist, create them."
   (let* ((backupRootDir "~/.emacs.d/emacs-backup/")
          (filePath (replace-regexp-in-string "[A-Za-z]:" "" fpath )) ; remove Windows driver letter in path
-         (backupFilePath (replace-regexp-in-string "//" "/" (concat backupRootDir filePath "~") )))
-    (make-directory (file-name-directory backupFilePath) (file-name-directory backupFilePath))
+         (backupFilePath
+		  (replace-regexp-in-string "//" "/"
+									(concat backupRootDir filePath "~")
+									)))
+    (make-directory (file-name-directory backupFilePath)
+					(file-name-directory backupFilePath))
     backupFilePath))
 
 (setopt make-backup-file-name-function 'bedrock--backup-file-name)
 
-;(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosaves/\\1" t)))
+										;(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosaves/\\1" t)))
 
 (setq create-lockfiles nil)
 
@@ -113,18 +128,20 @@ If the new path's directories does not exist, create them."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Show the help buffer after startup
-					;(add-hook 'after-init-hook 'help-quick)
+										;(add-hook 'after-init-hook 'help-quick)
 
 ;; which-key: shows a popup of available keybindings when typing a long key
 ;; sequence (e.g. C-x ...)
 (use-package which-key
-  :ensure t
+  :ensure
+  t
   :config
   (which-key-mode))
 
 (use-package dired
-  :bind (:map dired-mode-map
-			  ("," . make-directory)))
+  :bind
+  (:map dired-mode-map
+		("," . make-directory)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -146,16 +163,21 @@ If the new path's directories does not exist, create them."
 (setopt completions-format 'one-column)
 (setopt completions-group t)
 (setopt completion-auto-select 'second-tab)            ; Much more eager
-;(setopt completion-auto-select t)                     ; See `C-h v completion-auto-select' for more possible values
+										;(setopt completion-auto-select t)                     ; See `C-h v completion-auto-select' for more possible values
 
 (keymap-set minibuffer-mode-map "TAB" 'minibuffer-complete) ; TAB acts more like how it does in the shell
 
 ;; For a fancier built-in completion option, try ido-mode,
 ;; icomplete-vertical, or fido-mode. See also the file extras/base.el
 
-;(icomplete-vertical-mode)
-;(fido-vertical-mode)
-;(setopt icomplete-delay-completions-threshold 4000)
+										;(icomplete-vertical-mode)
+										;(fido-vertical-mode)
+										;(setopt icomplete-delay-completions-threshold 4000)
+
+;;; PGTK tweaks
+
+;; TODO: set it to nil?
+(setq pgtk-wait-for-event-timeout 0.01)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -183,16 +205,22 @@ If the new path's directories does not exist, create them."
 ;; (setopt tab-width 4)
 
 ;; Misc. UI tweaks
-(blink-cursor-mode -1)                                ; Steady cursor
-(pixel-scroll-precision-mode)                         ; Smooth scrolling
-(setopt pixel-scroll-precision-interpolate-mice t)
-(setopt pixel-scroll-precision-interpolation-factor 1.5)
-(setopt pixel-scroll-precision-use-momentum t)
-(setopt pixel-scroll-precision-interpolate-page t)
-(setq scroll-preserve-screen-position t)
+(blink-cursor-mode 1)
+(setopt blink-cursor-interval 0.7)
+
+					;(pixel-scroll-precision-mode)                         ; Smooth scrolling
+					;(setopt pixel-scroll-precision-interpolate-mice t)
+					;(setopt pixel-scroll-precision-interpolation-factor 1.5)
+					;(setopt pixel-scroll-precision-use-momentum t)
+					;(setopt pixel-scroll-precision-interpolate-page t)
+
+					;(setopt pixel-scroll-precision-large-scroll-height 10.0)
+					;(setopt pixel-scroll-precision-interpolation-factor 2.0)
+
+(setq scroll-preserve-screen-position 'always)
 
 ;; TODO: check org-timeblock with scrollbars and 1:1
-;; (scroll-bar-mode -1)
+(scroll-bar-mode -1)
 
 ;; Use common keystrokes by default
 ;; (cua-mode)
@@ -221,7 +249,7 @@ If the new path's directories does not exist, create them."
 (menu-bar-mode -1)
 
 ;; Hide tool bar
-;(tool-bar-mode -1)
+										;(tool-bar-mode -1)
 
 ;; Hide fringe bar
 ;; (set-fringe-mode 0)
@@ -232,7 +260,16 @@ If the new path's directories does not exist, create them."
 
 ;; Enable autopair
 
+;; (setopt electric-pair-pairs
+;; 	'((?\( . ?\))
+;;           (?\[ . ?\])
+;;           (?\{ . ?\})
+;;           (?\< . ?\>)))
+
+;; (setopt electric-pair-text-pairs electric-pair-pairs)
+
 (electric-pair-mode t)
+
 ;; (setq electric-pair-preserve-balance nil)
 
 ;; (use-package smartparens
@@ -251,8 +288,8 @@ If the new path's directories does not exist, create them."
   (clojure-mode . paredit-mode))
 
 ;; TODO: move font name to variable / constant
-(add-to-list 'default-frame-alist '(font . "Iosevka-15" ))
-(set-face-attribute 'default t :font "Iosevka-15")
+(add-to-list 'default-frame-alist '(font . "Iosevka-13" ))
+(set-face-attribute 'default t :font "Iosevka-13")
 
 ;; (setq-default line-spacing 20)
 ;; (setq default-text-properties '(line-spacing 0.15 line-height 1.15))
@@ -315,28 +352,31 @@ If the new path's directories does not exist, create them."
 ;; (use-package stimmung-themes
 ;;   :demand t
 ;;   :ensure t
-;;   :config (stimmung-themes-load-light)) ; or (stimmung-themes-load-dark)
+;;   :config
+;;   (setq stimmung-themes-comment 'foreground)
+;;   (stimmung-themes-load-light))
 
-(use-package nano-theme
-  :quelpa (nano-theme
-           :fetcher github
-           :repo "rougier/nano-theme")
-  :config
-  (nano-light)
+;; (use-package nano-theme
+;;   :quelpa
+;;   (nano-theme
+;;    :fetcher github
+;;    :repo "rougier/nano-theme")
+;;   :config
+;;   (nano-light)
 
-  ;; TODO: use custom-theme-set-faces
-										;(with-eval-after-load "nano-theme"
-										;  (custom-theme-set-faces
-										;   'nano
-										;   ;; TODO: fix weight only for TODO items
-										;   '(org-level-2 ((t (:weight normal))))
-										;   '(org-level-3 ((t (:weight normal))))
-										;   '(org-level-4 ((t (:weight normal))))
-										;   '(org-level-5 ((t (:weight normal))))))
+;;   ;; TODO: use custom-theme-set-faces
+;; 										;(with-eval-after-load "nano-theme"
+;; 										;  (custom-theme-set-faces
+;; 										;   'nano
+;; 										;   ;; TODO: fix weight only for TODO items
+;; 										;   '(org-level-2 ((t (:weight normal))))
+;; 										;   '(org-level-3 ((t (:weight normal))))
+;; 										;   '(org-level-4 ((t (:weight normal))))
+;; 										;   '(org-level-5 ((t (:weight normal))))))
 
-  ;; :custom-face
-  ;; (vertical-border ((t (:foreground "black"))))
-  )
+;;   ;; :custom-face
+;;   ;; (vertical-border ((t (:foreground "black"))))
+;;   )
 
 ;; (use-package nano-modeline
 ;;   :ensure t
@@ -345,49 +385,54 @@ If the new path's directories does not exist, create them."
 ;;   (setq nano-modeline-position 'nano-modeline-footer)
 ;;   ;;(setq nano-modeline-position 'nano-modeline-header)
 ;;   ;;(setq mode-line-format nil)
-  
+
 ;;   (nano-modeline-text-mode t)
-  
+
 ;;   (add-hook 'text-mode-hook #'nano-modeline-text-mode)
 ;;   (add-hook 'prog-mode-hook #'nano-modeline-prog-mode))
-  
-  ;; (add-hook 'org-mode-hook #'nano-modeline-org-mode)
-					;; (use-package doom-modeline
-					;;  :ensure t
-					;;  :init (doom-modeline-mode 1))
+
+;; (add-hook 'org-mode-hook #'nano-modeline-org-mode)
+;; (use-package doom-modeline
+;;  :ensure t
+;;  :init (doom-modeline-mode 1))
 
 ;; Treesitter
 
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-	(css "https://github.com/tree-sitter/tree-sitter-css")
-	(c "https://github.com/tree-sitter/tree-sitter-c")
-	(c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
-	(csv "https://github.com/tree-sitter-grammars/tree-sitter-csv")
-	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-	(editorconfig "https://github.com/ValdezFOmar/tree-sitter-editorconfig")
-	(elixir "https://github.com/elixir-lang/tree-sitter-elixir")
-	(erlang "https://github.com/WhatsApp/tree-sitter-erlang")
-	(fennel "https://github.com/TravonteD/tree-sitter-fennel")
-	(gitignore "https://github.com/shunsambongi/tree-sitter-gitignore")
-	(haxe "https://github.com/vantreeseba/tree-sitter-haxe")
-	(java "https://github.com/tree-sitter/tree-sitter-java")
-	(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-	(nix "https://github.com/nix-community/tree-sitter-nix")
-	(org "https://github.com/milisims/tree-sitter-org")
-	(python "https://github.com/tree-sitter/tree-sitter-python")
-	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-	(sql "https://github.com/DerekStride/tree-sitter-sql")
-	(xml "https://github.com/tree-sitter-grammars/tree-sitter-xml")
-	(zig "https://github.com/tree-sitter-grammars/tree-sitter-zig")
-	(clojure "https://github.com/sogaiu/tree-sitter-clojure")
-	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-	(html "https://github.com/tree-sitter/tree-sitter-html")
-	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-	(json "https://github.com/tree-sitter/tree-sitter-json")
-	(make "https://github.com/alemuller/tree-sitter-make")
-	(markdown "https://github.com/ikatyang/tree-sitter-markdown")
-	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+		(css "https://github.com/tree-sitter/tree-sitter-css")
+		(c "https://github.com/tree-sitter/tree-sitter-c")
+		(c-sharp "https://github.com/tree-sitter/tree-sitter-c-sharp")
+		(csv "https://github.com/tree-sitter-grammars/tree-sitter-csv")
+		(dockerfile
+		 "https://github.com/camdencheek/tree-sitter-dockerfile")
+		(editorconfig
+		 "https://github.com/ValdezFOmar/tree-sitter-editorconfig")
+		(elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+		(erlang "https://github.com/WhatsApp/tree-sitter-erlang")
+		(fennel "https://github.com/TravonteD/tree-sitter-fennel")
+		(gitignore
+		 "https://github.com/shunsambongi/tree-sitter-gitignore")
+		(haxe "https://github.com/vantreeseba/tree-sitter-haxe")
+		(java "https://github.com/tree-sitter/tree-sitter-java")
+		(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+		(nix "https://github.com/nix-community/tree-sitter-nix")
+		(org "https://github.com/milisims/tree-sitter-org")
+		(python "https://github.com/tree-sitter/tree-sitter-python")
+		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+		(sql "https://github.com/DerekStride/tree-sitter-sql")
+		(xml "https://github.com/tree-sitter-grammars/tree-sitter-xml")
+		(zig "https://github.com/tree-sitter-grammars/tree-sitter-zig")
+		(clojure "https://github.com/sogaiu/tree-sitter-clojure")
+		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(javascript
+		 "https://github.com/tree-sitter/tree-sitter-javascript"
+		 "master" "src")
+		(json "https://github.com/tree-sitter/tree-sitter-json")
+		(make "https://github.com/alemuller/tree-sitter-make")
+		(markdown "https://github.com/ikatyang/tree-sitter-markdown")
+		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -396,29 +441,28 @@ If the new path's directories does not exist, create them."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; (defun my-modus-themes-custom-faces (&rest _)
-;;       (modus-themes-with-colors
-;; 	(custom-set-faces
-;; 	 ;; Add "padding" to the mode lines
-;; 	 `(mode-line ((,c :box (:line-width 10 :color ,bg-mode-line-active))))
-;; 	 `(mode-line-inactive ((,c :box (:line-width 10 :color ,bg-mode-line-inactive)))))))
+;;   (modus-themes-with-colors
+;;     (custom-set-faces
+;;      ;; Add "padding" to the mode lines
+;;      `(mode-line ((,c :box (:line-width 10 :color ,bg-mode-line-active))))
+;;      `(mode-line-inactive ((,c :box (:line-width 10 :color ,bg-mode-line-inactive)))))))
 
-;; (use-package modus-themes
-;;   :ensure t
-
-;;   :config
+(use-package modus-themes
+  :ensure t
+  :config
+  (setq shr-use-fonts nil)
+  ;; (add-hook 'modus-themes-after-load-theme-hook #'my-modus-themes-custom-faces)
   
-;;   (setq shr-use-fonts nil)
-
-;;   ;; (add-hook 'modus-themes-after-load-theme-hook #'my-modus-themes-custom-faces)
-  
-;;   (load-theme 'modus-operandi :no-confirm))
+  (load-theme 'modus-operandi-deuteranopia :no-confirm)
+  ;; (load-theme 'modus-operandi-tinted :no-confirm)
+  )
 
 ;; (use-package doom-modeline
 ;;   :ensure t
 
 ;;   :config
 ;;   (setq doom-modeline-icon nil)
-  
+
 ;;   :init
 ;;   (doom-modeline-mode 1))
 
@@ -438,8 +482,94 @@ If the new path's directories does not exist, create them."
 ;; Packages for software development
 (load-file (expand-file-name "extras/dev.el" user-emacs-directory))
 
+(load-file (expand-file-name "extras/launcher.el" user-emacs-directory))
+
+
 ;; Meow
 (defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+
+(defun meow-setup-2 ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-overwrite-define-key
    '("j" . meow-next)
@@ -532,7 +662,8 @@ If the new path's directories does not exist, create them."
 ;;     event))
 
 (use-package meow
-  :ensure t
+  :ensure
+  t
 
   :config
   (meow-setup)
@@ -548,17 +679,17 @@ If the new path's directories does not exist, create them."
   (setq meow-cursor-type-paren 'hollow)
 
   (meow-define-keys 'paren
-  '("<escape>" . meow-normal-mode)
-  '("i" . meow-insert-mode)
-  '("l" . paredit-forward)
-  '("h" . paredit-backward)
-  '("j" . paredit-forward-down)
-  '("k" . paredit-backward-up)
-  '("n" . paredit-forward-slurp-sexp)
-  '("b" . paredit-forward-barf-sexp)
-  '("v" . paredit-backward-barf-sexp)
-  '("c" . paredit-backward-slurp-sexp)
-  '("u" . meow-undo))
+	'("<escape>" . meow-normal-mode)
+	'("i" . meow-insert-mode)
+	'("l" . paredit-forward)
+	'("h" . paredit-backward)
+	'("j" . paredit-forward-down)
+	'("k" . paredit-backward-up)
+	'("n" . paredit-forward-slurp-sexp)
+	'("b" . paredit-forward-barf-sexp)
+	'("v" . paredit-backward-barf-sexp)
+	'("c" . paredit-backward-slurp-sexp)
+	'("u" . meow-undo))
 
   (setq meow-expand-hint-counts '((word . 0)
                                   (line . 30)
@@ -567,20 +698,21 @@ If the new path's directories does not exist, create them."
                                   (till . 30)))
 
   (setq meow-selection-command-fallback
-	'((meow-change . meow-change-char)
-	  ;(meow-kill . meow-C-k)
-	  (meow-cancel-selection . keyboard-quit)
-	  (meow-pop-selection . meow-pop-grab)
-	  (meow-beacon-change . meow-beacon-change-char)))
+		'((meow-change . meow-change-char)
+										;(meow-kill . meow-C-k)
+		  (meow-cancel-selection . keyboard-quit)
+		  (meow-pop-selection . meow-pop-grab)
+		  (meow-beacon-change . meow-beacon-change-char)))
   
   (add-hook 'meow-insert-exit-hook 'corfu-quit)
 
   ;; TODO: refactor normal & motion shared binds
   (meow-define-keys
-      'normal
+    'normal
 
     '("C-;" . meow-comment)
     '("C-q" . delete-other-windows)
+    '("=" . indent-region)
 
     ;; org-mode items
     '("C-h" . (lambda ()
@@ -606,14 +738,15 @@ If the new path's directories does not exist, create them."
     '("M-l" . windmove-right)
 
     '("M-n" . next-buffer)
-    '("M-m" . previous-buffer))
+    '("M-m" . previous-buffer)
+	)
 
   
   (meow-define-keys
-      'motion
+    'motion
 
-    '("h" . meow-left)
-    '("l" . meow-right)
+    ;; '("h" . meow-left)
+    ;; '("l" . meow-right)
 
     '("C-q" . delete-other-windows)
     '("M-h" . windmove-left)
@@ -628,12 +761,17 @@ If the new path's directories does not exist, create them."
    'normal
    '("s" . save-buffer))
 
-  (meow-leader-define-key
-   'insert
-   '("<ESCAPE>" . meow-normal-mode))
+  ;; (meow-leader-define-key
+  ;;  'insert
+  ;;  '("[control-bracketleft]" . meow-insert-exit))
 
   (setq meow-visit-sanitize-completion nil)
+  (setq meow-keypad-leader-dispatch "C-c")
   (setq meow-use-clipboard t)
+  (setq meow-mode-state-list
+		'((conf-mode . normal) (fundamental-mode . normal) (help-mode . motion)
+		  (prog-mode . normal) (text-mode . normal)
+		  (custom-mode . normal)))
 
   ;; (define-key input-decode-map (kbd "C-[") [control-bracketleft])
   ;; NOTE: it's a cyrillic "х"
@@ -656,7 +794,7 @@ If the new path's directories does not exist, create them."
 ;; Email configuration in Emacs
 ;; WARNING: needs the `mu' program installed; see the elisp file for more
 ;; details.
-										;(load-file (expand-file-name "extras/email.el" user-emacs-directory))
+(load-file (expand-file-name "extras/email.el" user-emacs-directory))
 
 ;; Tools for academic researchers
 										;(load-file (expand-file-name "extras/researcher.el" user-emacs-directory))
@@ -667,26 +805,33 @@ If the new path's directories does not exist, create them."
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;  '(auto-save-visited-interval 5)
+;;  '(auto-save-visited-mode t)
+;; '(wgrep-auto-save-buffer t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(auto-save-visited-interval 5)
- '(auto-save-visited-mode t)
- '(custom-safe-themes
-   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c"
-     default))
  '(global-eldoc-mode nil)
+ '(org-timeblock-scale-options nil)
  '(package-selected-packages
-   '(avy cape cider corfu-terminal eglot-booster elfeed-org
-	 embark-consult flycheck-clj-kondo helm-ag helm-lsp
-	 helm-projectile helm-rg howm json-mode kind-icon lua-mode
-	 magit marginalia meow nano-theme nix-mode orderless
-	 org-download org-drill org-modern org-timeblock paredit
-	 quelpa-use-package rg tempel vertico vterm yaml-mode
-	 zprint-mode))
- '(wgrep-auto-save-buffer t))
+   '(0blayout 0x0 avy cape cider claude-code corfu-terminal direnv edraw
+			  edwina eglot-booster elfeed-org embark-consult
+			  flycheck-clj-kondo helm-ag helm-lsp helm-projectile
+			  helm-rg howm inheritenv json-mode kind-icon lua-mode
+			  magit makefile-executor marginalia meow modus-themes
+			  mood-line mu4e nano-theme nix-mode orderless
+			  org-download org-drill org-margin org-modern
+			  org-pomodoro org-timeblock paredit quelpa-use-package rg
+			  south-theme spacious-padding stimmung-themes super-save
+			  telega tempel vertico vterm yaml-mode zprint-mode))
+ '(package-vc-selected-packages
+   '((claude-code :url "https://github.com/stevemolitor/claude-code.el")
+	 (south-theme :url "https://github.com/SophieBosio/south" :branch
+				  "main"))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -712,17 +857,104 @@ If the new path's directories does not exist, create them."
   (save-buffer)
   (eval-expression (load-file user-init-file)))
 
-;; (use-package elfeed
-;;   :ensure t)
+;; media
 
-;; (use-package elfeed-org
+(defcustom my/mpv-org-media-props '("WATCH_URL" "URL" "VIDEO" "FILE" "MEDIA")
+  "Org property names to search for a media URL or path."
+  :type '(repeat string)
+  :group 'my/mpv)
+
+(defun my/mpv--org-media-at-heading (&optional inherit)
+  "Return media URL/path from Org heading properties, or nil.
+Checks `my/mpv-org-media-props'. INHERIT means search up the tree."
+  (when (derived-mode-p 'org-mode)
+    (save-excursion
+      (org-with-wide-buffer
+       (org-back-to-heading t)
+       (let* ((val (seq-some
+                    (lambda (prop)
+                      (org-entry-get (point) prop inherit))
+                    my/mpv-org-media-props)))
+         (when val
+           ;; Accept [[link][desc]] or raw string
+           (setq val (string-trim val))
+           (if (string-match "\\`\\[\\[\\([^][]+\\)\\]\\(?:\\[[^][]*\\]\\)?\\]\\'" val)
+               (match-string 1 val)
+             val)))))))
+
+(defun my/mpv-open (&optional file)
+  "Open media FILE or URL with mpv."
+  (interactive)
+  (let* ((mpv (or (executable-find "mpv")
+                  (user-error "MPV not found in PATH")))
+         (org-prop (my/mpv--org-media-at-heading 'inherit))
+         (tap-file (thing-at-point 'filename t))
+         (tap-url  (thing-at-point 'url t))
+         (guess (or file org-prop tap-file tap-url))
+         (file  (or guess (read-file-name "Media file or URL: ")))
+         (target (cond
+                  ;; URL
+                  ((string-match-p "\\`\\(https?\\|ftp\\|magnet\\)://" file) file)
+                  ;; Remote TRAMP
+                  ((file-remote-p file) (file-local-copy file))
+                  ;; Local path
+                  (t (expand-file-name file)))))
+    (start-process "mpv" nil mpv "--" target)))
+
+(use-package elfeed
+  :ensure t)
+
+(use-package elfeed-org
+  :ensure t
+  :config
+  (setq rmh-elfeed-org-files (list "~/org/rss.org"))
+  (elfeed-org))
+
+(use-package emacs
+  :config
+  (auth-source-pass-enable))
+
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1)
+  (setq super-save-auto-save-when-idle t)
+  (setq auto-save-default nil))
+
+(use-package telega
+  :init
+  (setopt telega-use-images t)
+  (setopt telega-emoji-use-images nil)
+  (setopt telega-emoji-font-family "Noto Color Emoji")
+  
+  (setopt telega-online-status-function
+	  (lambda ()
+            ;; Example policy: be "online" only when a telega buffer is visible
+            ;; in the selected window.
+            (let ((buf (window-buffer (selected-window))))
+              (derived-mode-p 'telega-root-mode 'telega-chat-mode)))))
+
+;; (use-package spacious-padding
 ;;   :ensure t
 ;;   :config
-;;   (setq rmh-elfeed-org-files (list "~/org/rss.org"))
-;;   (elfeed-org))
+;;   (setq spacious-padding-widths
+;; 	'(:internal-border-width 5
+;;       :header-line-width 0
+;;       :mode-line-width 3
+;;       :tab-width 0
+;;       :right-divider-width 0
+;;       :scroll-bar-width 0
+;;       :fringe-width 10))
+  
+;;   (setq spacious-padding-subtle-mode-line
+;; 		t)
 
-(set-default 'mode-line-format
-			 '("%e" mode-line-front-space
-			   (:eval (meow-indicator))
-			   " "
-			   "[%+] %b"))
+;;   (spacious-padding-mode 1))
+
+(set-default
+ 'mode-line-format
+ '("%e [%+]"
+   (:eval (meow-indicator))
+   "%b "
+   org-mode-line-string
+   org-pomodoro-mode-line))

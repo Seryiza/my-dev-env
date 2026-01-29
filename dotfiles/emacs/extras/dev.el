@@ -28,6 +28,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package emacs
+  :bind
+  ("M-." . xref-find-definitions)
+  
   :config
   ;; Treesitter config
 
@@ -106,21 +109,25 @@
   (when (or (eq major-mode 'clojure-mode)
 	        (eq major-mode 'clojurec-mode)
             (eq major-mode 'clojurescript-mode))
-    (shell-command-to-string (format "cljfmt fix --config %s %s"
-      				(concat (projectile-project-root buffer-file-name) ".cljfmt.edn")							 buffer-file-name))
+    (shell-command-to-string
+     (if (file-exists-p (concat (projectile-project-root buffer-file-name) ".cljfmt.edn"))
+	 (format "cljfmt fix --config %s %s"
+      			      (concat (projectile-project-root buffer-file-name) ".cljfmt.edn")
+					  buffer-file-name)
+       (format "cljfmt fix %s" buffer-file-name)))
     (revert-buffer :ignore-auto :noconfirm)))
 
 (use-package cider
   :ensure t
 
   :bind
-  ("C-c e C-e" . cider-eval-list-at-point)
-  ("C-c e C-b" . cider-eval-buffer)
-  ("C-c e C-f" . cider-eval-defun-at-point)
-  ("C-c t C-c" . cider-test-run-test)
-  ("C-c t C-n" . cider-test-run-ns-tests)
-  ("C-c t C-r" . cider-test-show-report)
-  ("M-." . xref-find-definitions)
+  (:map clojure-mode-map
+	("C-c e C-e" . cider-eval-list-at-point)
+	("C-c e C-b" . cider-eval-buffer)
+	("C-c e C-f" . cider-eval-defun-at-point)
+	("C-c t C-c" . cider-test-run-test)
+	("C-c t C-n" . cider-test-run-ns-tests)
+	("C-c t C-r" . cider-test-show-report))
 
   :config
   (setq cider-save-file-on-load t)
@@ -225,6 +232,11 @@
   ("C-c o C-v" . projectile-run-vterm)
   ("C-c f C-f" . projectile-find-file))
 
+(use-package makefile-executor
+  :ensure t
+  :config
+  (add-hook 'makefile-mode-hook 'makefile-executor-mode))
+
 (use-package helm
   :ensure t
 
@@ -246,3 +258,74 @@
 
 (use-package helm-projectile
   :ensure t)
+
+;;; Emacs Lisp
+
+
+;; TODO: fix eval-sexp-at-point with (insert "Hello!") inside quotes
+(defun my-elisp-eval-sexp-at-point ()
+  "Eval the smallest surrounding sexp at point."
+  (interactive)
+  (save-excursion
+    ;; Move to the start of the surrounding list/sexp, then forward over it,
+    ;; so `eval-last-sexp` evaluates that sexp.
+    (condition-case _
+        (progn
+          (backward-up-list 1)
+          (forward-sexp 1)
+          (eval-last-sexp nil))
+      (error
+       ;; If not inside a list, try just eval the preceding sexp.
+       (eval-last-sexp nil)))))
+
+(use-package emacs
+  :ensure nil
+  :bind
+  (:map emacs-lisp-mode-map
+		("C-c e C-e" . my-elisp-eval-sexp-at-point)
+		("C-c e C-b" . eval-buffer)
+		("C-c e C-f" . eval-defun)))
+
+(use-package eat
+  :ensure t
+  
+  :after meow
+
+  :hook
+  (eat-mode . eat-emacs-mode)
+  (eat-mode . meomacs-eat-meow-setup)
+
+  :commands
+  (eat eat-emacs-mode eat-char-mode eat-semi-char-mode eat-yank eat-self-input)
+
+  :init
+  (defun meomacs-eat-meow-setup ()
+    "Integrate Eat with Meow per-buffer."
+    (add-hook 'meow-normal-mode-hook #'eat-emacs-mode nil t)
+    (add-hook 'meow-insert-mode-hook #'eat-char-mode  nil t))
+
+  :config
+  (define-key eat-char-mode-map (kbd "C-y") #'eat-yank)
+  (advice-add #'eat-semi-char-mode :after #'eat-emacs-mode))
+
+(use-package inheritenv
+  :vc (:url "https://github.com/purcell/inheritenv" :rev :newest))
+
+(use-package claude-code
+  :ensure t
+  :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
+  
+  :config
+  ;; optional IDE integration with Monet
+  ;; (add-hook 'claude-code-process-environment-functions #'monet-start-server-function)
+  ;; (monet-mode 1)
+
+  (setq claude-code-terminal-backend 'eat)
+  (claude-code-mode)
+  
+  ;; :bind-keymap
+  ;; ("C-c a" . claude-code-command-map)
+
+  ;; Optionally define a repeat map so that "M" will cycle thru Claude auto-accept/plan/confirm modes after invoking claude-code-cycle-mode / C-c M.
+  :bind
+  (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))

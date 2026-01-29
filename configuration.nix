@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, nixpkgs-unstable, lib, zen-browser, ... }:
+{ config, pkgs, nixpkgs-unstable, lib, zen-browser, rep, ... }@inputs:
 let
   unstable-pkgs = nixpkgs-unstable.legacyPackages."x86_64-linux";
   my-obsidian = pkgs.symlinkJoin {
@@ -20,16 +20,18 @@ in {
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_15;
+  # >= 6.15 (audio, wifi)
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_18;
 
   boot.kernelParams = [
-    "i915.enable_dpcd_backlight=1"
-    "nvidia.NVreg_EnableBacklightHandler=0"
-    "nvidia.NVreg_RegistryDwords=EnableBrightnessControl=0"
-    "amd_pstate=guided"
-    "disable_aspm=1"
-    "amdgpu"
-    "snd-intel-dspcfg.dsp_driver=1"
+    #"i915.enable_dpcd_backlight=1"
+    #"nvidia.NVreg_EnableBacklightHandler=0"
+    #"nvidia.NVreg_RegistryDwords=EnableBrightnessControl=0"
+    #"amd_pstate=guided"
+    #"disable_aspm=1"
+    #"amdgpu"
+    #"snd-intel-dspcfg.dsp_driver=1"
+    "pci-stub.ids=10de:28e0,10de:22be"
   ];
 
   boot.initrd.kernelModules = [ "amdgpu" ];
@@ -73,6 +75,7 @@ in {
 
   # Enable networking
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.backend = "iwd";
   services.nscd.enableNsncd = true;
 
   systemd.tmpfiles.rules =
@@ -80,7 +83,7 @@ in {
 
   # Set your time zone.
   time.timeZone = "Asia/Bishkek";
-  #time.timeZone = "America/New_York";
+  #time.timeZone = "America/Denver";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -106,22 +109,47 @@ in {
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  services.xserver.videoDrivers = [ "amdgpu" ];
+  services.xserver.videoDrivers = [ "amdgpu" "modesetting" "fbdev" ];
 
   services.xserver.displayManager.lightdm.enable = false;
   services.xserver.displayManager.lightdm.greeters.gtk.enable = false;
 
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.wayland = true;
-  services.xserver.displayManager.gdm.debug = false;
+  services.displayManager.gdm.enable = false;
+  services.displayManager.gdm.wayland = true;
+  services.displayManager.gdm.debug = false;
+
+  services.displayManager.ly.enable = false;
+
+  services.greetd = {
+    enable = true;
+    settings = rec {
+      initial_session = {
+        command = "${pkgs.sway}/bin/sway";
+        user = "seryiza";
+      };
+      default_session = initial_session;
+    };
+  };
+
+  programs.sway = { enable = true; };
+  programs.gnupg.agent.enable = true;
+  # programs.swaylock.enable = true;
+
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true;
+    nix-direnv.enable = true;
+  };
+
+  services = { dbus = { enable = true; }; };
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.desktopManager.gnome.debug = false;
+  services.desktopManager.gnome.enable = true;
+  services.desktopManager.gnome.debug = false;
   qt = {
     enable = true;
     style = "adwaita";
-    platformTheme = "gnome";
+    platformTheme = null;
   };
 
   environment.pathsToLink =
@@ -129,6 +157,7 @@ in {
 
   # Configure keymap in X11
   services.xserver = {
+    dpi = 180;
     xkb = {
       variant = "";
       layout = "us";
@@ -140,14 +169,19 @@ in {
 
   services.emacs = {
     enable = true;
-    package = pkgs.emacs-pgtk;
+    # package = pkgs.emacs-pgtk;
+    package = (pkgs.emacsPackagesFor pkgs.emacs-pgtk).emacsWithPackages
+      (epkgs: [ epkgs.mu4e epkgs.melpaPackages.telega ]);
   };
+
+  environment.localBinInPath = true;
 
   # Samba
   services.samba = { enable = true; };
 
   services.gvfs.enable = true;
 
+  networking.wireless.iwd.enable = true;
   networking.wireless.iwd.settings = {
     General = {
       RoamThreshold = -75;
@@ -161,6 +195,9 @@ in {
   services.pulseaudio.enable = false;
 
   security.rtkit.enable = true;
+  security.polkit.enable = true;
+  services.seatd.enable = true;
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -209,12 +246,12 @@ in {
     '';
   };
 
-  services.asusd.enable = true;
+  services.asusd.enable = false;
 
   services.xremap = {
     enable = true;
     serviceMode = "user";
-    withGnome = true;
+    withWlroots = true;
     userName = "seryiza";
     watch = true;
     debug = false;
@@ -246,43 +283,68 @@ in {
   #fonts.packages = [ pkgs.nerdfonts ];
 
   services.flatpak.enable = true;
+  services.gnome.gnome-keyring.enable = true;
+  services.gnome.gcr-ssh-agent.enable = false;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.seryiza = {
     isNormalUser = true;
     description = "Sergey Zaborovsky";
-    extraGroups =
-      [ "audio" "input" "uinput" "networkmanager" "wheel" "docker" ];
+    extraGroups = [
+      "audio"
+      "video"
+      "render"
+      "seat"
+      "input"
+      "uinput"
+      "networkmanager"
+      "wheel"
+      "docker"
+      "tty"
+      "sway"
+    ];
     packages = [
       pkgs.firefox
       #pkgs.firefox-bin
       pkgs.google-chrome
       pkgs.kubectl
+      pkgs.dropbox
+      pkgs.bun
       pkgs.telegram-desktop
       pkgs.enpass
       pkgs.google-cloud-sdk
       pkgs.postgresql_17
-      pkgs.onlyoffice-bin
+      pkgs.onlyoffice-desktopeditors
       pkgs.masterpdfeditor
       pkgs.gh
+      pkgs.evince
       pkgs.monaspace
       pkgs.inkscape
       pkgs.comfortaa
       pkgs.less
       pkgs.delta
+      #pkgs.cinny-desktop
       #pkgs.planify
+      pkgs.codex
       pkgs.dbeaver-bin
+      pkgs.gparted
       pkgs.p7zip
       pkgs.unrar
       pkgs.anki-bin
+      pkgs.hyprpicker
       pkgs.gimp
       pkgs.gtk4-layer-shell
-      pkgs.walker
       pkgs.wireguard-tools
       pkgs.tangram
       pkgs.python3
       pkgs.python312Packages.pip
-      pkgs.logseq
+      pkgs.kooha
+      pkgs.wf-recorder
+      pkgs.ffmpeg-full
+      pkgs.video-trimmer
+      pkgs.kdePackages.kdenlive
+      pkgs.footage
+      #pkgs.logseq
       pkgs.libvterm
       pkgs.cmake
       pkgs.libtool
@@ -301,17 +363,28 @@ in {
       pkgs.lsb-release
       pkgs.dmidecode
       pkgs.monocraft
+      pkgs.jq
       pkgs.qbittorrent
       pkgs.rclone
       pkgs.wl-clipboard
+      pkgs.grim # screenshot functionality
+      pkgs.slurp # screenshot functionality
       pkgs.silver-searcher
       unstable-pkgs.clj-kondo
       unstable-pkgs.cljfmt
       pkgs.mediawriter
       pkgs.easyeffects
       pkgs.ntfs3g
+      pkgs.libnotify
       #pkgs.linux-firmware
       pkgs.iw
+      inputs.bzmenu.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.iwmenu.packages.${pkgs.stdenv.hostPlatform.system}.default
+      pkgs.brightnessctl
+      pkgs.drawing
+      #pkgs.pass
+      #pkgs.qtpass
+      pkgs.xfce.thunar
 
       # gnome
       pkgs.gnome-tweaks
@@ -325,6 +398,7 @@ in {
       pkgs.zprint
       pkgs.geckodriver
       pkgs.amberol
+      pkgs.tuigreet
 
       pkgs.dconf2nix
       pkgs.gcc
@@ -333,6 +407,9 @@ in {
       pkgs.clojure
       pkgs.babashka
       pkgs.emacs-lsp-booster
+      pkgs.code-cursor
+      #pkgs.zed-editor
+      pkgs.zed-editor-fhs
 
       pkgs.htop
       #pkgs.obsidian-wayland
@@ -343,6 +420,8 @@ in {
       pkgs.chntpw
       pkgs.nixfmt-classic
       zen-browser.packages."x86_64-linux".default
+      rep.packages.${pkgs.stdenv.hostPlatform.system}.default
+      pkgs.wev
       #my-obsidian
 
       #  thunderbird
@@ -361,11 +440,11 @@ in {
   ];
 
   environment.variables = {
-    XCURSOR_SIZE = "40";
     LIBVA_DRIVER_NAME = "iHD";
     #GDK_SCALE = "2";
     #GDK_DPI_SCALE = "0.5";
     #QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+    QT_QPA_PLATFORM = "wayland";
   };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -375,22 +454,25 @@ in {
     #extraPackages = [ pkgs.intel-media-driver pkgs.intel-vaapi-driver pkgs.libvdpau-va-gl ];
     extraPackages = with pkgs; [
       libvdpau-va-gl
-      vaapiVdpau
+      libva-vdpau-driver
       rocmPackages.clr
       rocmPackages.clr.icd
-      #amdvlk
     ];
     #extraPackages32 = with pkgs; [ driversi686Linux.amdvlk ];
   };
+
+  hardware.amdgpu.initrd.enable = true;
 
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
   };
 
+  services.blueman.enable = true;
+
   zramSwap = {
     enable = true;
-    memoryPercent = 50;
+    memoryPercent = 200;
   };
 
   boot.kernel.sysctl = {
@@ -408,8 +490,15 @@ in {
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
+  programs.ssh = { startAgent = true; };
+
+  #networking.networkmanager.dns = "systemd-resolved";
+  #networking.useNetworkd = true;
+  #networking.firewall.checkReversePath = "loose";
+  #networking.firewall.allowedTCPPorts = [ 22 25 53 465 587 ];
+  #networking.firewall.allowedUDPPorts = [ 53 51820 ];
+  #services.resolved.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

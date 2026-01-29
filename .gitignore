@@ -29,3 +29,8 @@ history.el
 
 # NixOS
 /result
+
+# Clojure
+.cpcache
+/.lsp
+/.clj-kondo/.cache

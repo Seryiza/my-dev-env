@@ -1,4 +1,4 @@
-;;; Emacs Bedrock
+;; Emacs Bedrock
 ;;;
 ;;; Extra config: Base enhancements
 
@@ -28,11 +28,10 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-package avy
-  :ensure t
-  :demand t
-  :bind (("C-c j" . avy-goto-line)
-         ("s-j"   . avy-goto-char-timer)))
+;; (use-package avy
+;;   :ensure t
+;;   :bind (("C-c j" . avy-goto-line)
+;;          ("s-j"   . avy-goto-char-timer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -69,28 +68,29 @@
   ;; Narrowing lets you restrict results to certain groups of candidates
   (setq consult-narrow-key "<"))
 
-(use-package embark
-  :ensure t
-  :demand t
-  :after avy
-  :bind (("C-c a" . embark-act))        ; bind this to an easy key to hit
-  :init
-  ;; Add the option to run embark when using avy
-  (defun bedrock/avy-action-embark (pt)
-    (unwind-protect
-        (save-excursion
-          (goto-char pt)
-          (embark-act))
-      (select-window
-       (cdr (ring-ref avy-ring 0))))
-    t)
+;; (use-package embark
+;;   :ensure t
+;;   :demand t
+;;   :after avy
+;;   :bind (("C-c a" . embark-act))        ; bind this to an easy key to hit
+;;   ;; :init
+;;   ;; Add the option to run embark when using avy
+;;   ;; (defun bedrock/avy-action-embark (pt)
+;;   ;;   (unwind-protect
+;;   ;;       (save-excursion
+;;   ;;         (goto-char pt)
+;;   ;;         (embark-act))
+;;   ;;     (select-window
+;;   ;;      (cdr (ring-ref avy-ring 0))))
+;;   ;;   t)
 
-  ;; After invoking avy-goto-char-timer, hit "." to run embark at the next
-  ;; candidate you select
-  (setf (alist-get ?. avy-dispatch-alist) 'bedrock/avy-action-embark))
+;;   ;; After invoking avy-goto-char-timer, hit "." to run embark at the next
+;;   ;; candidate you select
+;;   ;; (setf (alist-get ?. avy-dispatch-alist) 'bedrock/avy-action-embark)
+;;   )
 
-(use-package embark-consult
-  :ensure t)
+;; (use-package embark-consult
+;;   :ensure t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -124,21 +124,21 @@
 
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)                 ;; Enable auto completion
-  (corfu-auto-prefix 1)
+  (corfu-auto t)                 ;; auto completion
+  (corfu-auto-prefix 2)
   (corfu-auto-delay 0.05)
   ;; (corfu-separator ?\s)          ;; Orderless field separator
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   (corfu-preview-current nil)    ;; Disable current candidate preview
   ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
   (corfu-preselect 'first)
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
   :bind
   (:map corfu-map
-	;; ("RET" . nil)
+	("RET" . nil)
 	
 	;; ("TAB" . corfu-next)
 	;; ([tab] . corfu-next)
@@ -201,11 +201,16 @@
   (add-to-list 'completion-styles-alist
              '(tab completion-basic-try-completion ignore
                "Completion style which provides TAB completion only."))
-  
+
+  ;; (setq orderless-matching-styles '(orderless-initialism orderless-regexp))
+
   (setq completion-styles '(tab orderless partial-completion basic)
         completion-category-defaults nil
         completion-category-overrides '((eglot (styles orderless))
-                                        (eglot-capf (styles orderless)))))
+                                        (eglot-capf (styles orderless)))
+		completion-pcm-leading-wildcard t)
+
+  )
 
 (use-package emacs
   :custom
@@ -217,13 +222,13 @@
   ;; Require trigger prefix before template name when completing.
   ;; :custom
   ;; (tempel-trigger-prefix "<")
+  
   :ensure t
 
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
          ("M-*" . tempel-insert))
 
   :init
-
   ;; Setup completion at point
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
@@ -234,7 +239,7 @@
     ;; `tempel-expand' *before* the main programming mode Capf, such
     ;; that it will be tried first.
     (setq-local completion-at-point-functions
-                (cons #'tempel-expand
+                (cons #'tempel-complete
                       completion-at-point-functions)))
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
@@ -244,7 +249,7 @@
   ;; Optionally make the Tempel templates available to Abbrev,
   ;; either locally or globally. `expand-abbrev' is bound to C-x '.
   ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  (global-tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -280,3 +285,7 @@
   :ensure t
   :mode "\\.nix^\\'"
   :hook (before-save . nix-format-before-save))
+
+(use-package direnv
+  :ensure t
+  :config (direnv-mode))

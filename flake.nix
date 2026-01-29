@@ -2,11 +2,11 @@
   description = "Seryiza's NixOS flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -22,6 +22,10 @@
     xremap = { url = "github:xremap/nix-flake"; };
 
     zen-browser = { url = "github:0xc000022070/zen-browser-flake"; };
+
+    bzmenu.url = "github:e-tho/bzmenu";
+    iwmenu.url = "github:e-tho/iwmenu";
+    rep.url = "github:eraserhd/rep";
   };
 
   outputs = { self, nixpkgs, home-manager, nur, emacs-lsp-booster, xremap, ...
@@ -44,6 +48,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.seryiza = import ./home.nix;
+            home-manager.extraSpecialArgs = inputs;
           }
 
           nur.modules.nixos.default
