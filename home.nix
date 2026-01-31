@@ -312,6 +312,7 @@ in {
       modules-center = [ ];
       modules-right = [
         "privacy"
+        "custom/org_timeblock"
         "wireplumber"
         "network"
         "sway/language"
@@ -320,6 +321,12 @@ in {
         "tray"
       ];
 
+      "custom/org_timeblock" = {
+        exec = "${config.home.homeDirectory}/.local/bin/waybar-org-timeblock";
+        interval = 15;
+        format = "{text}";
+        max-length = 60;
+      };
       "sway/workspaces" = { disable-scroll = true; };
       "privacy" = { icon-size = 14; };
       "battery" = {
@@ -400,6 +407,7 @@ in {
       #idle_inhibitor,
       #scratchpad,
       #power-profiles-daemon,
+      #custom-org_timeblock,
       #mpd {
           padding: 0 10px;
           color: #CECECE;

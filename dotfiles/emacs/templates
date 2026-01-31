@@ -1,0 +1,25 @@
+;; -*- mode: emacs-lisp -*-
+
+text-mode
+
+(-- "–")
+(--- "—")
+(shrug "¯\\_(ツ)_/¯")
+
+(box "┌─" (make-string (length str) ?─) "─┐" n
+     "│ " (s str)                       " │" n
+     "└─" (make-string (length str) ?─) "─┘" n)
+(abox "+-" (make-string (length str) ?-) "-+" n
+      "| " (s str)                       " |" n
+      "+-" (make-string (length str) ?-) "-+" n)
+(rot13 (p "plain text" text) n "----" n (rot13 text))
+(calc (p "taylor(sin(x),x=0,3)" formula) n "----" n (format "%s" (calc-eval formula)))
+
+
+prog-mode
+
+(fixme (if (or (derived-mode-p 'racket-mode) (derived-mode-p 'emacs-lisp-mode)) ";; " comment-start) "FIXME: ")
+(todo (if (or (derived-mode-p 'racket-mode) (derived-mode-p 'emacs-lisp-mode)) ";; " comment-start) "TODO: ")
+(bug (if (or (derived-mode-p 'racket-mode) (derived-mode-p 'emacs-lisp-mode)) ";; " comment-start) "BUG: ")
+(hack (if (or (derived-mode-p 'racket-mode) (derived-mode-p 'emacs-lisp-mode)) ";; " comment-start) "HACK: ")
+(working (if (or (derived-mode-p 'racket-mode) (derived-mode-p 'emacs-lisp-mode)) ";; " comment-start) "WORKING HERE: ")
