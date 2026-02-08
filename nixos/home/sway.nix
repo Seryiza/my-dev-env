@@ -1,0 +1,227 @@
+{ config, pkgs, nixpkgs-unstable, lib, ... }:
+{
+  services.swayidle = {
+    enable = true;
+
+    events = [{
+      event = "before-sleep";
+      command = "${pkgs.swaylock}/bin/swaylock -fF -c 000000";
+    }];
+
+    timeouts = [
+      {
+        timeout = 600;
+        command = "${pkgs.swaylock}/bin/swaylock -fF -c 000000";
+      }
+      {
+        timeout = 630;
+        command = ''swaymsg "output * power off"'';
+        resumeCommand = ''swaymsg "output * power on"'';
+      }
+    ];
+  };
+
+  wayland.windowManager.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true;
+    systemd.enable = true;
+    package =
+      nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.sway;
+
+    extraSessionCommands = ''
+      export SDL_VIDEODRIVER=wayland
+      # needs qt5.qtwayland in systemPackages
+      export QT_QPA_PLATFORM=wayland
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+      # Fix for some Java AWT applications (e.g. Android Studio),
+      # use this if they aren't displayed properly:
+      export _JAVA_AWT_WM_NONREPARENTING=1
+    '';
+
+    extraConfig = ''
+      titlebar_border_thickness 2
+      titlebar_padding 6 3
+    '';
+
+    config = {
+      startup = [{ command = "brightnessctl set 80%"; }];
+
+      modifier = "Mod4";
+
+      bindkeysToCode = true;
+
+      fonts = {
+        names = [ "Iosevka" ];
+        size = 8.0;
+      };
+
+      focus.followMouse = false;
+
+      keybindings =
+        let modifier = config.wayland.windowManager.sway.config.modifier;
+        in lib.mkOptionDefault {
+          "${modifier}+Alt+h" = "workspace prev";
+          "${modifier}+Alt+l" = "workspace next";
+          "${modifier}+Return" = "exec alacritty";
+          "${modifier}+Escape" = "exec swaylock -c 000000";
+          "${modifier}+u" = "kill";
+          "${modifier}+n" = "exec tofi-drun | xargs swaymsg exec --";
+          "${modifier}+Alt+n" = "exec tofi-run | xargs swaymsg exec --";
+          "${modifier}+m" = "exec emacsclient -c";
+          "${modifier}+Shift+b" = "exec run-work-browser";
+          "${modifier}+Alt+space" = "sticky toggle";
+          "${modifier}+e" = "exec swaymsg exec -- QT_QPA_PLATFORM=xcb Enpass";
+          "Print" = ''exec grim -g "$(slurp)" - | wl-copy'';
+          "Ctrl+Print" = ''exec grim -g "$(slurp)"'';
+          "Shift+Print" = "exec grim - | wl-copy | drawing -c";
+          "XF86MonBrightnessUp" =
+            "exec increase-backlight && display-backlight";
+          "XF86MonBrightnessDown" =
+            "exec descrease-backlight && display-backlight";
+          "XF86AudioPlay" = "exec playerctl play-pause";
+          "XF86AudioRaiseVolume" =
+            "exec increase-current-volume && display-current-volume";
+          "XF86AudioLowerVolume" =
+            "exec decrease-current-volume && display-current-volume";
+          "XF86AudioMicMute" =
+            "exec toggle-microphone-mute && display-current-microphone";
+          "${modifier}+Alt+m" =
+            "exec toggle-microphone-mute && display-current-microphone";
+          "XF86AudioMute" = "exec toggle-audio-mute && display-current-volume";
+          "${modifier}+Shift+m" =
+            "exec toggle-audio-mute && display-current-volume";
+        };
+
+      window = {
+        border = 2;
+        titlebar = false;
+
+        commands = [
+          {
+            command = "border none";
+            criteria = { app_id = "dev.benz.walker"; };
+          }
+
+          {
+            command = "floating enable";
+            criteria = { app_id = "dev.benz.walker"; };
+          }
+
+          {
+            command = "sticky enable";
+            criteria = { title = "Picture-in-Picture"; };
+          }
+
+          {
+            command = "floating enable";
+            criteria = { title = "Picture-in-Picture"; };
+          }
+
+          {
+            command = "resize set width 300 height 150";
+            criteria = { title = "Picture-in-Picture"; };
+          }
+
+          {
+            command = "move position 0 0";
+            criteria = { title = "Picture-in-Picture"; };
+          }
+
+          # Emacs Launcher
+          {
+            command = "floating enable";
+            criteria = {
+              app_id = "emacs";
+              title = "^sway-app-launcher$";
+            };
+          }
+
+          {
+            command = "resize set width 900 px height 420 px";
+            criteria = {
+              app_id = "emacs";
+              title = "^sway-app-launcher$";
+            };
+          }
+
+          {
+            command = "move position center";
+            criteria = {
+              app_id = "emacs";
+              title = "^sway-app-launcher$";
+            };
+          }
+
+          {
+            command = "border pixel 2";
+            criteria = {
+              app_id = "emacs";
+              title = "^sway-app-launcher$";
+            };
+          }
+        ];
+      };
+
+      colors = {
+        focused = {
+          background = "#323232";
+          border = "#323232";
+          childBorder = "#323232";
+          indicator = "#323232";
+          text = "#FFFFFF";
+        };
+        unfocused = {
+          background = "#FFFFFF";
+          border = "#929292";
+          childBorder = "#929292";
+          indicator = "#929292";
+          text = "#444444";
+        };
+        focusedInactive = {
+          background = "#929292";
+          border = "#b4b4b4";
+          childBorder = "#929292";
+          indicator = "#929292";
+          text = "#FFFFFF";
+        };
+      };
+
+      gaps = {
+        left = 0;
+        right = 0;
+        top = 0;
+        bottom = 0;
+        inner = 5;
+        smartGaps = false;
+      };
+
+      input = {
+        "type:touchpad" = {
+          dwt = "enabled";
+          tap = "enabled";
+          tap_button_map = "lrm";
+          natural_scroll = "enabled";
+          middle_emulation = "enabled";
+        };
+        "type:keyboard" = {
+          xkb_layout = "us,ru";
+          xkb_options = "ctrl:nocaps,grp:ctrl_space_toggle";
+        };
+      };
+
+      bars = [ ];
+
+      output = {
+        eDP-1 = {
+          mode = "2560x1600@240Hz";
+          scale = "2";
+        };
+
+        "*" = {
+          bg = "#C9C5C0 solid_color";
+          subpixel = "none";
+        };
+      };
+    };
+  };
+}

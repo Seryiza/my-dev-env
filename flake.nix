@@ -36,19 +36,24 @@
         specialArgs = inputs;
         modules = [
           {
-            nixpkgs.overlays =
-              [ nur.overlays.default emacs-lsp-booster.overlays.default ];
+            nixpkgs.overlays = [
+              nur.overlays.default
+              emacs-lsp-booster.overlays.default
+              (final: prev: {
+                jdk = final.zulu21;
+                clojure = prev.clojure.override { jdk = final.zulu21; };
+              })
+            ];
           }
 
-          xremap.nixosModules.default
-
-          ./configuration.nix
+          ./nixos/configuration.nix
 
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.seryiza = import ./home.nix;
+            home-manager.users.seryiza = import ./nixos/home.nix;
+            home-manager.sharedModules = [ xremap.homeManagerModules.default ];
             home-manager.extraSpecialArgs = inputs;
           }
 
