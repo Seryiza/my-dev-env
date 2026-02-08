@@ -26,6 +26,7 @@
     bzmenu.url = "github:e-tho/bzmenu";
     iwmenu.url = "github:e-tho/iwmenu";
     rep.url = "github:eraserhd/rep";
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs = { self, nixpkgs, home-manager, nur, emacs-lsp-booster, xremap, ...

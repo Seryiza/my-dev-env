@@ -8,6 +8,7 @@
 (setopt auto-revert-avoid-polling t)
 (setopt auto-revert-interval 1)
 (setopt auto-revert-check-vc-info t)
+(setopt auto-revert-verbose nil)
 (global-auto-revert-mode)
 
 (savehist-mode)
@@ -63,18 +64,16 @@
 
 (pixel-scroll-precision-mode)
 
-(cua-mode)
-
 (xterm-mouse-mode 1)
 
 (setopt display-line-numbers-width 3)
 
 (let ((text-hooks '(text-mode-hook prog-mode-hook)))
   (mapc (lambda (hook)
-	  (add-hook hook 'hl-line-mode)
-	  (add-hook hook 'display-line-numbers-mode)
-	  (add-hook hook 'visual-line-mode))
-	text-hooks))
+      (add-hook hook 'hl-line-mode)
+      (add-hook hook 'display-line-numbers-mode)
+      (add-hook hook 'visual-line-mode))
+    text-hooks))
 
 (setopt tab-bar-show 1)
 
@@ -84,30 +83,28 @@
 (setopt display-time-interval 1)
 (display-time-mode)
 
-(add-to-list 'default-frame-alist '(font . "Iosevka-13" ))
-(set-face-attribute 'default t :font "Iosevka-13")
+(add-to-list 'default-frame-alist '(font . "Iosevka Slab" ))
+(set-face-attribute 'default nil
+                      :font (font-spec :family "Iosevka Slab"
+                                       :size 16
+                                       :weight 'normal
+                                       :width 'condensed))
 
-;; === Packages
-
-(use-package modus-themes
-  :ensure t
-  :config
-  (setq shr-use-fonts nil)
-  (load-theme 'modus-operandi-deuteranopia :no-confirm)
-  (when (daemonp)
-    (add-hook 'after-make-frame-functions
-              (lambda (_f) (enable-theme 'modus-operandi-deuteranopia)))))
+;; === Custom
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("a75fc55d480accd6f651d1bae492b7ab4c5b28894350b63ef39bf947bb8fd453"
+     default))
  '(package-selected-packages
-   '(cape claude-code consult corfu-terminal eat elfeed elfeed-org
-          json-mode kind-icon magit markdown-mode meow modus-themes
-          mu4e nix-mode orderless super-save telega tempel vertico
-          wgrep yaml-mode))
+   '(agent-shell cape claude-code consult corfu-terminal eat elfeed-org
+                 flycheck json-mode kind-icon magit markdown-mode meow
+                 mu4e nix-mode orderless super-save tempel vertico
+                 wgrep yaml-mode))
  '(package-vc-selected-packages
    '((claude-code :url "https://github.com/stevemolitor/claude-code.el"))))
 
@@ -117,6 +114,27 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; === Packages
+
+;; Dired is built-in, so use :ensure nil.
+(use-package dired
+  :ensure nil
+  :custom
+  ;; Must include “-l” per the manual.
+  (dired-listing-switches "-al --group-directories-first"))
+
+(use-package modus-themes
+  :ensure t
+  :pin gnu
+  :config
+  (setq shr-use-fonts nil)
+  
+  (when (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (_f) (enable-theme 'modus-operandi-deuteranopia))))
+
+  (load-theme 'modus-operandi-deuteranopia :no-confirm))
 
 (use-package consult
   :ensure t
@@ -153,13 +171,20 @@
 
 (use-package corfu
   :ensure t
+  
   :init
-  (global-corfu-mode)
+  (global-corfu-mode 1)
+  
   :bind
   (:map corfu-map
-        ("SPC" . corfu-insert-separator)
         ("C-n" . corfu-next)
-        ("C-p" . corfu-previous)))
+        ("C-p" . corfu-previous))
+
+  :custom
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.05)
+  (corfu-auto-trigger "."))
 
 (use-package corfu-popupinfo
   :after corfu
@@ -220,8 +245,10 @@
 
 (use-package orderless
   :ensure t
-  :config
-  (setq completion-styles '(orderless)))
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion))))
+  (completion-pcm-leading-wildcard t))
 
 (use-package wgrep
   :ensure t
@@ -230,6 +257,9 @@
 
 (use-package emacs
   :config
+  (setq show-paren-delay 0)
+  (show-paren-mode 1)
+
   ;; Tell Emacs to prefer the treesitter mode
   ;; You'll want to run the command `M-x treesit-install-language-grammar' before editing.
   (setq major-mode-remap-alist
@@ -240,6 +270,7 @@
           (json-mode . json-ts-mode)
           (css-mode . css-ts-mode)
           (python-mode . python-ts-mode)))
+  
   :hook
   ((prog-mode . electric-pair-mode)))
 
@@ -315,7 +346,6 @@
   :hook
   ((org-mode . visual-line-mode)
    (org-agenda-mode . hl-line-mode)
-   (org-mode . flyspell-mode)
    (org-mode . org-indent-mode))
 
   :bind
@@ -341,79 +371,83 @@
 
   (setq org-image-actual-width 400)
   (setq org-startup-with-inline-images t)
+  (setq org-tags-column 40)
 
   (setq org-blank-before-new-entry
-		'((heading . nil)
-		  (plain-list-item . auto)))
+        '((heading . nil)
+          (plain-list-item . auto)))
   
   (setq org-startup-folded 'nofold)
   (setq org-indent-indentation-per-level 2)
 
   (setopt org-capture-templates
-		  '(("i" "inbox item" item (file "inbox.org")
-			 "%?\n%i")
+          '(("i" "inbox item" item (file "inbox.org")
+             "%?\n%i")
 
-			("m" "my todo" entry (file+olp "areas.org" "Personal" "Tasks")
-   			 "* TODO %?")
+            ("m" "my todo" entry (file+olp "areas.org" "Personal" "Tasks")
+             "* TODO %?")
 
-			("t" "today todo" entry (file+olp "areas.org" "Personal" "Tasks")
-   			 "* TODO %?\nSCHEDULED: %t")
+            ("t" "today todo" entry (file+olp "areas.org" "Personal" "Tasks")
+             "* TODO %?\nSCHEDULED: %t")
+            
+            ("n" "NEXT todo" entry (file+olp "areas.org" "Personal" "Tasks")
+             "* NEXT %?")
 
-			("b" "timeblock" entry (file+olp "areas.org" "Personal" "Timeblocks")
-   			 "* %^{TIMEBLOCK}  :timeblock:\n%^{TIMESTAMP}T"
-   			 :immediate-finish t)
+            ("b" "timeblock" entry (file+olp "areas.org" "Personal" "Timeblocks")
+             "* %^{TIMEBLOCK}  :timeblock:\n%^{TIMESTAMP}T"
+             :immediate-finish t)
 
-			("w" "Work")
-			("wb" "timeblock" entry (file+olp "health-samurai.org" "Work" "Timeblocks")
-   			 "* %^{TIMESTAMP}T WORK  :timeblock:"
-   			 :immediate-finish t
-			 :empty-lines 1)))
+            ("w" "Work")
+            ("wb" "timeblock" entry (file+olp "health-samurai.org" "Work" "Timeblocks")
+             "* %^{TIMESTAMP}T WORK  :timeblock:"
+             :immediate-finish t
+             :empty-lines 1)))
 
    (setopt org-agenda-custom-commands
-   		  '(;; Archive tasks
-   			("#" "To archive" todo "DONE|CANX")
+          '(;; Archive tasks
+            ("#" "To archive" todo "DONE|CANX")
 
-   			;; Review weekly appointements
-   			("$" "Weekly appointments" agenda* "Weekly appointments")
+            ;; Review weekly appointements
+            ("$" "Weekly appointments" agenda* "Weekly appointments")
 
-   			;; Review weekly tasks
-   			("w" "Week tasks" agenda "Scheduled tasks for this week"
-   			 (; (org-agenda-category-filter-preset '("-RDV")) ; RDV for Rendez-vous
-			  (org-agenda-tag-filter-preset '("-habit"))
-   			  (org-deadline-warning-days 0)
-   			  (org-agenda-use-time-grid nil)))
+            ;; Review weekly tasks
+            ("w" "Week tasks" agenda "Scheduled tasks for this week"
+             (; (org-agenda-category-filter-preset '("-RDV")) ; RDV for Rendez-vous
+              (org-agenda-tag-filter-preset '("-habit"))
+              (org-deadline-warning-days 0)
+              (org-agenda-use-time-grid nil)))
 
-			;; Review daily tasks
-			("j" "Today Journal"
-			 ((agenda ""
-				  ((org-agenda-span 1)
-				   (org-agenda-start-day "0d")
-				   (org-agenda-use-time-grid t)
-				   (org-agenda-time-grid '((daily today require-timed)
-							   (1000 1500 2000 0000)
-							   "......" "----------------"))
-				   (org-agenda-overriding-header "Timeline / Schedule")))
-			  (todo "STRT"
-				((org-agenda-overriding-header "In progress")))
-			  (todo "NEXT"
-				((org-agenda-overriding-header "Next actions")))
-			  (todo "WAITING"
-				((org-agenda-overriding-header "Waiting / blocked")))))
+            ;; Review daily tasks
+            ("h" "Today Journal"
+             ((agenda ""
+                  ((org-agenda-span 1)
+                   (org-agenda-start-day "0d")
+                   (org-agenda-use-time-grid t)
+                   (org-agenda-time-grid '((daily today require-timed)
+                               ()
+                               "......" "----------------"))
+                   (org-agenda-overriding-header "Timeline / Schedule")))
+              (todo "STRT"
+                ((org-agenda-overriding-header "In progress")))
+              (todo "NEXT"
+                ((org-agenda-overriding-header "Next actions")))
+              (todo "WAITING"
+                ((org-agenda-overriding-header "Waiting / blocked")))))
 
-   			;; Review started and next tasks
-   			("s" "STRT/NEXT" tags-todo "TODO={STRT\\|NEXT}")
+            ;; Review started and next tasks
+            ("s" "STRT/NEXT" tags-todo "TODO={STRT\\|NEXT}")
 
-   			;; Review other non-scheduled/deadlined to-do tasks
-   			("t" "TODO" tags-todo "TODO={TODO}+DEADLINE=\"\"+SCHEDULED=\"\"")
+            ;; Review other non-scheduled/deadlined to-do tasks
+            ("t" "TODO" tags-todo "TODO={TODO}+DEADLINE=\"\"+SCHEDULED=\"\"")
 
-   			;; Review other non-scheduled/deadlined pending tasks
-   			("w" "WAIT" tags-todo "TODO={WAIT}+DEADLINE=\"\"+SCHEDULED=\"\"")
+            ;; Review other non-scheduled/deadlined pending tasks
+            ("w" "WAIT" tags-todo "TODO={WAIT}+DEADLINE=\"\"+SCHEDULED=\"\"")
 
-   			;; Review upcoming deadlines for the next 60 days
-   			("!" "Deadlines all" agenda "Past/upcoming deadlines"
-   			 ((org-agenda-span 1)
-   			  (org-deadline-warning-days 60)
-   			  (org-agenda-entry-types '(:deadline))))))
+            ;; Review upcoming deadlines for the next 60 days
+            ("!" "Deadlines all" agenda "Past/upcoming deadlines"
+             ((org-agenda-span 1)
+              (org-deadline-warning-days 60)
+              (org-agenda-entry-types '(:deadline))))))
   )
 
 (defun my-org-agenda-save-and-redo (&optional arg)
@@ -462,10 +496,67 @@ ARG is passed to `org-agenda-redo-all'."
   (setq rmh-elfeed-org-files (list "~/org/rss.org"))
   (elfeed-org))
 
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode))
+
 (use-package nix-mode
   :ensure t
   :mode "\\.nix^\\'"
   :hook (before-save . nix-format-before-save))
+
+(use-package windmove
+  :ensure nil
+  :bind* (("M-h" . windmove-left)
+          ("M-l" . windmove-right)
+          ("M-j" . windmove-down)
+          ("M-k" . windmove-up)))
+
+(defun my/keymap-clear! (map)
+  "Remove MAP's own bindings in-place, preserving its parent."
+  (let ((parent (keymap-parent map)))
+    (setcdr map nil)
+    (set-keymap-parent map parent)))
+
+(defvar my/telega-msg-button-map--orig nil
+  "Saved copy of telega's original message-button keymap.")
+
+(defun my/telega-msg-keys ()
+  "Temporarily enable telega message-button bindings."
+  (interactive)
+  (unless my/telega-msg-button-map--orig
+    (user-error "telega-msg-button-map not captured yet"))
+  ;; Make it transient. Note: this alone does not show a menu.
+  (set-transient-map my/telega-msg-button-map--orig t)
+  ;; If you use which-key, this shows the popup:
+  (when (fboundp 'which-key-show-keymap)
+    (which-key-show-keymap "Telega (msg)" my/telega-msg-button-map--orig)))
+
+(use-package telega
+  :ensure nil
+  :init
+  (setopt telega-use-images t)
+  (setopt telega-emoji-use-images nil)
+  (setopt telega-emoji-font-family "Noto Color Emoji")
+  
+  (setopt telega-online-status-function
+      (lambda ()
+            ;; Example policy: be "online" only when a telega buffer is visible
+            ;; in the selected window.
+            (let ((buf (window-buffer (selected-window))))
+              (derived-mode-p 'telega-root-mode 'telega-chat-mode))))
+
+  :config
+  (unless my/telega-msg-button-map--orig
+    (setq my/telega-msg-button-map--orig (copy-keymap telega-msg-button-map))
+    (define-key telega-chat-mode-map (kbd "M-m") #'my/telega-msg-keys))
+  
+  (my/keymap-clear! telega-msg-button-map)
+  (set-keymap-parent telega-msg-button-map button-map))
+
+(use-package agent-shell
+  :ensure t)
 
 ;; === Modal Editing
 
@@ -560,11 +651,7 @@ ARG is passed to `org-agenda-redo-all'."
   (meow-setup)
   
   (meow-leader-define-key '("<SPC>" . meow-M-x))
-  
-  (keymap-global-set "M-l" #'windmove-right)
-  (keymap-global-set "M-h" #'windmove-left)
-  (keymap-global-set "M-k" #'windmove-up)
-  (keymap-global-set "M-j" #'windmove-down)
+  (meow-leader-define-key '("s" . save-buffer))
 
   (keymap-set meow-normal-state-keymap "C-h" #'my/meow-org-promote-subtree)
   (keymap-set meow-normal-state-keymap "C-l" #'my/meow-org-demote-subtree)
@@ -584,12 +671,11 @@ ARG is passed to `org-agenda-redo-all'."
 
   (add-to-list 'meow-mode-state-list '(eat-mode . insert))
   (add-to-list 'meow-mode-state-list '(eat-eshell-mode . insert))
+  (add-to-list 'meow-mode-state-list '(agent-shell-mode . insert))
   
   (meow-setup-indicator))
 
 ;; === Custom Functions
-
-(require 'org)
 
 (defun my/org-waybar-current-timeblock ()
   "Return heading of the timeblock covering now, or nil."

@@ -1,6 +1,8 @@
 { config, pkgs, nixpkgs-unstable, lib, ... }@inputs:
 let
   unstable-pkgs = nixpkgs-unstable.legacyPackages."x86_64-linux";
+  llm-agents-pkgs =
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   volumeSound =
     "${pkgs.yaru-theme}/share/sounds/Yaru/stereo/audio-volume-change.oga";
   backlightSound = "${pkgs.yaru-theme}/share/sounds/Yaru/stereo/complete.oga";
@@ -315,6 +317,7 @@ in {
         "custom/org_timeblock"
         "wireplumber"
         "network"
+        "custom/wireguard"
         "sway/language"
         "battery"
         "clock"
@@ -326,7 +329,17 @@ in {
         interval = 15;
         format = "{text}";
         max-length = 60;
+        escape = true;
       };
+
+      "custom/wireguard" = {
+        format = "{text}";
+        exec =
+          "${config.home.homeDirectory}/.local/bin/waybar-wireguard.sh short";
+        interval = 15;
+        return-type = "json";
+      };
+
       "sway/workspaces" = { disable-scroll = true; };
       "privacy" = { icon-size = 14; };
       "battery" = {
@@ -391,26 +404,14 @@ in {
           box-shadow: inset 0 -3px #ffffff;
       }
 
-      #clock,
-      #battery,
-      #cpu,
-      #memory,
-      #disk,
-      #temperature,
-      #backlight,
-      #network,
-      #pulseaudio,
-      #wireplumber,
-      #custom-media,
-      #tray,
-      #mode,
-      #idle_inhibitor,
-      #scratchpad,
-      #power-profiles-daemon,
-      #custom-org_timeblock,
-      #mpd {
+      .modules-right .module {
           padding: 0 10px;
           color: #CECECE;
+      }
+
+      #custom-wireguard {
+          background: #FFFFFF;
+          color: #000000;
       }
 
       #window,
@@ -489,35 +490,22 @@ in {
     '';
   };
 
+  fonts.fontconfig.enable = true;
+
   home.packages = [
     pkgs.httpie
-    pkgs.vlc
-    pkgs.epiphany
-    pkgs.iosevka
     pkgs.gnumake
     pkgs.sops
-    pkgs.clapper
-    pkgs.zotero
-    pkgs.flowtime
-    pkgs.ngrok
-    unstable-pkgs.walker
-    pkgs.yaru-theme
-    pkgs.libcanberra-gtk3 # provides canberra-gtk-play
 
-    # gnome extensions
-    pkgs.gnomeExtensions.blur-my-shell
-    pkgs.gnomeExtensions.paperwm
-    pkgs.gnomeExtensions.just-perfection
-    pkgs.gnomeExtensions.xremap
-    pkgs.gnomeExtensions.advanced-alttab-window-switcher
-    pkgs.gnomeExtensions.activate-window-by-title
-    #pkgs.gnomeExtensions.switcher
-    #pkgs.gnomeExtensions.rounded-window-corners
-    #pkgs.gnomeExtensions.colorblind-filters
-    #pkgs.gnomeExtensions.colortint
-    #pkgs.gnomeExtensions.dash-to-dock
-    #pkgs.gnomeExtensions.transparent-top-bar-adjustable-transparency
-    pkgs.gnomeExtensions.quick-lang-switch
+    (pkgs.iosevka-bin.override { variant = "SGr-Iosevka"; })
+    (pkgs.iosevka-bin.override { variant = "SGr-IosevkaSlab"; })
+    pkgs.go-font
+
+    pkgs.yaru-theme
+    pkgs.libcanberra-gtk3
+    llm-agents-pkgs.claude-code
+    llm-agents-pkgs.claude-code-acp
+    llm-agents-pkgs.codex
 
     (pkgs.google-cloud-sdk.withExtraComponents
       [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
@@ -534,50 +522,8 @@ in {
   home.sessionVariables.LOCALES_ARCHIVE =
     "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
-  dconf.settings = {
-    "org/gnome/shell" = {
-      disable-user-extensions = false;
-      enabled-extensions = [
-        "blur-my-shell@aunetx"
-        "paperwm@paperwm.github.com"
-        "launch-new-instance@gnome-shell-extensions.gcampax.github.com"
-        "light-style@gnome-shell-extensions.gcampax.github.com"
-        pkgs.gnomeExtensions.quick-lang-switch.extensionUuid
-        pkgs.gnomeExtensions.just-perfection.extensionUuid
-        pkgs.gnomeExtensions.xremap.extensionUuid
-        pkgs.gnomeExtensions.activate-window-by-title.extensionUuid
-      ];
-    };
-  };
-
-  dconf.settings = {
-    "org/gnome/desktop/background" = {
-      "picture-uri" = "/home/seryiza/Pictures/Bierstadt_Sierra_-_1920-1080.jpg";
-      "picture-options" = "zoom";
-    };
-    "org/gnome/desktop/screensaver" = {
-      "picture-uri" = "/home/seryiza/Pictures/Bierstadt_Sierra_-_1920-1080.jpg";
-      "picture-options" = "zoom";
-    };
-  };
-
-  home.file."Pictures/Bierstadt_Sierra_-_1920-1080.jpg".source =
-    ./wallpapers/Bierstadt_Sierra_-_1920-1080.jpg;
-
   gtk.enable = true;
-
   xdg.enable = true;
-  xdg.configFile = {
-    "nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/code/my-dev-env/dotfiles/nvim/init.lua";
-    "nvim/lua".source = config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/code/my-dev-env/dotfiles/nvim/lua";
-  };
-
-  #home.file.".emacs.d" = {
-  #  source = ./emacs;
-  #  recursive = true;
-  #};
 
   home.file = {
     ".emacs.d".source = config.lib.file.mkOutOfStoreSymlink
@@ -585,8 +531,6 @@ in {
   };
 
   home.pointerCursor = {
-    #package = pkgs.capitaine-cursors-themed;
-    #name = ''"Capitaine Cursors - White"'';
     package = pkgs.rose-pine-cursor;
     name = "BreezeX-RosePineDawn-Linux";
     size = 35;
@@ -600,29 +544,6 @@ in {
     plugins = [ pkgs.vimPlugins.packer-nvim ];
   };
 
-  #programs.emacs = {
-  #  enable = true;
-  #  package = pkgs.emacs-pgtk;
-  #};
-
-  programs.wezterm = {
-    enable = true;
-    extraConfig = ''
-                return {
-                font = wezterm.font("Iosevka"),
-      	        font_size = 16.0,
-      	        color_scheme = "Catppuccin Latte",
-      	        window_decorations = "NONE",
-      	        enable_tab_bar = false
-                }
-    '';
-  };
-
-  programs.tmux = {
-    enable = true;
-    extraConfig = builtins.readFile ./tmux.conf;
-  };
-
   programs.tofi = {
     enable = true;
     settings = {
@@ -633,8 +554,6 @@ in {
       num-results = 10;
       font-size = 16;
       outline-width = 0;
-      # padding-left = "35%";
-      # padding-top = "10%";
       result-spacing = 20;
       width = "50%";
     };
@@ -657,10 +576,7 @@ in {
           ublock-origin
           violentmonkey
         ];
-        search = {
-          # TODO: add @ya
-          engines = { };
-        };
+        search = { engines = { }; };
       };
     };
   };
@@ -674,11 +590,7 @@ in {
 
   programs.git = {
     enable = true;
-    ignores = [
-      # direnv
-      ".direnv"
-      ".envrc"
-    ];
+    ignores = [ ".direnv" ".envrc" "/.agent-shell" ];
     settings = {
       user = {
         email = "git@seryiza.xyz";
@@ -688,25 +600,11 @@ in {
 
       commit = { gpgsign = true; };
       tag = { gpgSign = true; };
-      core = {
-        #pager = "delta";
-      };
-      interactive = {
-        #diffFilter = "delta --color-only --features decorations light";
-      };
+      core = { };
+      interactive = { };
       delta = {
         features = "decorations light";
         true-color = "always";
-      };
-      "delta \"interactive\"" = { keep-plus-minus-markers = "false"; };
-      "delta \"decorations\"" = {
-        commit-decoration-style = "blue ol";
-        commit-style = "raw";
-        file-style = "omit";
-        hunk-header-decoration-style = "blue box";
-        hunk-header-file-style = "red";
-        hunk-header-line-number-style = "#067a00";
-        hunk-header-style = "file line-number syntax";
       };
       init = { defaultBranch = "master"; };
       push = { autoSetupRemote = "true"; };
@@ -727,7 +625,7 @@ in {
       };
 
       font = {
-        size = 16;
+        size = 14;
         normal.family = "Iosevka";
       };
 
@@ -874,6 +772,30 @@ in {
     watchers = {
       aw-watcher-window-wayland = { package = pkgs.aw-watcher-window-wayland; };
     };
+  };
+
+  systemd.user.services.ics-sync = {
+    Unit.Description = "Run ics-sync";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.local/bin/hs-ical2org";
+      WorkingDirectory = "%h";
+      Environment = [
+        "PATH=${
+          lib.makeBinPath [ pkgs.bash pkgs.gawk pkgs.wget pkgs.coreutils ]
+        }:%h/.local/bin"
+      ];
+    };
+  };
+
+  systemd.user.timers.ics-sync = {
+    Unit.Description = "Run ics-sync every 15 minutes";
+    Timer = {
+      OnCalendar = "*:0/15";
+      Persistent = true;
+      Unit = "ics-sync.service";
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 
   home.stateVersion = "23.11";
