@@ -31,7 +31,7 @@
 
   outputs = { self, nixpkgs, home-manager, nur, emacs-lsp-booster, xremap, ...
     }@inputs: {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations."yuri-alpha" = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = inputs;
         modules = [

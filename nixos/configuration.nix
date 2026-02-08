@@ -78,7 +78,7 @@
 
   i18n.supportedLocales = [ "all" ];
 
-  networking.hostName = "nixos";
+  networking.hostName = "yuri-alpha";
 
   networking.networkmanager.enable = true;
   networking.networkmanager.wifi.backend = "iwd";
