@@ -1,10 +1,18 @@
 ```
-   _______   ________       ______   ________  ________       _______  ________  ________ 
-  ╱       ╲╲╱    ╱   ╲    _╱      ╲╲╱        ╲╱    ╱   ╲    ╱╱       ╲╱    ╱   ╲╱    ╱   ╲
- ╱        ╱╱         ╱   ╱        ╱╱         ╱         ╱   ╱╱        ╱         ╱         ╱
-╱         ╱╲__      ╱   ╱         ╱        _╱╲        ╱   ╱        _╱         ╱╲        ╱ 
-╲__╱__╱__╱   ╲_____╱    ╲________╱╲________╱  ╲______╱    ╲________╱╲__╱_____╱  ╲______╱  
+        ┓
+┏┳┓┓┏  ┏┫┏┓┓┏  ┏┓┏┓┓┏
+┛┗┗┗┫  ┗┻┗ ┗┛  ┗ ┛┗┗┛
+    ┛
 ```
 
-# My Dev Env
+# my dev env
+
 My developer environment based on Nix.
+
+## NixOS Setup
+
+```bash
+git clone /home/seryiza/code/my-dev-env
+cd my-dev-env
+sudo nixos-rebuild switch --flake .#yuri-alpha
+```
