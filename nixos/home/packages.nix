@@ -75,6 +75,7 @@ in {
     pkgs.brightnessctl
     pkgs.drawing
     pkgs.xfce.thunar
+    pkgs.nemo-with-extensions
     pkgs.clojure-lsp
     pkgs.lua-language-server
     pkgs.nil
@@ -98,5 +99,6 @@ in {
     inputs.zen-browser.packages.${system}.default
     inputs.rep.packages.${system}.default
     pkgs.wev
+    pkgs.xarchiver
   ];
 }

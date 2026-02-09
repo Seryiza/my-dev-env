@@ -1,5 +1,4 @@
-{ config, pkgs, ... }:
-{
+{ config, pkgs, ... }: {
   imports = [
     ./home/sway.nix
     ./home/mako.nix
@@ -7,7 +6,6 @@
     ./home/alacritty.nix
     ./home/waybar.nix
     ./home/email.nix
-    ./home/ics-sync.nix
     ./home/xremap.nix
   ];
 
@@ -95,6 +93,16 @@
   programs.bash = {
     enable = true;
     bashrcExtra = builtins.readFile ../dotfiles/bashrc;
+  };
+
+  programs.gpg = { enable = true; };
+
+  services.gpg-agent = {
+    enable = true;
+    enableBashIntegration = true;
+    pinentry.package = pkgs.pinentry-qt;
+    defaultCacheTtl = 86400;
+    maxCacheTtl = 86400;
   };
 
   programs.git = {

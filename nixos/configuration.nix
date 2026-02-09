@@ -134,8 +134,6 @@
     Defaults timestamp_timeout=-1
   '';
 
-  programs.gnupg.agent.enable = true;
-
   programs.direnv = {
     enable = true;
     enableBashIntegration = true;
