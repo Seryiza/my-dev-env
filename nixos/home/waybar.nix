@@ -10,8 +10,8 @@
         [ "sway/workspaces" "sway/mode" "sway/scratchpad" "sway/window" ];
       modules-center = [ ];
       modules-right = [
-        "privacy"
         "custom/org_timeblock"
+        "privacy"
         "wireplumber"
         "network"
         "custom/wireguard"
@@ -38,7 +38,10 @@
       };
 
       "sway/workspaces" = { disable-scroll = true; };
-      "privacy" = { icon-size = 14; };
+      "privacy" = {
+        icon-size = 12;
+        icon-spacing = 0;
+      };
       "battery" = {
         format = "{capacity}% battery";
         format-full = "";

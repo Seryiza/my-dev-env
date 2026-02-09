@@ -141,11 +141,15 @@ label:focus {
     background-color: #f53c3c;
 }
 
-#wireplumber.muted {
+#wireplumber {
+    margin-left: 0;
+}
+
+#wireplumber.muted,
+#wireplumber:not(.source-muted) {
     background-color: #ffffff;
     color: #000000;
 }
-
 
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
@@ -165,22 +169,12 @@ label:focus {
 }
 
 #privacy {
-    padding: 0;
+    margin-right: 0;
 }
 
 #privacy-item {
     padding: 0 5px;
-    color: white;
-}
-
-#privacy-item.screenshare {
-    background-color: #cf5700;
-}
-
-#privacy-item.audio-in {
-    background-color: #1ca000;
-}
-
-#privacy-item.audio-out {
-    background-color: #0069d4;
+    margin: 0;
+    color: #000000;
+    background-color: #ffffff;
 }
