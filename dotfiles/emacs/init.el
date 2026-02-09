@@ -70,10 +70,10 @@
 
 (let ((text-hooks '(text-mode-hook prog-mode-hook)))
   (mapc (lambda (hook)
-      (add-hook hook 'hl-line-mode)
-      (add-hook hook 'display-line-numbers-mode)
-      (add-hook hook 'visual-line-mode))
-    text-hooks))
+          (add-hook hook 'hl-line-mode)
+          (add-hook hook 'display-line-numbers-mode)
+          (add-hook hook 'visual-line-mode))
+        text-hooks))
 
 (setopt tab-bar-show 1)
 
@@ -85,10 +85,10 @@
 
 (add-to-list 'default-frame-alist '(font . "Iosevka Slab" ))
 (set-face-attribute 'default nil
-                      :font (font-spec :family "Iosevka Slab"
-                                       :size 16
-                                       :weight 'normal
-                                       :width 'condensed))
+                    :font (font-spec :family "Iosevka Slab"
+                                     :size 16
+                                     :weight 'normal
+                                     :width 'condensed))
 
 ;; === Custom
 
@@ -129,7 +129,7 @@
   :pin gnu
   :config
   (setq shr-use-fonts nil)
-  
+
   (when (daemonp)
     (add-hook 'after-make-frame-functions
               (lambda (_f) (enable-theme 'modus-operandi-deuteranopia))))
@@ -171,10 +171,10 @@
 
 (use-package corfu
   :ensure t
-  
+
   :init
   (global-corfu-mode 1)
-  
+
   :bind
   (:map corfu-map
         ("C-n" . corfu-next)
@@ -235,10 +235,10 @@
   :ensure t
   :hook
   (eat-mode . my/eat-hide-emacs-cursor-enable)
-  
+
   :custom
   (eat-term-name "xterm")
-  
+
   :config
   (eat-eshell-mode)                     ; use Eat to handle term codes in program output
   (eat-eshell-visual-command-mode))     ; commands like less will be handled by Eat
@@ -256,9 +256,15 @@
   (setq wgrep-auto-save-buffer t))
 
 (use-package emacs
+  :hook
+  (before-save . whitespace-cleanup)
+
   :config
   (setq show-paren-delay 0)
   (show-paren-mode 1)
+
+  (setopt treesit-language-source-alist
+          '((css "https://github.com/tree-sitter/tree-sitter-css")))
 
   ;; Tell Emacs to prefer the treesitter mode
   ;; You'll want to run the command `M-x treesit-install-language-grammar' before editing.
@@ -270,7 +276,7 @@
           (json-mode . json-ts-mode)
           (css-mode . css-ts-mode)
           (python-mode . python-ts-mode)))
-  
+
   :hook
   ((prog-mode . electric-pair-mode)))
 
@@ -364,7 +370,7 @@
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-use-outline-path 'file)
   (setq org-link-descriptive nil)
-  
+
   (setq org-log-into-drawer "LOGBOOK")
   (setq org-log-repeat 'time)
   (setq org-log-done 'time)
@@ -376,7 +382,7 @@
   (setq org-blank-before-new-entry
         '((heading . nil)
           (plain-list-item . auto)))
-  
+
   (setq org-startup-folded 'nofold)
   (setq org-indent-indentation-per-level 2)
 
@@ -389,7 +395,7 @@
 
             ("t" "today todo" entry (file+olp "areas.org" "Personal" "Tasks")
              "* TODO %?\nSCHEDULED: %t")
-            
+
             ("n" "NEXT todo" entry (file+olp "areas.org" "Personal" "Tasks")
              "* NEXT %?")
 
@@ -403,7 +409,7 @@
              :immediate-finish t
              :empty-lines 1)))
 
-   (setopt org-agenda-custom-commands
+  (setopt org-agenda-custom-commands
           '(;; Archive tasks
             ("#" "To archive" todo "DONE|CANX")
 
@@ -420,19 +426,22 @@
             ;; Review daily tasks
             ("h" "Today Journal"
              ((agenda ""
-                  ((org-agenda-span 1)
-                   (org-agenda-start-day "0d")
-                   (org-agenda-use-time-grid t)
-                   (org-agenda-time-grid '((daily today require-timed)
-                               ()
-                               "......" "----------------"))
-                   (org-agenda-overriding-header "Timeline / Schedule")))
+                      ((org-agenda-span 1)
+                       (org-agenda-start-day "0d")
+                       (org-agenda-use-time-grid t)
+                       (org-agenda-overriding-header "Timeline / Schedule")
+                       (org-agenda-skip-scheduled-if-done t)
+                       (org-agenda-skip-deadline-if-done  t)
+                       (org-agenda-skip-timestamp-if-done t)
+                       (org-agenda-time-grid '((daily today require-timed)
+                                               ()
+                                               "......" "----------------"))))
               (todo "STRT"
-                ((org-agenda-overriding-header "In progress")))
+                    ((org-agenda-overriding-header "In progress")))
               (todo "NEXT"
-                ((org-agenda-overriding-header "Next actions")))
+                    ((org-agenda-overriding-header "Next actions")))
               (todo "WAITING"
-                ((org-agenda-overriding-header "Waiting / blocked")))))
+                    ((org-agenda-overriding-header "Waiting / blocked")))))
 
             ;; Review started and next tasks
             ("s" "STRT/NEXT" tags-todo "TODO={STRT\\|NEXT}")
@@ -451,11 +460,11 @@
   )
 
 (defun my-org-agenda-save-and-redo (&optional arg)
-    "Save all Org buffers, then redo the agenda.
+  "Save all Org buffers, then redo the agenda.
 ARG is passed to `org-agenda-redo-all'."
-    (interactive "P")
-    (org-save-all-org-buffers)
-    (org-agenda-redo-all arg))
+  (interactive "P")
+  (org-save-all-org-buffers)
+  (org-agenda-redo-all arg))
 
 (use-package org-agenda
   :after org
@@ -519,8 +528,80 @@ ARG is passed to `org-agenda-redo-all'."
     (setcdr map nil)
     (set-keymap-parent map parent)))
 
+(require 'seq)
+(require 'subr-x)
+
+
 (defvar my/telega-msg-button-map--orig nil
   "Saved copy of telega's original message-button keymap.")
+
+(defcustom my/telega-media-save-dir (expand-file-name "~/Downloads/telega/")
+  "Directory where `my/telega-save-msg-media' stores files."
+  :type 'directory)
+
+(defvar my/telega--save-dir-by-id (make-hash-table :test #'eql))
+
+(defun my/telega--guess-filename (msg file)
+  "Return a filename (with extension) for FILE from MSG."
+  (let* ((id (plist-get file :id))
+         (c  (plist-get msg :content))
+         (ct (plist-get c :@type)))
+    (or
+     ;; Types that carry original file_name in TDLib
+     (pcase ct
+       ("messageDocument"  (plist-get (plist-get c :document)  :file_name))
+       ("messageAudio"     (plist-get (plist-get c :audio)     :file_name))
+       ("messageVideo"     (plist-get (plist-get c :video)     :file_name))
+       ("messageAnimation" (plist-get (plist-get c :animation) :file_name)))
+     ;; Fallbacks for types without file_name
+     (pcase ct
+       ;; photoSize is JPEG in TDLib -> .jpg is a reasonable default
+       ("messagePhoto" (format "%d.jpg" id))
+       ;; sticker format determines extension (webp/tgs/webm)
+       ("messageSticker"
+        (format "%d.%s" id
+                (pcase (plist-get (plist-get (plist-get c :sticker) :format) :@type)
+                  ("stickerFormatWebp" "webp")
+                  ("stickerFormatTgs"  "tgs")
+                  ("stickerFormatWebm" "webm")
+                  (_ "webp"))))
+       ;; videoNote is MPEG4
+       ("messageVideoNote" (format "%d.mp4" id))
+       ;; voiceNote mime types are usually ogg/mp3/m4a
+       ("messageVoiceNote"
+        (format "%d.%s" id
+                (pcase (plist-get (plist-get c :voice_note) :mime_type)
+                  ("audio/ogg"  "ogg")
+                  ("audio/mpeg" "mp3")
+                  ("audio/mp4"  "m4a")
+                  (_ "ogg"))))
+       (_ (number-to-string id))))))
+
+(defun my/telega--copy-downloaded-file (file)
+  (let* ((id   (plist-get file :id))
+         (dst  (gethash id my/telega--save-dir-by-id))
+         (src  (plist-get (plist-get file :local) :path)))
+    (when (and (stringp dst) (stringp src) (file-exists-p src))
+      (copy-file src dst t)
+      (remhash id my/telega--save-dir-by-id)
+      (message "Saved %s" (abbreviate-file-name dst))
+      t)))
+
+(defun my/telega-save-msg-media (&optional dir msg)
+  "Download (if needed) and copy message-at-point file into DIR."
+  (interactive (list nil (telega-msg-for-interactive)))
+  (let* ((dir  (file-name-as-directory (or dir my/telega-media-save-dir)))
+         (_    (make-directory dir t))
+         (file (telega-msg--content-file msg)))
+    (unless file (user-error "No file in this message"))
+    (puthash (plist-get file :id)
+             (expand-file-name (my/telega--guess-filename msg file) dir)
+             my/telega--save-dir-by-id)
+    (or (my/telega--copy-downloaded-file file)
+        (telega-file--download
+            file
+          :priority 32
+          :update-callback #'my/telega--copy-downloaded-file))))
 
 (defun my/telega-msg-keys ()
   "Temporarily enable telega message-button bindings."
@@ -539,9 +620,9 @@ ARG is passed to `org-agenda-redo-all'."
   (setopt telega-use-images t)
   (setopt telega-emoji-use-images nil)
   (setopt telega-emoji-font-family "Noto Color Emoji")
-  
+
   (setopt telega-online-status-function
-      (lambda ()
+          (lambda ()
             ;; Example policy: be "online" only when a telega buffer is visible
             ;; in the selected window.
             (let ((buf (window-buffer (selected-window))))
@@ -551,7 +632,7 @@ ARG is passed to `org-agenda-redo-all'."
   (unless my/telega-msg-button-map--orig
     (setq my/telega-msg-button-map--orig (copy-keymap telega-msg-button-map))
     (define-key telega-chat-mode-map (kbd "M-m") #'my/telega-msg-keys))
-  
+
   (my/keymap-clear! telega-msg-button-map)
   (set-keymap-parent telega-msg-button-map button-map))
 
@@ -646,10 +727,10 @@ ARG is passed to `org-agenda-redo-all'."
 (use-package meow
   :ensure t
   :demand t
-  
+
   :config
   (meow-setup)
-  
+
   (meow-leader-define-key '("<SPC>" . meow-M-x))
   (meow-leader-define-key '("s" . save-buffer))
 
@@ -657,7 +738,7 @@ ARG is passed to `org-agenda-redo-all'."
   (keymap-set meow-normal-state-keymap "C-l" #'my/meow-org-demote-subtree)
   (keymap-set meow-normal-state-keymap "C-j" #'my/meow-org-move-subtree-down)
   (keymap-set meow-normal-state-keymap "C-k" #'my/meow-org-move-subtree-up)
-  
+
   (meow-global-mode 1)
 
   (add-hook 'meow-insert-exit-hook 'corfu-quit)
@@ -672,7 +753,7 @@ ARG is passed to `org-agenda-redo-all'."
   (add-to-list 'meow-mode-state-list '(eat-mode . insert))
   (add-to-list 'meow-mode-state-list '(eat-eshell-mode . insert))
   (add-to-list 'meow-mode-state-list '(agent-shell-mode . insert))
-  
+
   (meow-setup-indicator))
 
 ;; === Custom Functions
@@ -687,13 +768,13 @@ ARG is passed to `org-agenda-redo-all'."
       (dolist (f (org-agenda-files))
         (with-current-buffer (find-file-noselect f)
           (org-with-wide-buffer
-            (goto-char (point-min))
-            (while (re-search-forward re nil t)
-              (let ((s (match-string 1)) (e (match-string 2)))
-                (when (and (not (string< hm s))  ; s <= hm
-                           (string< hm e))        ; hm < e
-                  (org-back-to-heading t)
-                  (throw 'done (substring-no-properties (org-get-heading t t t t)))))))))
+           (goto-char (point-min))
+           (while (re-search-forward re nil t)
+             (let ((s (match-string 1)) (e (match-string 2)))
+               (when (and (not (string< hm s))  ; s <= hm
+                          (string< hm e))        ; hm < e
+                 (org-back-to-heading t)
+                 (throw 'done (substring-no-properties (org-get-heading t t t t)))))))))
       nil)))
 
 ;; === GC
