@@ -1,5 +1,4 @@
-{ config, ... }:
-{
+{ config, ... }: {
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -52,7 +51,7 @@
       };
       "wireplumber" = {
         format = "{volume}%{format_source} audio";
-        format-muted = "MUTED {format_source}";
+        format-muted = "MUTED{format_source}";
         format-source = " MIC";
         format-source-muted = "";
       };
