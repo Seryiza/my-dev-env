@@ -11,8 +11,15 @@ shopt -s histappend
 shopt -s checkwinsize
 
 # Better history search (up/down arrow searches by prefix)
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
+is_interactive_tty=0
+if [[ $- == *i* ]] && [[ -t 0 ]] && [[ -t 1 ]]; then
+  is_interactive_tty=1
+fi
+
+if [[ $is_interactive_tty -eq 1 ]]; then
+  bind '"\e[A": history-search-backward'
+  bind '"\e[B": history-search-forward'
+fi
 
 # Prompt
 ESC_RESET="\[$(tput sgr0)\]"
