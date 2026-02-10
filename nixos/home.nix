@@ -23,7 +23,13 @@
 
   home.sessionPath = [ "$HOME/.local/bin" ];
 
-  gtk.enable = true;
+  gtk = {
+    enable = true;
+    iconTheme = {
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
+    };
+  };
   xdg.enable = true;
 
   home.file = {
