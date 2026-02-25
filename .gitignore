@@ -14,6 +14,8 @@
 /dotfiles/emacs/emacs-backup
 /dotfiles/emacs/auto-save-list
 /dotfiles/emacs/projectile-bookmarks.eld
+/dotfiles/emacs/package-quickstart.el
+/dotfiles/emacs/package-quickstart.elc
 /dotfiles/emacs/projects
 /dotfiles/emacs/tramp
 /dotfiles/emacs/url

@@ -61,16 +61,16 @@
           '(("i" "inbox item" item (file "inbox.org")
              "%?\n%i")
 
-            ("m" "my todo" entry (file+olp "areas.org" "Personal" "Tasks")
+            ("m" "my todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
              "* TODO %?")
 
-            ("t" "today todo" entry (file+olp "areas.org" "Personal" "Tasks")
+            ("t" "today todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
              "* TODO %?\nSCHEDULED: %t")
 
-            ("n" "NEXT todo" entry (file+olp "areas.org" "Personal" "Tasks")
+            ("n" "NEXT todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
              "* NEXT %?")
 
-            ("b" "timeblock" entry (file+olp "areas.org" "Personal" "Timeblocks")
+            ("b" "timeblock" entry (file+olp "projects.org" "Areas" "Personal" "Timeblocks")
              "* %^{TIMEBLOCK}  :timeblock:\n%^{TIMESTAMP}T"
              :immediate-finish t)
 
@@ -99,19 +99,25 @@
                       ((org-agenda-span 1)
                        (org-agenda-start-day "0d")
                        (org-agenda-use-time-grid t)
-                       (org-agenda-overriding-header "Timeline / Schedule")
+                       (org-agenda-overriding-header "Schedule")
                        (org-agenda-skip-scheduled-if-done t)
                        (org-agenda-skip-deadline-if-done t)
                        (org-agenda-skip-timestamp-if-done t)
+                       (org-agenda-skip-function
+                        '(unless (org-before-first-heading-p)
+                           (org-agenda-skip-entry-if 'todo '("STRT" "NEXT"))))
                        (org-agenda-time-grid '((daily today require-timed)
                                                ()
                                                "......" "----------------"))))
               (todo "STRT"
-                    ((org-agenda-overriding-header "In progress")))
+                    ((org-agenda-overriding-header "In progress")
+                     (org-agenda-skip-function nil)))
               (todo "NEXT"
-                    ((org-agenda-overriding-header "Next actions")))
+                    ((org-agenda-overriding-header "Next actions")
+                     (org-agenda-skip-function nil)))
               (todo "WAITING"
-                    ((org-agenda-overriding-header "Waiting / blocked")))))
+                    ((org-agenda-overriding-header "Waiting / blocked")
+                     (org-agenda-skip-function nil)))))
 
             ;; Review started and next tasks
             ("s" "STRT/NEXT" tags-todo "TODO={STRT\\|NEXT}")

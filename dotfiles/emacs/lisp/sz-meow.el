@@ -5,6 +5,37 @@
 (autoload 'sz/meow-org-move-subtree-down "sz-org" nil t)
 (autoload 'sz/meow-org-move-subtree-up "sz-org" nil t)
 
+(defvar sz/meow-keypad-only-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c SPC") #'meow-keypad)
+    map)
+  "Keymap for `sz/meow-keypad-only-mode'.")
+
+(define-minor-mode sz/meow-keypad-only-mode
+  "Expose Meow keypad in buffers where Meow modal editing is disabled."
+  :init-value nil
+  :lighter ""
+  :keymap sz/meow-keypad-only-mode-map)
+
+(defun sz/meow-term-enable ()
+  "Enable Meow in `term-mode' buffers."
+  (meow-mode 1))
+
+(defun sz/meow-term-line ()
+  "Use NORMAL state in `term-line-mode'."
+  (when (bound-and-true-p meow-mode)
+    (meow-normal-mode 1)))
+
+(defun sz/meow-term-char ()
+  "Use INSERT state in `term-char-mode'."
+  (when (bound-and-true-p meow-mode)
+    (meow-insert-mode 1)))
+
+(defun sz/meow-disable-modal-keep-keypad ()
+  "Disable Meow modal states here, but keep keypad available."
+  (meow-mode -1)
+  (sz/meow-keypad-only-mode 1))
+
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
@@ -96,6 +127,7 @@
   (meow-setup)
 
   (meow-leader-define-key '("<SPC>" . meow-M-x))
+  (meow-leader-define-key '("C-;" . meow-M-x))
   (meow-leader-define-key '("s" . save-buffer))
 
   (keymap-set meow-normal-state-keymap "C-h" #'sz/meow-org-promote-subtree)
@@ -113,8 +145,50 @@
             (find . 30)
             (till . 30)))
 
-  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
-  (add-to-list 'meow-mode-state-list '(eat-eshell-mode . insert))
-  (add-to-list 'meow-mode-state-list '(agent-shell-mode . insert))
+  (add-hook 'term-mode-hook #'sz/meow-term-enable)
+  (add-hook 'term-line-mode-hook #'sz/meow-term-line)
+  (add-hook 'term-char-mode-hook #'sz/meow-term-char)
 
-  (meow-setup-indicator))
+  (dolist (hook '(shell-mode-hook
+                  eshell-mode-hook
+                  eat-mode-hook
+                  eat-eshell-mode-hook
+                  agent-shell-mode-hook))
+    (add-hook hook #'sz/meow-disable-modal-keep-keypad))
+
+  (meow-setup-indicator)
+
+  (defvar my/meow-vterm-keymap (make-sparse-keymap)
+    "Meow state keymap for vterm passthrough.")
+
+  (defvar my/meow-vterm-leader-keymap
+    (let ((map (make-sparse-keymap)))
+      (set-keymap-parent map (or (alist-get 'leader meow-keymap-alist)
+                                 mode-specific-map))
+      (define-key map (kbd "SPC") #'meow-keypad)
+      map)
+    "One-shot Meow leader map for vterm.")
+
+  (defun my/meow-vterm-leader ()
+    "Interpret the next key using Meow leader bindings in vterm."
+    (interactive)
+    (setq-local meow--indicator (propertize " VTERM->MEOW " 'face 'meow-keypad-indicator))
+    (force-mode-line-update)
+    (set-transient-map
+     my/meow-vterm-leader-keymap
+     nil
+     (lambda ()
+       (meow--update-indicator)
+       (force-mode-line-update))))
+
+  (meow-define-state vterm
+    "Passthrough Meow state for vterm (only leader trigger)."
+    :lighter " [VT]"
+    :keymap my/meow-vterm-keymap)
+
+  ;; Only bind the leader trigger in this state
+  (meow-define-keys 'vterm
+    '("C-;" . my/meow-vterm-leader))
+
+  ;; Start vterm buffers in this custom state
+  (add-to-list 'meow-mode-state-list '(vterm-mode . vterm)))

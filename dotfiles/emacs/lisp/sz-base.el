@@ -22,6 +22,8 @@
   (context-menu-mode))
 
 (setopt make-backup-files t)
+(setopt create-lockfiles nil)
+
 (let ((backup-dir (locate-user-emacs-file "backups/")))
   (make-directory backup-dir t)
   (setq backup-directory-alist `(("." . ,backup-dir))
@@ -68,8 +70,8 @@
 (blink-cursor-mode t)
 (setopt blink-cursor-interval 0.7)
 
-(when (fboundp 'pixel-scroll-precision-mode)
-  (pixel-scroll-precision-mode))
+;; (when (fboundp 'pixel-scroll-precision-mode)
+;;   (pixel-scroll-precision-mode))
 
 (unless (display-graphic-p)
   (xterm-mouse-mode 1))
@@ -90,7 +92,7 @@
                             ;; (horizontal-scroll-bars . nil)
                             ))
 
-(defconst sz/default-font-family "Iosevka Slab")
+(defconst sz/default-font-family "Iosevka")
 (defconst sz/default-font-size 12)
 
 (defun sz/apply-default-font (&optional frame)
@@ -104,7 +106,14 @@
 
 (add-to-list 'default-frame-alist
              `(font . ,(format "%s-%d" sz/default-font-family sz/default-font-size)))
+
 (sz/apply-default-font)
+
+(defun sz/reinit-el ()
+  "Reload the current `user-init-file`."
+  (interactive)
+  (load user-init-file nil t t)   ; noerror=nil, nomessage=t, nosuffix=t
+  (message "Reloaded %s" user-init-file))
 
 ;; === Packages
 
@@ -130,7 +139,7 @@
   :bind (("C-x b" . consult-buffer)     ; orig. switch-to-buffer
          ("M-y"   . consult-yank-pop)   ; orig. yank-pop
          ;; Searching
-         ("M-s r" . consult-ripgrep)
+         ("C-c f C-g" . consult-ripgrep)
          ("M-s l" . consult-line)       ; Alternative: rebind C-s to use
          ("M-s s" . consult-line)       ; consult-line instead of isearch, bind
          ("M-s L" . consult-line-multi) ; isearch to M-s s
@@ -209,7 +218,7 @@
 
 (use-package eat
   :ensure t
-  :hook (eat-mode . sz/eat-hide-emacs-cursor-enable)
+  ;; :hook (eat-mode . sz/eat-hide-emacs-cursor-enable)
   :custom (eat-term-name "xterm")
   :config
   (eat-eshell-mode)                 ; use Eat to handle term codes in program output
@@ -239,17 +248,24 @@
   :config
   (setq show-paren-delay 0)
   (show-paren-mode 1)
+  (global-eldoc-mode -1)
 
   (setopt treesit-language-source-alist
-          '((css "https://github.com/tree-sitter/tree-sitter-css")))
+          '((css "https://github.com/tree-sitter/tree-sitter-css")
+            (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+            (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+            (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+            (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")
+            (json "https://github.com/tree-sitter/tree-sitter-json")))
 
   ;; Tell Emacs to prefer the treesitter mode
   ;; You'll want to run the command `M-x treesit-install-language-grammar' before editing.
   (setq major-mode-remap-alist
         '((yaml-mode . yaml-ts-mode)
           (bash-mode . bash-ts-mode)
+          (js-mode . js-ts-mode)
           (js2-mode . js-ts-mode)
-          (typescript-mode . typescript-ts-mode)
+          (tsx-mode . tsx-ts-mode)
           (json-mode . json-ts-mode)
           (css-mode . css-ts-mode)
           (python-mode . python-ts-mode))))
@@ -272,15 +288,41 @@
 (use-package json-mode
   :ensure t)
 
-(use-package makefile
+(use-package typescript-ts-mode
+  :ensure nil
+  :mode (("\\.mts\\'" . typescript-ts-mode)
+         ("\\.cts\\'" . typescript-ts-mode)))
+
+(use-package tsx-ts-mode
+  :ensure nil
+  :mode ("\\.tsx\\'" . tsx-ts-mode))
+
+(use-package add-node-modules-path
+  :ensure t
+  :hook ((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
+         . add-node-modules-path))
+
+(use-package make-mode
   :ensure nil
   :hook (makefile-mode . (lambda () (setq indent-tabs-mode t))))
 
 (use-package eglot
+  :hook ((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
+         . eglot-ensure)
   :custom
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
-  :config (fset #'jsonrpc--log-event #'ignore))
+
+  :config
+  (fset #'jsonrpc--log-event #'ignore)
+  (add-to-list 'eglot-server-programs
+               '((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
+                 . (eglot-alternatives
+                    '("vtsls" "--stdio")
+                    '("typescript-language-server" "--stdio")))))
+
+(use-package rg
+  :ensure t)
 
 (use-package tempel
   :ensure t
@@ -344,3 +386,63 @@
 
 (use-package agent-shell
   :ensure t)
+
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode +1)
+
+  :bind
+  ("C-c o C-s" . projectile-run-shell)
+  ("C-c o C-v" . projectile-run-vterm)
+  ("C-c f C-f" . projectile-find-file))
+
+(use-package flycheck-clj-kondo
+  :ensure t)
+
+(use-package clojure-mode
+  :ensure t
+
+  :init
+  (defun format-clojure ()
+    (when (or (eq major-mode 'clojure-mode)
+              (eq major-mode 'clojurec-mode)
+              (eq major-mode 'clojurescript-mode))
+      (shell-command-to-string
+       (if (file-exists-p (concat (projectile-project-root buffer-file-name) ".cljfmt.edn"))
+           (format "cljfmt fix --config %s %s"
+                   (concat (projectile-project-root buffer-file-name) ".cljfmt.edn")
+                   buffer-file-name)
+         (format "cljfmt fix %s" buffer-file-name)))
+      (revert-buffer :ignore-auto :noconfirm)))
+
+  :config
+  (add-hook 'after-save-hook #'format-clojure))
+
+(use-package cider
+  :ensure t
+
+  :bind
+  (:map cider-eval-commands-map
+    ("C-e" . cider-eval-list-at-point)
+    ("C-b" . cider-eval-buffer)
+    ("C-f" . cider-eval-defun-at-point))
+  (:map cider-test-commands-map
+    ("C-c" . cider-test-run-test)
+    ("C-n" . cider-test-run-ns-tests)
+    ("C-r" . cider-test-show-report))
+
+  :config
+  ;; Make C-c C-e / C-c C-t prefixes instead of cider-eval-last-sexp, etc.
+  (define-key cider-mode-map (kbd "C-c C-e") cider-eval-commands-map)
+  (define-key cider-mode-map (kbd "C-c C-t") cider-test-commands-map)
+
+  (setq cider-save-file-on-load t)
+  (setq cider-use-xref nil)
+  (setq cider-font-lock-reader-conditionals nil))
+
+(use-package vterm
+  :ensure nil
+  :commands (vterm vterm-other-window)
+  :config
+  (add-to-list 'vterm-keymap-exceptions "C-;"))

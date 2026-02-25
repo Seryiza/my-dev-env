@@ -15,6 +15,14 @@
 
 (defvar sz/telega--save-dir-by-id (make-hash-table :test #'eql))
 
+(defun sz/telega--safe-filename (name)
+  "Return a safe basename from NAME, or nil if it looks invalid."
+  (when (and (stringp name) (> (length name) 0))
+    (let* ((trimmed (directory-file-name name))
+           (base (file-name-nondirectory trimmed)))
+      (unless (member base '("" "." ".."))
+        base))))
+
 (defun sz/telega--guess-filename (msg file)
   "Return a filename (with extension) for FILE from MSG."
   (let* ((id (plist-get file :id))
@@ -22,11 +30,12 @@
          (ct (plist-get c :@type)))
     (or
      ;; Types that carry original file_name in TDLib
-     (pcase ct
-       ("messageDocument"  (plist-get (plist-get c :document)  :file_name))
-       ("messageAudio"     (plist-get (plist-get c :audio)     :file_name))
-       ("messageVideo"     (plist-get (plist-get c :video)     :file_name))
-       ("messageAnimation" (plist-get (plist-get c :animation) :file_name)))
+     (sz/telega--safe-filename
+      (pcase ct
+        ("messageDocument"  (plist-get (plist-get c :document)  :file_name))
+        ("messageAudio"     (plist-get (plist-get c :audio)     :file_name))
+        ("messageVideo"     (plist-get (plist-get c :video)     :file_name))
+        ("messageAnimation" (plist-get (plist-get c :animation) :file_name))))
      ;; Fallbacks for types without file_name
      (pcase ct
        ;; photoSize is JPEG in TDLib -> .jpg is a reasonable default
@@ -54,12 +63,32 @@
 (defun sz/telega--copy-downloaded-file (file)
   (let* ((id   (plist-get file :id))
          (dst  (gethash id sz/telega--save-dir-by-id))
-         (src  (plist-get (plist-get file :local) :path)))
-    (when (and (stringp dst) (stringp src) (file-exists-p src))
-      (copy-file src dst t)
-      (remhash id sz/telega--save-dir-by-id)
-      (message "Saved %s" (abbreviate-file-name dst))
-      t)))
+         (local (plist-get file :local))
+         (src   (plist-get local :path))
+         (downloading (plist-get local :is_downloading_active))
+         (completed   (plist-get local :is_downloading_completed))
+         (downloaded  (plist-get local :downloaded_size))
+         (expected    (plist-get file :expected_size)))
+    (when (and (stringp dst)
+               (stringp src)
+               (> (length src) 0)
+               (file-regular-p src)
+               (not downloading)
+               (or completed
+                   (and (numberp expected)
+                        (> expected 0)
+                        (numberp downloaded)
+                        (>= downloaded expected))))
+      (if (file-directory-p dst)
+          (progn
+            (remhash id sz/telega--save-dir-by-id)
+            (message "Skip save: destination is a directory: %s"
+                     (abbreviate-file-name dst))
+            nil)
+        (copy-file src dst t)
+        (remhash id sz/telega--save-dir-by-id)
+        (message "Saved %s" (abbreviate-file-name dst))
+        t))))
 
 (defun sz/telega-save-msg-media (&optional dir msg)
   "Download (if needed) and copy message-at-point file into DIR."
