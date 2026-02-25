@@ -1,5 +1,9 @@
-{ config, pkgs, nixpkgs-unstable, lib, ... }:
-{
+{ config, pkgs, nixpkgs-unstable, lib, ... }: {
+  home.activation.clearTofiDrunCache =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      rm -f "${config.xdg.cacheHome}/tofi-drun"
+    '';
+
   services.swayidle = {
     enable = true;
 
@@ -85,7 +89,7 @@
             "exec decrease-current-volume && display-current-volume";
           "XF86AudioMicMute" =
             "exec toggle-microphone-mute && display-current-microphone";
-          "${modifier}+Alt+m" =
+          "XF86HomePage" =
             "exec toggle-microphone-mute && display-current-microphone";
           "XF86AudioMute" = "exec toggle-audio-mute && display-current-volume";
           "${modifier}+Shift+m" =

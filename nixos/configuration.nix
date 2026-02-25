@@ -157,9 +157,7 @@
 
   environment.systemPackages = with pkgs; [ glibcLocales busybox iputils ];
 
-  environment.variables = {
-    QT_QPA_PLATFORM = "wayland";
-  };
+  environment.variables = { QT_QPA_PLATFORM = "wayland"; };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
@@ -175,7 +173,7 @@
   services.emacs = {
     enable = true;
     package = (pkgs.emacsPackagesFor pkgs.emacs-pgtk).emacsWithPackages
-      (epkgs: [ epkgs.mu4e epkgs.melpaPackages.telega ]);
+      (epkgs: [ epkgs.mu4e epkgs.vterm epkgs.melpaPackages.telega ]);
   };
 
   # Samba

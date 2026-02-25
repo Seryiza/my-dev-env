@@ -146,7 +146,8 @@ label:focus {
 }
 
 #wireplumber.muted,
-#wireplumber:not(.source-muted) {
+#wireplumber:not(.source-muted),
+#custom-wireguard {
     background-color: #ffffff;
     color: #000000;
 }

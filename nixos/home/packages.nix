@@ -100,5 +100,15 @@ in {
     inputs.rep.packages.${system}.default
     pkgs.wev
     pkgs.xarchiver
+    pkgs.file
+    pkgs.openssl
+    pkgs.qrencode
+    pkgs.xray
+    pkgs.k9s
+    pkgs.vtsls
+    pkgs.typescript-language-server
+    pkgs.devd
+    pkgs.anytype
+    pkgs.gnome-calendar
   ];
 }
