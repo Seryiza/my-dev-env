@@ -6,6 +6,12 @@
 
 (require 'use-package)
 
+;; Packages installed in NixOS
+(setq package-hidden-regexps
+      '("\\`vterm\\'"
+        "\\`telega\\'"
+        "\\`visual-fill-column\\'"))
+
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)
   (load custom-file nil t))

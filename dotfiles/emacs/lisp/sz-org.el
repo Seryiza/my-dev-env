@@ -152,4 +152,9 @@ ARG is passed to `org-agenda-redo-all'."
     (let ((split-width-threshold 80))
       (apply orig-fun args))))
 
+(use-package org-repeat-by-cron
+  :ensure t
+  :config
+  (global-org-repeat-by-cron-mode))
+
 (provide 'sz-org)
