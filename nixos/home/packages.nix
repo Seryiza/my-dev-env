@@ -115,5 +115,6 @@ in {
     pkgs.go
     pkgs.scrcpy
     pkgs.android-tools
+    pkgs.libdecor
   ];
 }
