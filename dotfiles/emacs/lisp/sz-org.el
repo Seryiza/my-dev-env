@@ -108,7 +108,10 @@
                            (org-agenda-skip-entry-if 'todo '("STRT" "NEXT"))))
                        (org-agenda-time-grid '((daily today require-timed)
                                                ()
-                                               "......" "----------------"))))
+                                               "......" "----------------"))
+                       (org-agenda-prefix-format
+                        '((agenda . " %i %-12:c%?-11t %s [%-4e] ")
+                          ))))
               (todo "STRT"
                     ((org-agenda-overriding-header "In progress")
                      (org-agenda-skip-function nil)))
