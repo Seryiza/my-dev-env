@@ -16,12 +16,16 @@
   home.sessionVariables = {
     WLR_DRM_NO_ATOMIC = "1";
     GRIM_DEFAULT_DIR = "$HOME/Pictures/Screenshots";
+    EDITOR = "emacsclient -c -a emacs";
+    VISUAL = "emacsclient -c -a emacs";
+    SUDO_EDITOR = "emacsclient -c -a emacs";
+    BROWSER = "firefox";
   };
 
   home.sessionVariables.LOCALES_ARCHIVE =
     "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
-  home.sessionPath = [ "$HOME/.local/bin" ];
+  home.sessionPath = [ "$HOME/.local/bin" "$HOME/go/bin" ];
 
   gtk = {
     enable = true;
@@ -31,6 +35,70 @@
     };
   };
   xdg.enable = true;
+  xdg.desktopEntries.emacsclient = {
+    name = "Emacs Client";
+    genericName = "Text Editor";
+    comment = "Edit text with Emacs (client)";
+    type = "Application";
+    exec = "emacsclient -c -a emacs %F";
+    terminal = false;
+    categories = [ "Development" "TextEditor" ];
+    mimeType = [
+      "text/plain"
+      "text/markdown"
+      "text/x-shellscript"
+      "text/x-yaml"
+      "text/x-toml"
+      "text/x-python"
+      "text/x-c"
+      "text/x-c++"
+      "text/x-go"
+      "text/x-rust"
+      "text/x-java"
+      "text/x-kotlin"
+      "text/x-clojure"
+      "text/x-lua"
+      "text/x-php"
+      "text/x-ruby"
+      "text/x-perl"
+      "text/x-sql"
+      "text/x-makefile"
+      "application/json"
+      "application/xml"
+    ];
+  };
+
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = [ "firefox.desktop" ];
+      "application/xhtml+xml" = [ "firefox.desktop" ];
+      "x-scheme-handler/http" = [ "firefox.desktop" ];
+      "x-scheme-handler/https" = [ "firefox.desktop" ];
+      "x-scheme-handler/ftp" = [ "firefox.desktop" ];
+      "text/plain" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/markdown" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-shellscript" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-yaml" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-toml" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-python" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-c" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-c++" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-go" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-rust" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-java" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-kotlin" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-clojure" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-lua" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-php" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-ruby" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-perl" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-sql" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "text/x-makefile" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "application/json" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "application/xml" = [ "emacsclient.desktop" "emacs.desktop" ];
+    };
+  };
 
   home.file = {
     ".emacs.d".source = config.lib.file.mkOutOfStoreSymlink

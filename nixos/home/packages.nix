@@ -110,5 +110,10 @@ in {
     pkgs.devd
     pkgs.anytype
     pkgs.gnome-calendar
+    pkgs.php
+    pkgs.bbin
+    pkgs.go
+    pkgs.scrcpy
+    pkgs.android-tools
   ];
 }

@@ -52,6 +52,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "bak";
             home-manager.users.seryiza = import ./nixos/home.nix;
             home-manager.sharedModules = [ xremap.homeManagerModules.default ];
             home-manager.extraSpecialArgs = inputs;

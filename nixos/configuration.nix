@@ -155,11 +155,17 @@
 
   environment.localBinInPath = true;
 
-  environment.systemPackages = with pkgs; [ glibcLocales busybox iputils ];
+  environment.systemPackages = with pkgs; [
+    glibcLocales
+    busybox
+    iputils
+    config.services.emacs.package
+  ];
 
   environment.variables = { QT_QPA_PLATFORM = "wayland"; };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables.BROWSER = "firefox";
 
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
