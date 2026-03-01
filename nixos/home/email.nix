@@ -1,5 +1,8 @@
 { config, pkgs, lib, ... }:
-{
+let
+  maildir = "${config.home.homeDirectory}/Maildir";
+  offlineimapBin = lib.getExe pkgs.offlineimap;
+in {
   home.packages = [
     pkgs.offlineimap
     pkgs.mu
@@ -9,7 +12,7 @@
   programs.mu.enable = true;
 
   accounts.email = {
-    maildirBasePath = "${config.home.homeDirectory}/Maildir";
+    maildirBasePath = maildir;
     accounts = {
       fastmail = {
         address = "seryiza@fastmail.com";
@@ -17,6 +20,7 @@
         primary = true;
         flavor = "fastmail.com";
         realName = "Sergey Zaborovsky";
+        aliases = [ "/@seryiza\\.xyz$/" ];
         passwordCommand = "${pkgs.pass}/bin/pass mail/seryiza@fastmail.com";
         mu = { enable = true; };
         offlineimap = {
@@ -29,12 +33,13 @@
 
   # Run OfflineIMAP every 5 minutes as a user service.
   systemd.user.services.offlineimap-sync = {
+    Unit.Description = "OfflineIMAP sync";
     Service = {
-      ExecStart = "${pkgs.offlineimap}/bin/offlineimap";
+      Type = "oneshot";
+      ExecStart = offlineimapBin;
       Environment =
         "PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.mu pkgs.offlineimap ]}";
     };
-    Unit.Description = "OfflineIMAP sync";
     Install.WantedBy = [ "default.target" ];
   };
 
@@ -43,6 +48,7 @@
     Timer = {
       OnBootSec = "1m";
       OnUnitActiveSec = "5m";
+      Persistent = true;
     };
     Install.WantedBy = [ "timers.target" ];
   };

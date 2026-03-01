@@ -1,7 +1,12 @@
 ;; === Base options
 
+(require 'sz-alerts)
+
 (setopt initial-major-mode 'fundamental-mode)
 (setopt display-time-default-load-average nil)
+
+(setopt user-full-name "Sergey Zaborovsky")
+(setopt user-mail-address "hey@seryiza.xyz")
 
 (setopt auto-revert-avoid-polling t)
 (setopt auto-revert-use-notify t)
@@ -367,6 +372,21 @@
   :config
   (setq rmh-elfeed-org-files (list "~/org/rss.org"))
   (elfeed-org))
+
+(use-package mu4e
+  :ensure nil
+  :custom
+  (mu4e-update-interval (* 5 60))
+  (mu4e-get-mail-command "true")
+
+  :config
+  (setq mu4e-bookmarks
+        (cons '(:name "Inbox"
+                :query "maildir:/fastmail/INBOX"
+                :key ?i
+                :favorite t)
+              mu4e-bookmarks))
+  (add-hook 'mu4e-query-items-updated-hook #'sz/mu4e-notify-new-mail))
 
 (use-package flycheck
   :ensure t
