@@ -5,6 +5,8 @@
 /*.log
 
 # Emacs
+*.elc
+
 /dotfiles/emacs/.cache
 /dotfiles/emacs/.lsp-session-v1
 /dotfiles/emacs/eln-cache
@@ -15,7 +17,6 @@
 /dotfiles/emacs/auto-save-list
 /dotfiles/emacs/projectile-bookmarks.eld
 /dotfiles/emacs/package-quickstart.el
-/dotfiles/emacs/package-quickstart.elc
 /dotfiles/emacs/projects
 /dotfiles/emacs/tramp
 /dotfiles/emacs/url

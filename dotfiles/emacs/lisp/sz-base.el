@@ -125,6 +125,8 @@
 ;; Dired is built-in, so use :ensure nil.
 (use-package dired
   :ensure nil
+  :bind (:map dired-mode-map
+              ("," . make-directory))
   :config
   ;; Must include "-l" per the manual.
   (setq dired-listing-switches "-al --group-directories-first"))
@@ -386,7 +388,12 @@
                 :key ?i
                 :favorite t)
               mu4e-bookmarks))
-  (add-hook 'mu4e-query-items-updated-hook #'sz/mu4e-notify-new-mail))
+
+  (add-hook 'mu4e-query-items-updated-hook #'sz/mu4e-notify-new-mail)
+
+  ;; Start background mu4e for emacs server
+  (when (server-running-p)
+    (mu4e t)))
 
 (use-package flycheck
   :ensure t

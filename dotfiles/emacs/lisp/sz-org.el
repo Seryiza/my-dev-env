@@ -1,5 +1,7 @@
 ;; === Org mode
 
+(require 'sz-alerts)
+
 (setq org-directory "~/org")
 (setq org-agenda-files '("~/org"))
 (setq org-archive-location "~/org/archive/%s::")
@@ -146,8 +148,33 @@ ARG is passed to `org-agenda-redo-all'."
 
 (use-package org-agenda
   :after org
-  :bind (:map org-agenda-mode-map ("g" . sz/org-agenda-save-and-redo))
+  :hook
+  ((after-save . sz/org-appt-refresh-on-save)
+   (org-capture-after-finalize . sz/org-appt-refresh)
+   (org-after-todo-state-change . sz/org-appt-refresh))
+
+  :bind
+  (:map org-agenda-mode-map
+        ("g" . sz/org-agenda-save-and-redo))
+
+  :custom
+  (appt-display-format 'window)
+  (appt-disp-window-function #'sz/org-appt-display-notification)
+  (appt-delete-window-function #'ignore)
+  (appt-audible nil)
+  (appt-display-diary nil)
+  (appt-message-warning-time 10)
+  (appt-display-interval 10)
+
   :config
+  (require 'appt)
+  (appt-activate 1)
+  (sz/org-appt-refresh)
+
+  (unless (timerp sz/org-appt--refresh-timer)
+    (setq sz/org-appt--refresh-timer
+          (run-at-time "00:01" 86400 #'sz/org-appt-refresh)))
+
   (define-advice org-agenda (:around (orig-fun &rest args) split-vertically)
     (let ((split-width-threshold 80))
       (apply orig-fun args))))

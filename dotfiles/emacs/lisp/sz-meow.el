@@ -36,6 +36,15 @@
   (meow-mode -1)
   (sz/meow-keypad-only-mode 1))
 
+(defun sz/meow-handle-eat-eshell-mode ()
+  "Enable terminal passthrough when `eat-eshell-mode' is active."
+  (if (bound-and-true-p eat-eshell-mode)
+      (progn
+        (meow-mode 1)
+        (sz/meow-keypad-only-mode -1)
+        (meow-terminal-mode 1))
+    (sz/meow-disable-modal-keep-keypad)))
+
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
@@ -150,45 +159,63 @@
   (add-hook 'term-char-mode-hook #'sz/meow-term-char)
 
   (dolist (hook '(shell-mode-hook
-                  eshell-mode-hook
-                  eat-mode-hook
-                  eat-eshell-mode-hook
-                  agent-shell-mode-hook))
+                  eshell-mode-hook))
     (add-hook hook #'sz/meow-disable-modal-keep-keypad))
+  (add-hook 'eat-eshell-mode-hook #'sz/meow-handle-eat-eshell-mode)
 
   (meow-setup-indicator)
 
-  (defvar my/meow-vterm-keymap (make-sparse-keymap)
-    "Meow state keymap for vterm passthrough.")
+  (defvar my/meow-terminal-keymap (make-sparse-keymap)
+    "Meow state keymap for terminal passthrough.")
 
-  (defvar my/meow-vterm-leader-keymap
+  (defvar my/meow-terminal-leader-keymap
     (let ((map (make-sparse-keymap)))
       (set-keymap-parent map (or (alist-get 'leader meow-keymap-alist)
                                  mode-specific-map))
       (define-key map (kbd "SPC") #'meow-keypad)
       map)
-    "One-shot Meow leader map for vterm.")
+    "One-shot Meow leader map for terminal buffers.")
 
-  (defun my/meow-vterm-leader ()
-    "Interpret the next key using Meow leader bindings in vterm."
+  (defun my/meow-terminal-leader ()
+    "Interpret the next key using Meow leader bindings in terminal buffers."
     (interactive)
-    (setq-local meow--indicator (propertize " VTERM->MEOW " 'face 'meow-keypad-indicator))
+    (setq-local meow--indicator (propertize " TERM->MEOW " 'face 'meow-keypad-indicator))
     (force-mode-line-update)
     (set-transient-map
-     my/meow-vterm-leader-keymap
+     my/meow-terminal-leader-keymap
      nil
      (lambda ()
        (meow--update-indicator)
        (force-mode-line-update))))
 
-  (meow-define-state vterm
-    "Passthrough Meow state for vterm (only leader trigger)."
-    :lighter " [VT]"
-    :keymap my/meow-vterm-keymap)
+  (meow-define-state terminal
+    "Passthrough Meow state for terminal-like buffers (leader only)."
+    :lighter " [TM]"
+    :keymap my/meow-terminal-keymap)
 
   ;; Only bind the leader trigger in this state
-  (meow-define-keys 'vterm
-    '("C-;" . my/meow-vterm-leader))
+  (meow-define-keys 'terminal
+    '("C-;" . my/meow-terminal-leader))
 
-  ;; Start vterm buffers in this custom state
-  (add-to-list 'meow-mode-state-list '(vterm-mode . vterm)))
+  ;; Start terminal buffers in the custom passthrough state.
+  (dolist (mode '(vterm-mode
+                  eat-mode))
+    (add-to-list 'meow-mode-state-list (cons mode 'terminal)))
+
+  ;; Agent Shell: keep full Meow modal behavior and move conflicting
+  ;; single-key commands under an explicit prefix map.
+  (with-eval-after-load 'agent-shell
+    (defvar sz/agent-shell-action-map
+      (let ((map (make-sparse-keymap)))
+        (define-key map (kbd "n") #'agent-shell-next-item)
+        (define-key map (kbd "p") #'agent-shell-previous-item)
+        (define-key map (kbd "o") #'agent-shell-other-buffer)
+        (define-key map (kbd "i") #'agent-shell-interrupt)
+        (define-key map (kbd "m") #'agent-shell-set-session-mode)
+        (define-key map (kbd "v") #'agent-shell-set-session-model)
+        (define-key map (kbd "t") #'agent-shell-cycle-session-mode)
+        map)
+      "Action map for `agent-shell-mode' under `C-c a'.")
+    (keymap-set agent-shell-mode-map "C-c a" sz/agent-shell-action-map)
+    (keymap-unset agent-shell-mode-map "n")
+    (keymap-unset agent-shell-mode-map "p")))
