@@ -252,6 +252,7 @@
    (prog-mode . display-line-numbers-mode)
    (text-mode . visual-line-mode)
    (after-make-frame-functions . sz/apply-default-font))
+
   :config
   (setq show-paren-delay 0)
   (show-paren-mode 1)
@@ -392,7 +393,7 @@
   (add-hook 'mu4e-query-items-updated-hook #'sz/mu4e-notify-new-mail)
 
   ;; Start background mu4e for emacs server
-  (when (server-running-p)
+  (when (daemonp)
     (mu4e t)))
 
 (use-package flycheck

@@ -51,6 +51,7 @@
   (setq org-image-actual-width 400)
   (setq org-startup-with-inline-images t)
   (setq org-tags-column 40)
+  (setq org-confirm-babel-evaluate nil)
 
   (setq org-blank-before-new-entry
         '((heading . nil)
@@ -183,5 +184,38 @@ ARG is passed to `org-agenda-redo-all'."
   :ensure t
   :config
   (global-org-repeat-by-cron-mode))
+
+(use-package howm
+  :ensure t
+  :defer nil
+
+  :hook
+  (howm-view-contents-mode . howm-org-font-lock-minor-mode)
+  (howm-view-summary-mode . howm-org-font-lock-minor-mode)
+
+  :init
+  (setq howm-view-title-header "*")
+  (setq howm-dtime-format "[%Y-%m-%d %a %H:%M]")
+  (setq howm-view-title-skip-regexp
+        (concat "\\(^\\*?\\s-*$\\)" "\\|" ;; empty title or ...
+                ;; date & time
+                (concat "\\(^\\[[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+                        " .+ " ;; day of the week
+                        "[0-9]\\{2\\}:[0-9]\\{2\\}\\]\\)")))
+  (setq howm-menu-file-extension ".org")
+  (setq howm-menu-skel-replace-rules '(("^= " . "* ") ("^== " . "** ")))
+
+  (setq howm-keyword-body-regexp "[^>=\r\n]+")
+  (setq howm-ref-body-regexp "[^=\r\n]+")
+
+  ;; Disable wiki link [[...]] for syntax compatibility.
+  (setq howm-wiki-regexp nil)
+
+  (setq howm-directory "~/org/")
+  (setq howm-file-name-format "howm/%Y-%m-%d-%H%M%S.org")
+  (setq howm-prefix (kbd "C-c ,"))
+  (setq howm-keyword-file (expand-file-name ".howm-keys" howm-directory))
+  (setq howm-history-file (expand-file-name ".howm-history" howm-directory))
+  (setq howm-template "* %title%cursor\n:PROPERTIES:\n:CREATED: %date\n:END:"))
 
 (provide 'sz-org)

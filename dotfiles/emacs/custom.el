@@ -9,7 +9,7 @@
  '(package-selected-packages
    '(add-node-modules-path agent-shell cape claude-code consult
                            corfu-terminal eat elfeed-org flycheck
-                           flycheck-clj-kondo json-mode kind-icon
+                           flycheck-clj-kondo howm json-mode kind-icon
                            magit markdown-mode meow mu4e nix-mode
                            orderless org-repeat-by-cron projectile rg
                            super-save tempel vertico wgrep))
