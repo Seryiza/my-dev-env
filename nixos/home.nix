@@ -97,6 +97,29 @@
       "text/x-makefile" = [ "emacsclient.desktop" "emacs.desktop" ];
       "application/json" = [ "emacsclient.desktop" "emacs.desktop" ];
       "application/xml" = [ "emacsclient.desktop" "emacs.desktop" ];
+      "image/jpeg" = [ "org.gnome.Loupe.desktop" ];
+      "image/png" = [ "org.gnome.Loupe.desktop" ];
+      "image/gif" = [ "org.gnome.Loupe.desktop" ];
+      "image/webp" = [ "org.gnome.Loupe.desktop" ];
+      "image/tiff" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-tga" = [ "org.gnome.Loupe.desktop" ];
+      "image/vnd-ms.dds" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-dds" = [ "org.gnome.Loupe.desktop" ];
+      "image/bmp" = [ "org.gnome.Loupe.desktop" ];
+      "image/vnd.microsoft.icon" = [ "org.gnome.Loupe.desktop" ];
+      "image/vnd.radiance" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-exr" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-portable-bitmap" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-portable-graymap" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-portable-pixmap" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-portable-anymap" = [ "org.gnome.Loupe.desktop" ];
+      "image/x-qoi" = [ "org.gnome.Loupe.desktop" ];
+      "image/qoi" = [ "org.gnome.Loupe.desktop" ];
+      "image/svg+xml" = [ "org.gnome.Loupe.desktop" ];
+      "image/svg+xml-compressed" = [ "org.gnome.Loupe.desktop" ];
+      "image/avif" = [ "org.gnome.Loupe.desktop" ];
+      "image/heic" = [ "org.gnome.Loupe.desktop" ];
+      "image/jxl" = [ "org.gnome.Loupe.desktop" ];
     };
   };
 
@@ -210,6 +233,16 @@
     enable = true;
     watchers = {
       aw-watcher-window-wayland = { package = pkgs.aw-watcher-window-wayland; };
+    };
+  };
+
+  systemd.user.services."activitywatch-watcher-aw-watcher-window-wayland" = {
+    # On login this unit can start before sway exposes a Wayland socket.
+    # Retrying prevents the watcher from staying dead until manual restart.
+    Unit.StartLimitIntervalSec = 0;
+    Service = {
+      Restart = "on-failure";
+      RestartSec = 10;
     };
   };
 

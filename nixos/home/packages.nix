@@ -15,9 +15,11 @@ in {
 
     pkgs.yaru-theme
     pkgs.libcanberra-gtk3
+
     llm-agents-pkgs.claude-code
     llm-agents-pkgs.claude-code-acp
     llm-agents-pkgs.codex
+    llm-agents-pkgs.codex-acp
 
     (pkgs.google-cloud-sdk.withExtraComponents
       [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
@@ -116,5 +118,7 @@ in {
     pkgs.scrcpy
     pkgs.android-tools
     pkgs.libdecor
+    pkgs.loupe
+    pkgs.nautilus
   ];
 }

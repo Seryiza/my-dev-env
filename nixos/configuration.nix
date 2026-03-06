@@ -16,7 +16,7 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # >= 6.15 (audio, wifi)
-  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_18;
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_19;
   boot.kernelParams = [ ];
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.supportedFilesystems = [ "ntfs" ];
@@ -34,6 +34,7 @@
   boot.loader.efi.efiSysMountPoint = "/boot";
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "nodev";
+  boot.loader.grub.configurationLimit = 5;
   boot.loader.grub.useOSProber = true;
   boot.loader.grub.efiSupport = true;
 
