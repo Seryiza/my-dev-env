@@ -161,11 +161,14 @@ in {
 
   programs.neovim = {
     enable = true;
+    withPython3 = true;
+    withRuby = true;
     plugins = [ pkgs.vimPlugins.packer-nvim ];
   };
 
   programs.firefox = {
     enable = true;
+    configPath = ".mozilla/firefox";
     policies = {
       AppAutoUpdate = false;
       DisableAppUpdate = true;

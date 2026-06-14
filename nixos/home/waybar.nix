@@ -2,7 +2,7 @@
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    systemd.target = "sway-session.target";
+    systemd.targets = [ "sway-session.target" ];
 
     settings = [{
       spacing = 0;

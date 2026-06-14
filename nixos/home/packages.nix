@@ -123,7 +123,7 @@ in {
     pkgs.iw
     pkgs.brightnessctl
     pkgs.drawing
-    pkgs.xfce.thunar
+    pkgs.thunar
     pkgs.nemo-with-extensions
     pkgs.clojure-lsp
     pkgs.lua-language-server
@@ -146,7 +146,7 @@ in {
     pkgs.rocmPackages.rocm-smi
     pkgs.evtest
     pkgs.chntpw
-    pkgs.nixfmt-classic
+    pkgs.nixfmt
     inputs.zen-browser.packages.${system}.default
     inputs.rep.packages.${system}.default
     pkgs.wev
