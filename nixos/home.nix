@@ -138,6 +138,12 @@ in {
       force = true;
     };
 
+    ".local/bin/waybar-org-current-clock" = {
+      source = ../scripts/waybar-org-current-clock;
+      executable = true;
+      force = true;
+    };
+
     # ".npmrc".text = ''
     #   registry=https://registry.npmjs.org/
     #   prefix=${config.home.homeDirectory}/.cache/npm/global

@@ -152,7 +152,8 @@ label:focus {
     color: #000000;
 }
 
-#custom-org_timeblock.no-timeblock {
+#custom-org_timeblock.no-timeblock,
+#custom-org_clock.no-clock {
     color: #000000;
     background-color: #ffffff;
 }

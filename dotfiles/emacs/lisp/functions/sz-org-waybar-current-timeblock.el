@@ -35,7 +35,6 @@
                                  e)))))))))
       nil)))
 
-(defun sz/org-waybar-current-timeblock ()
-  "Return the active Org clock heading, current timeblock heading, or nil."
-  (or (sz/org-waybar-current-clock)
-      (sz/org-waybar-current-scheduled-timeblock)))
+(defun sz/org-waybar-current-clocking-todo ()
+  "Return the active Org clock TODO heading, or nil."
+  (sz/org-waybar-current-clock))
