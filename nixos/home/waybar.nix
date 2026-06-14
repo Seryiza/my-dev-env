@@ -40,6 +40,32 @@
           format = "{capacity}% battery";
           format-full = "";
         };
+        "clock" = {
+          interval = 60;
+          format = "{:%d %b %H:%M}";
+          tooltip = true;
+          tooltip-format = "{:%A, %d %B %Y}\n<tt><small>{calendar}</small></tt>";
+
+          calendar = {
+            mode = "month";
+            weeks-pos = "right";
+            on-scroll = 1;
+            format = {
+              months = "<span color='#ffead3'><b>{}</b></span>";
+              days = "<span color='#ecc6d9'><b>{}</b></span>";
+              weeks = "<span color='#99ffdd'><b>W{}</b></span>";
+              weekdays = "<span color='#ffcc66'><b>{}</b></span>";
+              today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+            };
+          };
+
+          actions = {
+            on-click = "shift_reset";
+            on-click-right = "mode";
+            on-scroll-up = "shift_up";
+            on-scroll-down = "shift_down";
+          };
+        };
         "network" = {
           # Waybar does not expose arbitrary numeric format conditions for
           # signalStrength. A five-entry format-icons table maps to 20-point
