@@ -63,10 +63,11 @@
           {ifname}: {ipaddr}/{cidr}'';
       };
       "wireplumber" = {
-        format = "{volume}%{format_source} audio";
-        format-muted = "MUTED{format_source}";
-        format-source = " MIC";
+        format = "{volume}% {node_name}{format_source}";
+        format-muted = "MUTED {node_name}{format_source}";
+        format-source = " +MIC";
         format-source-muted = "";
+        tooltip-format = "{node_name}: {volume}%{format_source}";
       };
     }];
 
