@@ -47,10 +47,20 @@
         format-full = "";
       };
       "network" = {
-        format-wifi = "{signalStrength}% wlan";
+        # Waybar does not expose arbitrary numeric format conditions for
+        # signalStrength. A five-entry format-icons table maps to 20-point
+        # buckets, so only the 0..19% bucket renders text; empty buckets hide
+        # the module.
+        format = "";
+        format-wifi = "{icon}";
+        format-icons = [ "<20% wlan" "" "" "" "" ];
+        format-ethernet = "";
         format-linked = "{ifname} (No IP)";
         format-disconnected = "Disconnected";
-        format-alt = "{ifname}: {ipaddr}/{cidr}";
+        format-disabled = "Wi-Fi disabled";
+        tooltip-format-wifi = ''
+          {essid} ({signalStrength}%)
+          {ifname}: {ipaddr}/{cidr}'';
       };
       "wireplumber" = {
         format = "{volume}%{format_source} audio";
