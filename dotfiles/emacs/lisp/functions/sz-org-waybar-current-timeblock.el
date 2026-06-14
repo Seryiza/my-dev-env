@@ -12,7 +12,7 @@
     (substring-no-properties org-clock-current-task)))
 
 (defun sz/org-waybar-current-scheduled-timeblock ()
-  "Return heading of the scheduled timeblock covering now, or nil."
+  "Return scheduled timeblock as \"<heading> -> <end-time>\", or nil."
   (let* ((now  (current-time))
          (date (format-time-string "%Y-%m-%d" now))
          (hm   (format-time-string "%H:%M" now))
@@ -23,11 +23,16 @@
           (org-with-wide-buffer
            (goto-char (point-min))
            (while (re-search-forward re nil t)
-             (let ((s (match-string 1)) (e (match-string 2)))
+             (let ((s (match-string-no-properties 1))
+                   (e (match-string-no-properties 2)))
                (when (and (not (string< hm s))  ; s <= hm
                           (string< hm e))       ; hm < e
                  (org-back-to-heading t)
-                 (throw 'done (substring-no-properties (org-get-heading t t t t)))))))))
+                 (throw 'done
+                        (substring-no-properties
+                         (format "%s -> %s"
+                                 (substring-no-properties (org-get-heading t t t t))
+                                 e)))))))))
       nil)))
 
 (defun sz/org-waybar-current-timeblock ()
