@@ -8,9 +8,14 @@
       {
         name = "top";
         position = "top";
+        height = 20;
         spacing = 0;
-        modules-left =
-          [ "sway/workspaces" "sway/mode" "sway/scratchpad" "sway/window" ];
+        modules-left = [
+          "sway/workspaces"
+          "sway/mode"
+          "sway/scratchpad"
+          "sway/window"
+        ];
         modules-center = [ ];
         modules-right = [
           "privacy"
@@ -25,13 +30,14 @@
 
         "custom/wireguard" = {
           format = "{text}";
-          exec =
-            "${config.home.homeDirectory}/.local/bin/waybar-wireguard.sh short";
+          exec = "${config.home.homeDirectory}/.local/bin/waybar-wireguard.sh short";
           interval = 15;
           return-type = "json";
         };
 
-        "sway/workspaces" = { disable-scroll = true; };
+        "sway/workspaces" = {
+          disable-scroll = true;
+        };
         "privacy" = {
           icon-size = 12;
           icon-spacing = 0;
@@ -44,7 +50,14 @@
           interval = 60;
           format = "{:%d %b %H:%M}";
           tooltip = true;
-          tooltip-format = "{:%A, %d %B %Y}\n<tt><small>{calendar}</small></tt>";
+          tooltip-format = "{:%A, %d %B %Y}\n\n{tz_list}\n\n<tt><small>{calendar}</small></tt>";
+          timezone-tooltip-format = "{:%Z: %H:%M}";
+          timezones = [
+            "Europe/Copenhagen"
+            "Asia/Sakhalin"
+            "Europe/Moscow"
+            "Etc/UTC"
+          ];
 
           calendar = {
             mode = "month";
@@ -62,6 +75,8 @@
           actions = {
             on-click = "shift_reset";
             on-click-right = "mode";
+            on-click-forward = "tz_up";
+            on-click-backward = "tz_down";
             on-scroll-up = "shift_up";
             on-scroll-down = "shift_down";
           };
@@ -73,7 +88,13 @@
           # the module.
           format = "";
           format-wifi = "{icon}";
-          format-icons = [ "<20% wlan" "" "" "" "" ];
+          format-icons = [
+            "<20% wlan"
+            ""
+            ""
+            ""
+            ""
+          ];
           format-ethernet = "";
           format-linked = "{ifname} (No IP)";
           format-disconnected = "Disconnected";
@@ -94,8 +115,12 @@
       {
         name = "bottom";
         position = "bottom";
+        height = 20;
         spacing = 0;
-        modules-left = [ "custom/org_timeblock" "custom/org_clock" ];
+        modules-left = [
+          "custom/org_timeblock"
+          "custom/org_clock"
+        ];
         modules-center = [ ];
         modules-right = [ ];
 
