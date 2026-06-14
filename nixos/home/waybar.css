@@ -152,6 +152,11 @@ label:focus {
     color: #000000;
 }
 
+#custom-org_timeblock.no-timeblock {
+    color: #000000;
+    background-color: #ffffff;
+}
+
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
     background-color: #eb4d4b;

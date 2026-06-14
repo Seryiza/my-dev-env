@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+SYSTEMCTL="${SYSTEMCTL:-/run/current-system/sw/bin/systemctl}"
+EMACSCLIENT="${EMACSCLIENT:-/run/current-system/sw/bin/emacsclient}"
+EMACS_SERVICE="${EMACS_SERVICE:-emacs.service}"
+PLACEHOLDER="${PLACEHOLDER:-no timeblock}"
+
+# Only query the Emacs daemon managed by the systemd user service.
+# Do not pass emacsclient -a/--alternate-editor: that would spawn a new Emacs
+# daemon when the service/socket is unavailable.
+if ! "$SYSTEMCTL" --user is-active --quiet "$EMACS_SERVICE" 2>/dev/null; then
+  printf '\n\n\n'
+  exit 0
+fi
+
+if [ -n "${EMACS_SOCKET:-}" ]; then
+  if ! out="$("$EMACSCLIENT" --socket-name="$EMACS_SOCKET" --eval '(sz/org-waybar-current-timeblock)' 2>/dev/null)"; then
+    printf '\n\n\n'
+    exit 0
+  fi
+else
+  if ! out="$("$EMACSCLIENT" --eval '(sz/org-waybar-current-timeblock)' 2>/dev/null)"; then
+    printf '\n\n\n'
+    exit 0
+  fi
+fi
+
+case "$out" in
+  nil|"") printf '%s\n\n%s\n' "$PLACEHOLDER" "no-timeblock"; exit 0 ;;
+  \"*\") out=${out#\"}; out=${out%\"} ;;
+esac
+
+printf '%b\n\n\n' "$out"

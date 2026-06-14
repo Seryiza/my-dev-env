@@ -132,6 +132,12 @@ in {
     ".emacs.d".source = config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/code/my-dev-env/dotfiles/emacs";
 
+    ".local/bin/waybar-org-timeblock" = {
+      source = ../scripts/waybar-org-timeblock;
+      executable = true;
+      force = true;
+    };
+
     # ".npmrc".text = ''
     #   registry=https://registry.npmjs.org/
     #   prefix=${config.home.homeDirectory}/.cache/npm/global
