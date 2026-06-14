@@ -1,5 +1,6 @@
 /passwords.yml
 /vault-password
+.codex
 
 /.vagrant
 /*.log
@@ -18,6 +19,8 @@
 /dotfiles/emacs/projectile-bookmarks.eld
 /dotfiles/emacs/package-quickstart.el
 /dotfiles/emacs/projects
+/dotfiles/emacs/persist
+/dotfiles/emacs/recentf
 /dotfiles/emacs/tramp
 /dotfiles/emacs/url
 /dotfiles/emacs/bookmarks

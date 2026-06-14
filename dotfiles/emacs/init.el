@@ -14,17 +14,26 @@
         "\\`mu4e\\'"))
 
 (setq custom-file (locate-user-emacs-file "custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file nil t))
+(load custom-file nil t)
 
 (add-to-list 'load-path (locate-user-emacs-file "lisp"))
 
 (let* ((dir (locate-user-emacs-file "lisp"))
+       (functions-dir (expand-file-name "functions" dir))
        (files '("sz-base.el"
+                "sz-theme.el"
                 "sz-meow.el"
+                "sz-eat.el"
                 "sz-alerts.el"
                 "sz-org.el"
                 "sz-telega.el"
-                "sz-external-functions.el")))
+                "sz-mode-line.el")))
+
+  ;; Load my emacs modules
   (dolist (file files)
-    (load (expand-file-name file dir) nil 'nomessage)))
+    (load (expand-file-name file dir) nil 'nomessage))
+
+  ;; Load elisp commands and functions
+  (when (file-directory-p functions-dir)
+    (dolist (file (directory-files functions-dir t "\\.el\\'"))
+      (load file nil 'nomessage))))

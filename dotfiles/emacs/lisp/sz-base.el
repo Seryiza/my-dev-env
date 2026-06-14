@@ -20,6 +20,9 @@
 ;; Move through windows with Ctrl-<arrow keys>
 (windmove-default-keybindings 'control)
 
+(setopt use-short-answers t)
+(setopt use-dialog-box nil)
+
 (setopt sentence-end-double-space nil)
 
 ;; Make right-click do something sensible
@@ -79,17 +82,25 @@
 ;;   (pixel-scroll-precision-mode))
 
 (unless (display-graphic-p)
+  (require 'term/xterm)
+  ;; Force modified special keys like S-RET to be reported in TTY Emacs.
+  (setq xterm-extra-capabilities
+        '(modifyOtherKeys reportBackground getSelection setSelection))
+  (when (eq (terminal-parameter nil 'terminal-initted) 'terminal-init-xterm)
+    (xterm--init-modify-other-keys))
   (xterm-mouse-mode 1))
 
 (setopt display-line-numbers-width 3)
 
 (setopt display-time-format "%a %F %T")
 (setopt display-time-interval 1)
-(display-time-mode)
+(display-time-mode -1)
 
 ;; Default frame configuration
 (setq frame-resize-pixelwise t)
 (tool-bar-mode -1) ; All these tools are in the menu-bar anyway
+(menu-bar-mode -1)
+
 (setq default-frame-alist '((fullscreen . maximized)
 
                             ;; You can turn off scroll bars by uncommenting these lines:
@@ -98,6 +109,8 @@
                             ))
 
 (defconst sz/default-font-family "Iosevka")
+;; (defconst sz/default-font-family "Iosevka Slab")
+;; (defconst sz/default-font-family "Go Mono")
 (defconst sz/default-font-size 12)
 
 (defun sz/apply-default-font (&optional frame)
@@ -120,6 +133,32 @@
   (load user-init-file nil t t)   ; noerror=nil, nomessage=t, nosuffix=t
   (message "Reloaded %s" user-init-file))
 
+(defun sz/move-or-switch-tab (direction)
+  "Move to window in DIRECTION, or switch tabs when none exists.
+An active minibuffer counts as a window target so the movement keys
+can move focus back to minibuffer input."
+  (let ((target (window-in-direction direction)))
+    (if target
+      (select-window target)
+
+      (if (memq direction '(right below))
+        (tab-next)
+        (tab-previous)))))
+
+(defun sz/below-or-tab-next ()
+  (interactive)
+  (sz/move-or-switch-tab 'below))
+
+(defun sz/above-or-tab-previous ()
+  (interactive)
+  (sz/move-or-switch-tab 'above))
+
+(define-obsolete-function-alias
+  'sz/right-or-tab-next 'sz/below-or-tab-next "2026-05-13")
+
+(define-obsolete-function-alias
+  'sz/left-or-tab-previous 'sz/above-or-tab-previous "2026-05-13")
+
 ;; === Packages
 
 ;; Dired is built-in, so use :ensure nil.
@@ -130,16 +169,6 @@
   :config
   ;; Must include "-l" per the manual.
   (setq dired-listing-switches "-al --group-directories-first"))
-
-(use-package modus-themes
-  :ensure t
-  :pin gnu
-  :hook (after-make-frame-functions . (lambda (_f)
-                                        (when (daemonp)
-                                          (enable-theme 'modus-operandi-deuteranopia))))
-  :config
-  (setq shr-use-fonts nil)
-  (load-theme 'modus-operandi-deuteranopia :no-confirm))
 
 (use-package consult
   :ensure t
@@ -215,22 +244,6 @@
     (keymap-set eshell-mode-map "C-r" 'consult-history))
   :hook (eshell-mode . bedrock/setup-eshell))
 
-(defun sz/eat-hide-emacs-cursor ()
-  (setq-local cursor-type nil
-              cursor-in-non-selected-windows nil))
-
-(defun sz/eat-hide-emacs-cursor-enable ()
-  (sz/eat-hide-emacs-cursor)
-  (add-hook 'post-command-hook #'sz/eat-hide-emacs-cursor nil t))
-
-(use-package eat
-  :ensure t
-  ;; :hook (eat-mode . sz/eat-hide-emacs-cursor-enable)
-  :custom (eat-term-name "xterm")
-  :config
-  (eat-eshell-mode)                 ; use Eat to handle term codes in program output
-  (eat-eshell-visual-command-mode)) ; commands like less will be handled by Eat
-
 (use-package orderless
   :ensure t
   :custom
@@ -246,6 +259,7 @@
   :hook
   ((before-save . whitespace-cleanup)
    (prog-mode . electric-pair-mode)
+   (prog-mode . eldoc-mode)
    (text-mode . hl-line-mode)
    (prog-mode . hl-line-mode)
    (text-mode . display-line-numbers-mode)
@@ -253,10 +267,23 @@
    (text-mode . visual-line-mode)
    (after-make-frame-functions . sz/apply-default-font))
 
+  :bind
+  (:map emacs-lisp-mode-map
+    ("C-c C-e" . nil)
+    ("C-c C-e C-e" . eval-last-sexp)
+    ("C-c C-e C-b" . eval-buffer)
+    ("C-c C-e C-f" . eval-defun))
+
   :config
   (setq show-paren-delay 0)
   (show-paren-mode 1)
   (global-eldoc-mode -1)
+
+  ;; (setq tab-bar-auto-width t)
+  ;; (setq tab-bar-auto-width-max '(200 16))
+  ;; (setq tab-bar-close-button-show nil)
+  ;; (setq tab-bar-tab-hints nil)
+  ;; (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
 
   (setopt treesit-language-source-alist
           '((css "https://github.com/tree-sitter/tree-sitter-css")
@@ -296,6 +323,11 @@
 (use-package json-mode
   :ensure t)
 
+(use-package js
+  :ensure nil
+  :custom
+  (js-indent-level 2))
+
 (use-package typescript-ts-mode
   :ensure nil
   :mode (("\\.mts\\'" . typescript-ts-mode)
@@ -315,8 +347,9 @@
   :hook (makefile-mode . (lambda () (setq indent-tabs-mode t))))
 
 (use-package eglot
-  :hook ((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
-         . eglot-ensure)
+  :hook (((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
+          . eglot-ensure)
+         (eglot-managed-mode . eglot-inlay-hints-mode))
   :custom
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
@@ -324,10 +357,14 @@
   :config
   (fset #'jsonrpc--log-event #'ignore)
   (add-to-list 'eglot-server-programs
-               '((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode)
-                 . (eglot-alternatives
-                    '("vtsls" "--stdio")
-                    '("typescript-language-server" "--stdio")))))
+               `(((js-mode :language-id "javascript")
+                  (js-ts-mode :language-id "javascript")
+                  (tsx-ts-mode :language-id "typescriptreact")
+                  (typescript-ts-mode :language-id "typescript")
+                  (typescript-mode :language-id "typescript"))
+                 . ,(eglot-alternatives
+                     '(("vtsls" "--stdio")
+                       ("typescript-language-server" "--stdio"))))))
 
 (use-package rg
   :ensure t)
@@ -360,15 +397,22 @@
 (use-package inheritenv
   :vc (:url "https://github.com/purcell/inheritenv" :rev :newest))
 
-(use-package claude-code
-  :ensure t
-  :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
-  :config (claude-code-mode)
-  :bind-keymap ("C-c c" . claude-code-command-map)
-  :bind (:repeat-map sz/claude-code-map ("M" . claude-code-cycle-mode)))
+;; (use-package claude-code
+;;   :ensure t
+;;   :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
+;;   :config (claude-code-mode)
+;;   :bind-keymap ("C-c c" . claude-code-command-map)
+;;   :bind (:repeat-map sz/claude-code-map ("M" . claude-code-cycle-mode)))
 
 (use-package elfeed
-  :ensure t)
+  :ensure t
+  :config
+  (defun sz/elfeed-mark-auto-read-tags-read (entry)
+    "Mark ENTRY as read when it has the `hide' tag."
+    (when (elfeed-tagged-p 'hide entry)
+      (elfeed-untag entry 'unread)))
+
+  (add-hook 'elfeed-new-entry-hook #'sz/elfeed-mark-auto-read-tags-read t))
 
 (use-package elfeed-org
   :ensure t
@@ -383,6 +427,7 @@
   (mu4e-get-mail-command "true")
 
   :config
+  (mu4e-modeline-mode -1)
   (setq mu4e-bookmarks
         (cons '(:name "Inbox"
                 :query "maildir:/fastmail/INBOX"
@@ -408,9 +453,7 @@
 (use-package windmove
   :ensure nil
   :bind* (("M-h" . windmove-left)
-          ("M-l" . windmove-right)
-          ("M-j" . windmove-down)
-          ("M-k" . windmove-up)))
+          ("M-l" . windmove-right)))
 
 (use-package agent-shell
   :ensure t)
@@ -474,3 +517,48 @@
   :commands (vterm vterm-other-window)
   :config
   (add-to-list 'vterm-keymap-exceptions "C-;"))
+
+;; (use-package activities
+;;   :ensure t
+;;   :init
+;;   (activities-mode)
+;;   (activities-tabs-mode)
+;;   (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+
+;;   :bind
+;;   (("C-x C-a C-n" . activities-new)
+;;    ("C-x C-a C-d" . activities-define)
+;;    ("C-x C-a C-a" . activities-resume)
+;;    ("C-x C-a C-s" . activities-suspend)
+;;    ("C-x C-a C-k" . activities-kill)
+;;    ("C-x C-a RET" . activities-switch)
+;;    ("C-x C-a b" . activities-switch-buffer)
+;;    ("C-x C-a g" . activities-revert)
+;;    ("C-x C-a l" . activities-list)))
+
+(use-package vtab
+  :ensure nil
+  :load-path "~/code/vtab"
+  :demand t
+
+  :bind*
+  (("M-j" . sz/below-or-tab-next)
+   ("M-k" . sz/above-or-tab-previous)
+   ("M-n" . tab-new)
+   ("M-u" . tab-close))
+
+  :custom
+  ;; Keep Emacs' horizontal tab bar hidden after commands like `tab-new'.
+  (tab-bar-show nil)
+  (vtab-window-width 30)
+  (vtab-hide-cursor t)
+  (vtab-hide-mode-line nil)
+  (vtab-hide-scroll-bars nil)
+  (vtab-active-fill-width t)
+
+  :config
+  (vtab-mode 1))
+
+(use-package all-the-icons
+  :ensure t
+  :if (display-graphic-p))

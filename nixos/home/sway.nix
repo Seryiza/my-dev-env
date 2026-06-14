@@ -169,21 +169,21 @@
       colors = {
         focused = {
           background = "#323232";
-          border = "#323232";
+          border = "#000000";
           childBorder = "#323232";
           indicator = "#323232";
           text = "#FFFFFF";
         };
         unfocused = {
           background = "#FFFFFF";
-          border = "#929292";
+          border = "#000000";
           childBorder = "#929292";
           indicator = "#929292";
           text = "#444444";
         };
         focusedInactive = {
           background = "#929292";
-          border = "#b4b4b4";
+          border = "#000000";
           childBorder = "#929292";
           indicator = "#929292";
           text = "#FFFFFF";
@@ -196,7 +196,8 @@
         top = 0;
         bottom = 0;
         inner = 5;
-        smartGaps = false;
+        smartGaps = true;
+        smartBorders = "on";
       };
 
       input = {

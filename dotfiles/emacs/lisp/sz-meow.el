@@ -36,15 +36,6 @@
   (meow-mode -1)
   (sz/meow-keypad-only-mode 1))
 
-(defun sz/meow-handle-eat-eshell-mode ()
-  "Enable terminal passthrough when `eat-eshell-mode' is active."
-  (if (bound-and-true-p eat-eshell-mode)
-      (progn
-        (meow-mode 1)
-        (sz/meow-keypad-only-mode -1)
-        (meow-terminal-mode 1))
-    (sz/meow-disable-modal-keep-keypad)))
-
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
@@ -157,50 +148,6 @@
   (add-hook 'term-mode-hook #'sz/meow-term-enable)
   (add-hook 'term-line-mode-hook #'sz/meow-term-line)
   (add-hook 'term-char-mode-hook #'sz/meow-term-char)
-
-  (dolist (hook '(shell-mode-hook
-                  eshell-mode-hook))
-    (add-hook hook #'sz/meow-disable-modal-keep-keypad))
-  (add-hook 'eat-eshell-mode-hook #'sz/meow-handle-eat-eshell-mode)
-
-  (meow-setup-indicator)
-
-  (defvar my/meow-terminal-keymap (make-sparse-keymap)
-    "Meow state keymap for terminal passthrough.")
-
-  (defvar my/meow-terminal-leader-keymap
-    (let ((map (make-sparse-keymap)))
-      (set-keymap-parent map (or (alist-get 'leader meow-keymap-alist)
-                                 mode-specific-map))
-      (define-key map (kbd "SPC") #'meow-keypad)
-      map)
-    "One-shot Meow leader map for terminal buffers.")
-
-  (defun my/meow-terminal-leader ()
-    "Interpret the next key using Meow leader bindings in terminal buffers."
-    (interactive)
-    (setq-local meow--indicator (propertize " TERM->MEOW " 'face 'meow-keypad-indicator))
-    (force-mode-line-update)
-    (set-transient-map
-     my/meow-terminal-leader-keymap
-     nil
-     (lambda ()
-       (meow--update-indicator)
-       (force-mode-line-update))))
-
-  (meow-define-state terminal
-    "Passthrough Meow state for terminal-like buffers (leader only)."
-    :lighter " [TM]"
-    :keymap my/meow-terminal-keymap)
-
-  ;; Only bind the leader trigger in this state
-  (meow-define-keys 'terminal
-    '("C-;" . my/meow-terminal-leader))
-
-  ;; Start terminal buffers in the custom passthrough state.
-  (dolist (mode '(vterm-mode
-                  eat-mode))
-    (add-to-list 'meow-mode-state-list (cons mode 'terminal)))
 
   ;; Agent Shell: keep full Meow modal behavior and move conflicting
   ;; single-key commands under an explicit prefix map.

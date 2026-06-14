@@ -1,10 +1,15 @@
 ;; === Org mode
 
 (require 'sz-alerts)
+(require 'subr-x)
 
 (setq org-directory "~/org")
-(setq org-agenda-files '("~/org"))
 (setq org-archive-location "~/org/archive/%s::")
+(setq org-agenda-files '("~/org"
+                         "~/org/areas"
+                         "~/org/projects"))
+
+(defconst sz/org-projects-directory "~/org/projects")
 
 (defun sz/meow-org-promote-subtree ()
   (interactive)
@@ -22,20 +27,184 @@
   (interactive)
   (when (derived-mode-p 'org-mode) (org-move-subtree-up)))
 
+(defun sz/org-clipboard-has-image-p ()
+  "Return non-nil when the GUI clipboard has image data."
+  (when (and (display-graphic-p)
+             (fboundp 'gui-get-selection))
+    (let ((targets (ignore-errors (gui-get-selection 'CLIPBOARD 'TARGETS)))
+          found)
+      (when (vectorp targets)
+        (setq targets (append targets nil)))
+      (while (and (consp targets) (not found))
+        (let ((target (car targets)))
+          (setq found
+                (and (symbolp target)
+                     (string-match-p "\\`image/" (symbol-name target)))))
+        (setq targets (cdr targets)))
+      found)))
+
+(defun sz/org-yank-or-yank-media (&optional arg)
+  "Paste a clipboard image in Org, otherwise yank text.
+ARG is passed through to `yank' when the clipboard does not contain image
+data."
+  (interactive "*P")
+  (if (and (derived-mode-p 'org-mode)
+           (fboundp 'yank-media)
+           (sz/org-clipboard-has-image-p))
+      (let ((beg (point)))
+        (call-interactively #'yank-media)
+        (org-display-inline-images nil t beg (point)))
+    (yank arg)))
+
+(defun sz/org-project-files ()
+  "Return direct Org files from `sz/org-projects-directory'."
+  (when (file-directory-p sz/org-projects-directory)
+    (directory-files sz/org-projects-directory t "\\.org\\'")))
+
+(defun sz/org-project-top3-todo-blocks ()
+  "Return agenda blocks with up to 3 TODO items per project file."
+  (mapcar
+   (lambda (file)
+     `(alltodo ""
+               ((org-agenda-files '(,file))
+                (org-agenda-overriding-header ,(file-name-base file))
+                (org-agenda-max-entries 3)
+                (org-agenda-prefix-format "%i %s "))))
+   (sz/org-project-files)))
+
+(defun sz/org-entry-end-position ()
+  "Return the end position of the current Org entry."
+  (save-excursion
+    (cond
+     ((ignore-errors (org-back-to-heading t) t)
+      (if (outline-next-heading)
+          (point)
+        (point-max)))
+     ((org-before-first-heading-p)
+      (if (re-search-forward org-outline-regexp-bol nil t)
+          (match-beginning 0)
+        (point-max)))
+     (t
+      (point-max)))))
+
+(defun sz/org-agenda-skip-active-tasks ()
+  "Skip current entry when it is an active task state used elsewhere."
+  (unless (org-before-first-heading-p)
+    (org-agenda-skip-entry-if 'todo '("STRT" "NEXT"))))
+
+(defun sz/org-timestamp-is-today-p (timestamp)
+  "Return non-nil when TIMESTAMP falls on the current day."
+  (when timestamp
+    (let ((today (decode-time (current-time)))
+          (date (decode-time (org-timestamp-to-time timestamp))))
+      (and (= (nth 3 date) (nth 3 today))
+           (= (nth 4 date) (nth 4 today))
+           (= (nth 5 date) (nth 5 today))))))
+
+(defun sz/org-entry-scheduled-timestamp ()
+  "Return the current entry scheduled timestamp object, if any."
+  (save-excursion
+    (when (ignore-errors (org-back-to-heading t) t)
+      (when-let ((scheduled (org-entry-get nil "SCHEDULED")))
+        (org-timestamp-from-string scheduled)))))
+
+(defun sz/org-entry-has-tag-p (tag)
+  "Return non-nil when the current entry has TAG."
+  (save-excursion
+    (when (ignore-errors (org-back-to-heading t) t)
+      (member tag (org-get-tags nil t)))))
+
+(defun sz/org-entry-has-timed-timestamp-today-p ()
+  "Return non-nil when the current entry has a timed timestamp today."
+  (save-excursion
+    (when (ignore-errors (org-back-to-heading t) t)
+      (let ((end (sz/org-entry-end-position))
+            found)
+        (while (and (not found)
+                    (re-search-forward org-ts-regexp-both end t))
+          (when-let ((timestamp (org-timestamp-from-string (match-string 0))))
+            (setq found
+                  (and (sz/org-timestamp-is-today-p timestamp)
+                       (org-timestamp-has-time-p timestamp)))))
+        found))))
+
+(defun sz/org-agenda-skip-daily-timeline ()
+  "Skip agenda entries that should not appear in the daily timeline."
+  (or (sz/org-agenda-skip-active-tasks)
+      (when (or (sz/org-entry-has-tag-p "habit")
+                (not (sz/org-entry-has-timed-timestamp-today-p)))
+        (sz/org-entry-end-position))))
+
+(defun sz/org-agenda-skip-daily-scheduled ()
+  "Skip agenda entries that are not untimed scheduled items for today."
+  (or (sz/org-agenda-skip-active-tasks)
+      (let ((scheduled (sz/org-entry-scheduled-timestamp)))
+        (when (or (sz/org-entry-has-tag-p "habit")
+                  (not (sz/org-timestamp-is-today-p scheduled))
+                  (org-timestamp-has-time-p scheduled))
+          (sz/org-entry-end-position)))))
+
+(defun sz/org-agenda-skip-daily-habit ()
+  "Skip agenda entries that are not scheduled habits for today."
+  (or (sz/org-agenda-skip-active-tasks)
+      (let ((scheduled (sz/org-entry-scheduled-timestamp)))
+        (when (or (not (sz/org-entry-has-tag-p "habit"))
+                  (not (sz/org-timestamp-is-today-p scheduled)))
+          (sz/org-entry-end-position)))))
+
+(defun sz/org-daily-agenda-blocks ()
+  "Return agenda blocks for the daily dashboard views."
+  `((agenda ""
+            ((org-agenda-span 1)
+             (org-agenda-start-day "0d")
+             (org-agenda-use-time-grid t)
+             (org-agenda-skip-scheduled-if-done t)
+             (org-agenda-skip-deadline-if-done t)
+             (org-agenda-skip-timestamp-if-done t)
+             (org-agenda-time-grid '((daily today require-timed)
+                                     ()
+                                     "......" "----------------"))
+             (org-agenda-prefix-format
+              '((agenda . " %-15:c%-11t [%-4e] %s")))))
+    (todo "STRT"
+          ((org-agenda-overriding-header "STRT")
+           (org-agenda-skip-function nil)))
+    (todo "NEXT"
+          ((org-agenda-overriding-header "NEXT")
+           (org-agenda-skip-function nil)))
+    (todo "WAIT"
+          ((org-agenda-overriding-header "WAIT")
+           (org-agenda-skip-function nil)))))
+
 (use-package org
+  :ensure t
+  :pin gnu
+
   :hook
   ((org-mode . visual-line-mode)
    (org-agenda-mode . hl-line-mode)
-   (org-mode . org-indent-mode))
+   (org-mode . org-indent-mode)
+   (org-mode . howm-mode))
+
   :bind
-  ("C-c j h" . org-agenda)
-  ("C-c j j" . org-capture)
+  (("C-c j a" . org-agenda)
+   ("C-c j c" . org-capture)
+   ("C-c j b" . sz/org-capture-timeblocks-loop)
+
+   :map org-mode-map
+   ("C-y" . sz/org-yank-or-yank-media)
+   ("C-c C-e" . nil)
+   ("C-c C-e C-e" . org-babel-execute-src-block))
+
   :config
+  (add-to-list 'org-modules 'org-habit)
+  (require 'org-habit)
+
   ;; Make org-open-at-point follow file links in the same window
   (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 
   ;; TODO: debug it with my org files (CANX state?)
-  (setq org-element-use-cache nil)
+  ;; (setq org-element-use-cache nil)
 
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "STRT(s!)" "WAIT(w!)" "|" "DONE(d)" "CANX(c)")))
@@ -50,8 +219,13 @@
 
   (setq org-image-actual-width 400)
   (setq org-startup-with-inline-images t)
+  (setq org-yank-image-save-method (expand-file-name "images/" org-directory))
   (setq org-tags-column 40)
   (setq org-confirm-babel-evaluate nil)
+
+  (setq org-habit-following-days 1)
+  (setq org-habit-preceding-days 3)
+  (setq org-habit-graph-column 60)
 
   (setq org-blank-before-new-entry
         '((heading . nil)
@@ -61,30 +235,48 @@
   (setq org-indent-indentation-per-level 2)
 
   (setopt org-capture-templates
-          '(("i" "inbox item" item (file "inbox.org")
+          '(("i" "inbox item" item (file+olp "inbox.org" "Inbox")
              "%?\n%i")
 
-            ("m" "my todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
+            ("t" "TODOs")
+            ("tt" "Personal" entry (file+olp "areas/personal.org" "Personal")
              "* TODO %?")
 
-            ("t" "today todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
+            ("tc" "Clocking" entry (file+olp "areas/personal.org" "Personal")
+             "* STRT %^{what}"
+             :clock-in t
+             :clock-keep t
+             :immediate-finish t)
+
+            ("to" "Today" entry (file+olp "areas/personal.org" "Personal")
              "* TODO %?\nSCHEDULED: %t")
 
-            ("n" "NEXT todo" entry (file+olp "projects.org" "Areas" "Personal" "Tasks")
+            ("tn" "NEXT" entry (file+olp "areas/personal.org" "Personal")
              "* NEXT %?")
 
-            ("b" "timeblock" entry (file+olp "projects.org" "Areas" "Personal" "Timeblocks")
+            ("b" "Timeblock")
+
+            ("bb" "timeblock" entry (file+olp "areas/personal.org" "Personal")
              "* %^{TIMEBLOCK}  :timeblock:\n%^{TIMESTAMP}T"
              :immediate-finish t)
 
-            ("w" "Work")
-            ("wb" "timeblock" entry (file+olp "health-samurai.org" "Work" "Timeblocks")
-             "* %^{TIMESTAMP}T WORK  :timeblock:"
-             :immediate-finish t
-             :empty-lines 1)))
+            ("bh" "Work" entry (file+olp "health-samurai.org" "Health Samurai" "Timeblocks")
+             "* WORK   :timeblock:\n%^{TIMESTAMP}T"
+             :immediate-finish t)
+
+            ("br" "Rest" entry (file+olp "areas/personal.org" "Personal")
+             "* relaxing  :timeblock:rest:\n%U"
+             :clock-in t
+             :clock-keep t
+             :immediate-finish t)
+
+            ("h" "Work")
+            ("ht" "TODO" entry (file+olp "health-samurai.org" "Health Samurai" "Tasks")
+             "* TODO %^{what}"
+             :immediate-finish t)))
 
   (setopt org-agenda-custom-commands
-          '(;; Archive tasks
+          `(;; Archive tasks
             ("#" "To archive" todo "DONE|CANX")
 
             ;; Review weekly appointments
@@ -92,47 +284,24 @@
 
             ;; Review weekly tasks
             ("w" "Week tasks" agenda "Scheduled tasks for this week"
-             ((org-agenda-tag-filter-preset '("-habit"))
+             ((org-agenda-tag-filter-preset '("-habit" "-routine"))
               (org-deadline-warning-days 0)
               (org-agenda-use-time-grid nil)))
 
             ;; Review daily tasks
-            ("h" "Today Journal"
-             ((agenda ""
-                      ((org-agenda-span 1)
-                       (org-agenda-start-day "0d")
-                       (org-agenda-use-time-grid t)
-                       (org-agenda-overriding-header "Schedule")
-                       (org-agenda-skip-scheduled-if-done t)
-                       (org-agenda-skip-deadline-if-done t)
-                       (org-agenda-skip-timestamp-if-done t)
-                       (org-agenda-skip-function
-                        '(unless (org-before-first-heading-p)
-                           (org-agenda-skip-entry-if 'todo '("STRT" "NEXT"))))
-                       (org-agenda-time-grid '((daily today require-timed)
-                                               ()
-                                               "......" "----------------"))
-                       (org-agenda-prefix-format
-                        '((agenda . " %i %-12:c%?-11t %s [%-4e] ")
-                          ))))
-              (todo "STRT"
-                    ((org-agenda-overriding-header "In progress")
-                     (org-agenda-skip-function nil)))
-              (todo "NEXT"
-                    ((org-agenda-overriding-header "Next actions")
-                     (org-agenda-skip-function nil)))
-              (todo "WAITING"
-                    ((org-agenda-overriding-header "Waiting / blocked")
-                     (org-agenda-skip-function nil)))))
+            ("j" "Today Journal"
+             ,(sz/org-daily-agenda-blocks))
 
-            ;; Review started and next tasks
-            ("s" "STRT/NEXT" tags-todo "TODO={STRT\\|NEXT}")
+            ("o" "Work"
+             ,(sz/org-daily-agenda-blocks)
+             ((org-agenda-files '("~/org/health-samurai.org"))))
+
+            ;; Review project tasks
+            ("p" "Top 3 TODOs per project file"
+             ,(sz/org-project-top3-todo-blocks))
 
             ;; Review other non-scheduled/deadlined to-do tasks
             ("t" "TODO" tags-todo "TODO={TODO}+DEADLINE=\"\"+SCHEDULED=\"\"")
-
-            ;; Review other non-scheduled/deadlined pending tasks
-            ("w" "WAIT" tags-todo "TODO={WAIT}+DEADLINE=\"\"+SCHEDULED=\"\"")
 
             ;; Review upcoming deadlines for the next 60 days
             ("!" "Deadlines all" agenda "Past/upcoming deadlines"
@@ -164,8 +333,10 @@ ARG is passed to `org-agenda-redo-all'."
   (appt-delete-window-function #'ignore)
   (appt-audible nil)
   (appt-display-diary nil)
-  (appt-message-warning-time 10)
+  ;; Per-entry APPT_WARNTIME overrides this default.
+  (appt-message-warning-time 0)
   (appt-display-interval 10)
+  (org-agenda-window-setup 'current-window)
 
   :config
   (require 'appt)
@@ -174,11 +345,7 @@ ARG is passed to `org-agenda-redo-all'."
 
   (unless (timerp sz/org-appt--refresh-timer)
     (setq sz/org-appt--refresh-timer
-          (run-at-time "00:01" 86400 #'sz/org-appt-refresh)))
-
-  (define-advice org-agenda (:around (orig-fun &rest args) split-vertically)
-    (let ((split-width-threshold 80))
-      (apply orig-fun args))))
+          (run-at-time "00:01" 86400 #'sz/org-appt-refresh))))
 
 (use-package org-repeat-by-cron
   :ensure t
@@ -216,6 +383,39 @@ ARG is passed to `org-agenda-redo-all'."
   (setq howm-prefix (kbd "C-c ,"))
   (setq howm-keyword-file (expand-file-name ".howm-keys" howm-directory))
   (setq howm-history-file (expand-file-name ".howm-history" howm-directory))
-  (setq howm-template "* %title%cursor\n:PROPERTIES:\n:CREATED: %date\n:END:"))
+  (setq howm-template "* %title%cursor\n:PROPERTIES:\n:CREATED: %date\n:END:")
+
+  :config
+  (defun sz/howm-vtab-window ()
+    "Return the current frame's vtab window, when vtab is active."
+    (when (and (bound-and-true-p vtab-mode)
+               (fboundp 'vtab--get-buffer))
+      (get-buffer-window (vtab--get-buffer) (selected-frame))))
+
+  (defun sz/howm-with-vtab-temporarily-deletable (fn &rest args)
+    "Let howm rebuild summary/contents windows while vtab is active."
+    (let ((vtab-window (sz/howm-vtab-window)))
+      (unwind-protect
+          (progn
+            (when (window-live-p vtab-window)
+              (set-window-parameter vtab-window 'no-delete-other-windows nil))
+            (apply fn args))
+        (when (and (bound-and-true-p vtab-mode)
+                   (fboundp 'vtab--ensure-visible))
+          (vtab--ensure-visible)))))
+
+  (advice-remove 'riffle-setup-window-configuration
+                 #'sz/howm-with-vtab-temporarily-deletable)
+  (advice-add 'riffle-setup-window-configuration
+              :around #'sz/howm-with-vtab-temporarily-deletable))
+
+(use-package org-download
+  :ensure t
+
+  :bind
+  (("C-c d C-d" . org-download-clipboard))
+
+  :config
+  (setq-default org-download-image-dir "~/org/images"))
 
 (provide 'sz-org)

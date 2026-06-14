@@ -71,6 +71,7 @@ alias docker-compose="docker compose"
 alias e="emacs -nw"
 alias n="nvim"
 alias m="make"
+alias verstak="nix run path:/home/seryiza/code/verstak -- "
 
 if [[ "$INSIDE_EMACS" ]]; then
     export PAGER=less # Emacs overrides PAGER on startup. Revert it back.

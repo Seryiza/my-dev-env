@@ -1,4 +1,7 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+let
+  chromeExecutable = pkgs.lib.getExe' pkgs.google-chrome "google-chrome-stable";
+in {
   imports = [
     ./home/sway.nix
     ./home/mako.nix
@@ -20,12 +23,14 @@
     VISUAL = "emacsclient -c -a emacs";
     SUDO_EDITOR = "emacsclient -c -a emacs";
     BROWSER = "firefox";
+    CHROME_EXECUTABLE = chromeExecutable;
   };
 
   home.sessionVariables.LOCALES_ARCHIVE =
     "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
-  home.sessionPath = [ "$HOME/.local/bin" "$HOME/go/bin" ];
+  home.sessionPath =
+    [ "$HOME/.local/bin" "$HOME/go/bin" "$HOME/.cache/npm/global/bin" ];
 
   gtk = {
     enable = true;
@@ -126,6 +131,11 @@
   home.file = {
     ".emacs.d".source = config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/code/my-dev-env/dotfiles/emacs";
+
+    # ".npmrc".text = ''
+    #   registry=https://registry.npmjs.org/
+    #   prefix=${config.home.homeDirectory}/.cache/npm/global
+    # '';
   };
 
   home.pointerCursor = {
@@ -189,6 +199,9 @@
 
   programs.bash = {
     enable = true;
+    initExtra = ''
+      export CHROME_EXECUTABLE="${chromeExecutable}"
+    '';
     bashrcExtra = builtins.readFile ../dotfiles/bashrc;
   };
 
@@ -228,6 +241,11 @@
   services.playerctld.enable = true;
 
   services.syncthing.enable = true;
+
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
 
   services.activitywatch = {
     enable = true;

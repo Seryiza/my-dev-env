@@ -16,18 +16,19 @@
 (defvar sz/org-appt--refresh-timer nil)
 
 (defun sz/notify (title body &optional category)
-  "Send a desktop notification or fall back to `message'."
-  (let* ((key (or category "default"))
-         (prev-id (gethash key sz/notification-ids 0)))
-    (if (sz/notifications-available-p)
-        (puthash key
-                 (notifications-notify
-                  :title title
-                  :body body
-                  :app-name "emacs"
-                  :replaces-id prev-id)
-                 sz/notification-ids)
-      (message "%s: %s" title body))))
+  "Send a desktop notification from the Emacs daemon only."
+  (when (daemonp)
+    (let* ((key (or category "default"))
+           (prev-id (gethash key sz/notification-ids 0)))
+      (if (sz/notifications-available-p)
+          (puthash key
+                   (notifications-notify
+                    :title title
+                    :body body
+                    :app-name "emacs"
+                    :replaces-id prev-id)
+                   sz/notification-ids)
+        (message "%s: %s" title body)))))
 
 (defun sz/mu4e--notification-item ()
   "Pick a bookmark item to notify about."

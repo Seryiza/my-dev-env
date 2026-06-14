@@ -1,8 +1,46 @@
-{ pkgs, nixpkgs-unstable, ... }@inputs:
+{ config, pkgs, nixpkgs-unstable, ... }@inputs:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  unstable-pkgs = nixpkgs-unstable.legacyPackages.${system};
+  unstable-pkgs = import nixpkgs-unstable {
+    inherit system;
+    config.allowUnfree = true;
+  };
   llm-agents-pkgs = inputs.llm-agents.packages.${system};
+  goose-desktop = pkgs.callPackage ../pkgs/goose-desktop.nix { };
+  jan-wayland = pkgs.symlinkJoin {
+    name = "jan-wayland";
+    paths = [ unstable-pkgs.jan ];
+    postBuild = ''
+      mkdir -p "$out/bin" "$out/libexec"
+
+      cat > "$out/libexec/jan-wayland-apprun" <<'EOF'
+      #!${pkgs.bash}/bin/bash
+      set -euo pipefail
+
+      source "$APPDIR/apprun-hooks/linuxdeploy-plugin-gtk.sh"
+      export GTK_CSD=0
+      export GDK_BACKEND=wayland
+      export WINIT_UNIX_BACKEND=wayland
+      export XCURSOR_THEME='${config.home.pointerCursor.name}'
+      export XCURSOR_SIZE='${toString config.home.pointerCursor.size}'
+      export XCURSOR_PATH='${config.home.pointerCursor.package}/share/icons:${pkgs.adwaita-icon-theme}/share/icons'"''${XCURSOR_PATH:+:$XCURSOR_PATH}"
+
+      exec "$APPDIR/AppRun.wrapped" "$@"
+      EOF
+      chmod +x "$out/libexec/jan-wayland-apprun"
+
+      rm -f "$out/bin/Jan"
+      cat > "$out/bin/Jan" <<'EOF'
+      #!${pkgs.bash}/bin/bash
+      set -euo pipefail
+
+      export APPIMAGE_DEBUG_EXEC="@out@/libexec/jan-wayland-apprun"
+      exec ${unstable-pkgs.jan}/bin/Jan "$@"
+      EOF
+      substituteInPlace "$out/bin/Jan" --replace-fail '@out@' "$out"
+      chmod +x "$out/bin/Jan"
+    '';
+  };
 in {
   home.packages = [
     pkgs.httpie
@@ -17,9 +55,11 @@ in {
     pkgs.libcanberra-gtk3
 
     llm-agents-pkgs.claude-code
-    llm-agents-pkgs.claude-code-acp
+    llm-agents-pkgs.claude-agent-acp
     llm-agents-pkgs.codex
     llm-agents-pkgs.codex-acp
+    llm-agents-pkgs.pi
+    llm-agents-pkgs.opencode
 
     (pkgs.google-cloud-sdk.withExtraComponents
       [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
@@ -28,8 +68,11 @@ in {
     pkgs.kubectl
     pkgs.dropbox
     pkgs.bun
-    pkgs.telegram-desktop
-    pkgs.enpass
+    pkgs.mission-center
+    unstable-pkgs.telegram-desktop
+    goose-desktop
+    # unstable because of https://github.com/NixOS/nixpkgs/issues/500724
+    unstable-pkgs.enpass
     pkgs.postgresql_17
     pkgs.onlyoffice-desktopeditors
     pkgs.gh
@@ -37,6 +80,9 @@ in {
     pkgs.inkscape
     pkgs.comfortaa
     pkgs.less
+    pkgs.pciutils
+    pkgs.clinfo
+    pkgs.vulkan-tools
     pkgs.dbeaver-bin
     pkgs.gparted
     pkgs.p7zip
@@ -71,6 +117,7 @@ in {
     pkgs.silver-searcher
     unstable-pkgs.clj-kondo
     unstable-pkgs.cljfmt
+    jan-wayland
     pkgs.ntfs3g
     pkgs.libnotify
     pkgs.iw
@@ -93,8 +140,10 @@ in {
     pkgs.clojure
     pkgs.babashka
     pkgs.emacs-lsp-booster
-    pkgs.zed-editor-fhs
+    unstable-pkgs.zed-editor-fhs
     pkgs.htop
+    pkgs.rocmPackages.rocminfo
+    pkgs.rocmPackages.rocm-smi
     pkgs.evtest
     pkgs.chntpw
     pkgs.nixfmt-classic
@@ -102,6 +151,7 @@ in {
     inputs.rep.packages.${system}.default
     pkgs.wev
     pkgs.xarchiver
+    pkgs.lsof
     pkgs.file
     pkgs.openssl
     pkgs.qrencode
@@ -120,5 +170,11 @@ in {
     pkgs.libdecor
     pkgs.loupe
     pkgs.nautilus
+    pkgs.exercism
+    unstable-pkgs.brotab
+    pkgs.gnome-font-viewer
+    pkgs.ghostty
+    pkgs.pnpm
+    pkgs.epiphany
   ];
 }
