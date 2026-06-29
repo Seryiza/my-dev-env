@@ -13,7 +13,7 @@
                 kind-icon log4e magit markdown-mode meow modus-themes
                 mu4e nix-mode orderless org-download
                 org-repeat-by-cron projectile rg super-save telega
-                tempel vertico vtab vterm yaml-mode))
+                tempel verb vertico vtab vterm yaml-mode))
  '(package-vc-selected-packages
    '((claude-code :url "https://github.com/stevemolitor/claude-code.el"))))
 

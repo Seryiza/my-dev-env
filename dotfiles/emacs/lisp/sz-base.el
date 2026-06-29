@@ -319,6 +319,12 @@ can move focus back to minibuffer input."
   :ensure t
   :hook (markdown-mode . visual-line-mode))
 
+(use-package verb
+  :ensure t
+  :after org
+  :config
+  (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
+
 (use-package yaml-mode
   :ensure t)
 
