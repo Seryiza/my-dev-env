@@ -239,7 +239,7 @@ in {
     configureUwsgi = true;
     environmentFile = "/var/lib/searxng/searx.env";
     uwsgiConfig = {
-      http = "127.0.0.1:8888";
+      http = "127.0.0.1:18888";
       disable-logging = true;
     };
     settings = {
