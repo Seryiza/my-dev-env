@@ -2,6 +2,7 @@
 
 (require 'sz-alerts)
 (require 'subr-x)
+(require 'calendar)
 
 (setq org-directory "~/org")
 (setq org-archive-location "~/org/archive/%s::")
@@ -10,6 +11,14 @@
                          "~/org/projects"))
 
 (defconst sz/org-projects-directory "~/org/projects")
+
+(defun workdayp (date)
+  "Return non-nil when DATE is a workday (Monday through Friday)."
+  (memq (calendar-day-of-week date) '(1 2 3 4 5)))
+
+(defun everydayp (date)
+  "Return non-nil when DATE is any day of the week."
+  (memq (calendar-day-of-week date) '(0 1 2 3 4 5 6)))
 
 (defun sz/meow-org-promote-subtree ()
   (interactive)
