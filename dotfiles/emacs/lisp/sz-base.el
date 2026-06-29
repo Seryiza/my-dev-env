@@ -155,11 +155,13 @@ can move focus back to minibuffer input."
   (interactive)
   (sz/move-or-switch-tab 'above))
 
-(define-obsolete-function-alias
-  'sz/right-or-tab-next 'sz/below-or-tab-next "2026-05-13")
+(defun sz/left-or-tab-previous ()
+  (interactive)
+  (sz/move-or-switch-tab 'left))
 
-(define-obsolete-function-alias
-  'sz/left-or-tab-previous 'sz/above-or-tab-previous "2026-05-13")
+(defun sz/right-or-tab-next ()
+  (interactive)
+  (sz/move-or-switch-tab 'right))
 
 ;; === Packages
 
@@ -545,28 +547,44 @@ can move focus back to minibuffer input."
 ;;    ("C-x C-a g" . activities-revert)
 ;;    ("C-x C-a l" . activities-list)))
 
-(use-package vtab
-  :ensure nil
-  :load-path "~/code/vtab"
-  :demand t
+;; (use-package vtab
+;;   :ensure nil
+;;   :load-path "~/code/vtab"
+;;   :demand t
 
+;;   :bind*
+;;   (("M-j" . sz/below-or-tab-next)
+;;    ("M-k" . sz/above-or-tab-previous)
+;;    ("M-n" . tab-new)
+;;    ("M-u" . tab-close))
+
+;;   :custom
+;;   ;; Keep Emacs' horizontal tab bar hidden after commands like `tab-new'.
+;;   (tab-bar-show nil)
+;;   (vtab-window-width 30)
+;;   (vtab-hide-cursor t)
+;;   (vtab-hide-mode-line nil)
+;;   (vtab-hide-scroll-bars nil)
+;;   (vtab-active-fill-width t)
+
+;;   :config
+;;   (vtab-mode 1))
+
+(use-package emacs
+  :ensure nil
   :bind*
-  (("M-j" . sz/below-or-tab-next)
-   ("M-k" . sz/above-or-tab-previous)
+  (("M-h" . sz/left-or-tab-previous)
+   ("M-j" . windmove-down)
+   ("M-k" . windmove-up)
+   ("M-l" . sz/right-or-tab-next)
    ("M-n" . tab-new)
    ("M-u" . tab-close))
 
-  :custom
-  ;; Keep Emacs' horizontal tab bar hidden after commands like `tab-new'.
-  (tab-bar-show nil)
-  (vtab-window-width 30)
-  (vtab-hide-cursor t)
-  (vtab-hide-mode-line nil)
-  (vtab-hide-scroll-bars nil)
-  (vtab-active-fill-width t)
-
   :config
-  (vtab-mode 1))
+  (tab-bar-mode 1)
+  (setq tab-bar-close-button-show nil)
+  (setq tab-bar-new-tab-choice "*scratch*")
+  (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator)))
 
 (use-package all-the-icons
   :ensure t

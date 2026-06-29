@@ -17,9 +17,9 @@
       (let ((tab-bg (modus-themes-get-color-value 'bg-tab-current :overrides))
             (tab-inactive-bg (modus-themes-get-color-value 'bg-tab-other :overrides)))
         (custom-set-faces
-         ;; '(tab-bar ((t (:height 0.8))))
-         ;; `(tab-bar-tab ((t (:box (:line-width (8 . 2) :color ,tab-bg :style nil)))))
-         ;; `(tab-bar-tab-inactive ((t (:box (:line-width (8 . 2) :color ,tab-inactive-bg :style nil)))))
+         '(tab-bar ((t (:height 0.8))))
+         `(tab-bar-tab ((t (:box (:line-width (8 . 2) :color ,tab-bg :style nil)))))
+         `(tab-bar-tab-inactive ((t (:box (:line-width (8 . 2) :color ,tab-inactive-bg :style nil)))))
          '(vtab-active-face ((t (:background "black" :foreground "white"))))))))
 
   :init
