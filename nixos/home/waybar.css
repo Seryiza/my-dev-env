@@ -16,14 +16,18 @@ window#waybar.hidden {
     opacity: 0.2;
 }
 
-.modules-right .module {
+.modules-right > * {
     padding: 0 10px;
+}
+
+.modules-right > widget:last-child {
+    padding: 0;
 }
 
 /*
 window#waybar.empty {
     background-color: transparent;
-}
+
 window#waybar.solo {
     background-color: #FFFFFF;
 }
@@ -101,6 +105,8 @@ button:hover {
 #custom-media,
 #custom-org_timeblock,
 #custom-org_clock,
+#sway-language,
+#language,
 #tray,
 #mode,
 #idle_inhibitor,
@@ -111,9 +117,13 @@ button:hover {
     color: #ffffff;
 }
 
+/* #sway-language { */
+/*     text-transform: capitalize; */
+/* } */
+
 #window,
 #workspaces {
-    margin: 0 15px;
+    margin: 0;
 }
 
 /* If workspaces is the leftmost module, omit left margin */

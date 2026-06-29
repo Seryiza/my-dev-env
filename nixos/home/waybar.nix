@@ -11,9 +11,6 @@
         height = 20;
         spacing = 0;
         modules-left = [
-          "sway/workspaces"
-          "sway/mode"
-          "sway/scratchpad"
           "sway/window"
         ];
         modules-center = [ ];
@@ -53,6 +50,7 @@
           tooltip-format = "{:%A, %d %B %Y}\n\n{tz_list}\n\n<tt><small>{calendar}</small></tt>";
           timezone-tooltip-format = "{:%Z: %H:%M}";
           timezones = [
+            "Asia/Bishkek"
             "Europe/Copenhagen"
             "Asia/Sakhalin"
             "Europe/Moscow"
@@ -118,11 +116,15 @@
         height = 20;
         spacing = 0;
         modules-left = [
+          "sway/mode"
+          "sway/scratchpad"
           "custom/org_timeblock"
           "custom/org_clock"
         ];
         modules-center = [ ];
-        modules-right = [ ];
+        modules-right = [
+          "sway/workspaces"
+        ];
 
         "custom/org_timeblock" = {
           exec = "${config.home.homeDirectory}/.local/bin/waybar-org-timeblock";
