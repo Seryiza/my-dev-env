@@ -1,4 +1,9 @@
-{ config, pkgs, nixpkgs-unstable, ... }@inputs:
+{
+  config,
+  pkgs,
+  nixpkgs-unstable,
+  ...
+}@inputs:
 let
   system = pkgs.stdenv.hostPlatform.system;
   unstable-pkgs = import nixpkgs-unstable {
@@ -41,7 +46,8 @@ let
       chmod +x "$out/bin/Jan"
     '';
   };
-in {
+in
+{
   home.packages = [
     pkgs.httpie
     pkgs.gnumake
@@ -53,6 +59,7 @@ in {
 
     pkgs.yaru-theme
     pkgs.libcanberra-gtk3
+    pkgs.steam-run
 
     llm-agents-pkgs.claude-code
     llm-agents-pkgs.claude-agent-acp
@@ -60,9 +67,11 @@ in {
     llm-agents-pkgs.codex-acp
     llm-agents-pkgs.pi
     llm-agents-pkgs.opencode
+    llm-agents-pkgs.spec-kit
 
-    (pkgs.google-cloud-sdk.withExtraComponents
-      [ pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
+    (pkgs.google-cloud-sdk.withExtraComponents [
+      pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+    ])
 
     pkgs.google-chrome
     pkgs.kubectl
@@ -177,5 +186,8 @@ in {
     pkgs.ghostty
     pkgs.pnpm
     pkgs.epiphany
+    pkgs.chez
+    pkgs.cambalache
+    pkgs.postman
   ];
 }
