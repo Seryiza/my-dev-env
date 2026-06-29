@@ -57,8 +57,27 @@
   (when (fboundp 'which-key-show-keymap)
     (which-key-show-keymap "Telega (msg)" sz/telega-msg-button-map--orig)))
 
+(defun sz/telega-msg-mark-toggle-no-move (msg)
+  "Toggle mark for telega MSG without moving point to the next message."
+  (interactive (list (telega-msg-for-interactive)))
+  (let ((point-marker (copy-marker (point-marker)))
+        (window-start-marker (copy-marker (window-start))))
+    (unwind-protect
+        (progn
+          (telega-msg-mark-toggle msg)
+          (goto-char point-marker)
+          (when (eq (window-buffer) (current-buffer))
+            (set-window-start (selected-window) window-start-marker t)))
+      (set-marker point-marker nil)
+      (set-marker window-start-marker nil))))
+
 (use-package telega
   :ensure nil
+  :bind
+  (:map telega-chat-mode-map
+        ("C-c C-j C-i" . sz/telega-capture-message-to-inbox)
+        ([remap meow-delete] . telega-msg-delete-dwim)
+        ([remap meow-line] . sz/telega-msg-mark-toggle-no-move))
   :init
   (setopt telega-use-images t)
   (setopt telega-emoji-use-images nil)
@@ -71,6 +90,9 @@
             (let ((buf (window-buffer (selected-window))))
               (derived-mode-p 'telega-root-mode 'telega-chat-mode))))
   :config
+  (require 'sz-telega-capture-message-to-inbox
+           (locate-user-emacs-file "lisp/functions/sz-telega-capture-message-to-inbox.el"))
+
   (unless sz/telega-msg-button-map--orig
     (setq sz/telega-msg-button-map--orig (copy-keymap telega-msg-button-map))
     (define-key telega-chat-mode-map (kbd "M-m") #'sz/telega-msg-keys))
