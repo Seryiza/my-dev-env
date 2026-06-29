@@ -1,9 +1,4 @@
 { config, pkgs, nixpkgs-unstable, lib, ... }: {
-  home.activation.clearTofiDrunCache =
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      rm -f "${config.xdg.cacheHome}/tofi-drun"
-    '';
-
   services.swayidle = {
     enable = true;
 
@@ -68,8 +63,8 @@
           "${modifier}+Return" = "exec alacritty";
           "${modifier}+Escape" = "exec swaylock -c 000000";
           "${modifier}+u" = "kill";
-          "${modifier}+n" = "exec tofi-drun | xargs swaymsg exec --";
-          "${modifier}+Alt+n" = "exec tofi-run | xargs swaymsg exec --";
+          "${modifier}+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
+          "${modifier}+Alt+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
           "${modifier}+m" = "exec emacsclient -c";
           "${modifier}+Shift+b" = "exec run-work-browser";
           "${modifier}+Alt+space" = "sticky toggle";

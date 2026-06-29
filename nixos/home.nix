@@ -197,21 +197,6 @@ in {
 
   programs.mpv = { enable = true; };
 
-  programs.tofi = {
-    enable = true;
-    settings = {
-      background-color = "#000000CC";
-      border-width = 0;
-      font = "monospace";
-      height = "50%";
-      num-results = 10;
-      font-size = 16;
-      outline-width = 0;
-      result-spacing = 20;
-      width = "50%";
-    };
-  };
-
   programs.bash = {
     enable = true;
     initExtra = ''

@@ -112,6 +112,7 @@ in {
     pkgs.qbittorrent
     pkgs.rclone
     pkgs.wl-clipboard
+    pkgs.wmenu
     pkgs.grim
     pkgs.slurp
     pkgs.silver-searcher
