@@ -78,8 +78,10 @@
 (blink-cursor-mode t)
 (setopt blink-cursor-interval 0.7)
 
-;; (when (fboundp 'pixel-scroll-precision-mode)
-;;   (pixel-scroll-precision-mode))
+(setq scroll-margin 1
+      scroll-conservatively 10000
+      scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01)
 
 (unless (display-graphic-p)
   (require 'term/xterm)
@@ -448,7 +450,8 @@ can move focus back to minibuffer input."
 (use-package nix-mode
   :ensure t
   :mode "\\.nix^\\'"
-  :hook (before-save . nix-format-before-save))
+  ;; :hook (before-save . nix-format-before-save)
+  )
 
 (use-package windmove
   :ensure nil
