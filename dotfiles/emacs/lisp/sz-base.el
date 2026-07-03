@@ -207,7 +207,12 @@ Return nil when Sway should fall back to its own directional focus."
               ("," . make-directory))
   :config
   ;; Must include "-l" per the manual.
-  (setq dired-listing-switches "-al --group-directories-first"))
+  (setq dired-listing-switches "-al --group-directories-first")
+  (setq dired-kill-when-opening-new-dired-buffer t)
+  (setq dired-dwim-target t)
+  (setq delete-by-moving-to-trash t)
+  (setq dired-free-space nil)
+  (setq dired-auto-revert-buffer t))
 
 (use-package consult
   :ensure t
