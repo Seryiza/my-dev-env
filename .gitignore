@@ -1,6 +1,7 @@
 /passwords.yml
 /vault-password
 .codex
+/.agent-shell
 
 /.vagrant
 /*.log
@@ -10,10 +11,13 @@
 
 /dotfiles/emacs/.cache
 /dotfiles/emacs/.lsp-session-v1
+/dotfiles/emacs/agent
 /dotfiles/emacs/eln-cache
 /dotfiles/emacs/elpa
+/dotfiles/emacs/eshell
 /dotfiles/emacs/quelpa
 /dotfiles/emacs/tree-sitter
+/dotfiles/emacs/transient
 /dotfiles/emacs/emacs-backup
 /dotfiles/emacs/auto-save-list
 /dotfiles/emacs/projectile-bookmarks.eld

@@ -33,10 +33,16 @@
 (setopt make-backup-files t)
 (setopt create-lockfiles nil)
 
-(let ((backup-dir (locate-user-emacs-file "backups/")))
+(let* ((state-root (or (getenv "XDG_STATE_HOME")
+                       (expand-file-name "~/.local/state/")))
+       (emacs-state-dir (expand-file-name "emacs/" state-root))
+       (backup-dir (expand-file-name "backups/" emacs-state-dir))
+       (auto-save-dir (expand-file-name "auto-save-list/" emacs-state-dir)))
   (make-directory backup-dir t)
+  (make-directory auto-save-dir t)
   (setq backup-directory-alist `(("." . ,backup-dir))
-        auto-save-file-name-transforms `((".*" ,backup-dir t))
+        auto-save-file-name-transforms `((".*" ,auto-save-dir t))
+        auto-save-list-file-prefix (expand-file-name ".saves-" auto-save-dir)
         backup-by-copying t
         delete-old-versions t
         kept-new-versions 6
