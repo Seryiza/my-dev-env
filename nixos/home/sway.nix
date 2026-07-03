@@ -58,6 +58,10 @@
       keybindings =
         let modifier = config.wayland.windowManager.sway.config.modifier;
         in lib.mkOptionDefault {
+          "${modifier}+h" = lib.mkForce "exec sway-smart-focus left";
+          "${modifier}+j" = lib.mkForce "exec sway-smart-focus down";
+          "${modifier}+k" = lib.mkForce "exec sway-smart-focus up";
+          "${modifier}+l" = lib.mkForce "exec sway-smart-focus right";
           "${modifier}+Alt+h" = "workspace prev";
           "${modifier}+Alt+l" = "workspace next";
           "${modifier}+Return" = "exec alacritty";

@@ -1,6 +1,7 @@
 ;; === Base options
 
 (require 'sz-alerts)
+(require 'seq)
 
 (setopt initial-major-mode 'fundamental-mode)
 (setopt display-time-default-load-average nil)
@@ -135,17 +136,51 @@
   (load user-init-file nil t t)   ; noerror=nil, nomessage=t, nosuffix=t
   (message "Reloaded %s" user-init-file))
 
+(defun sz/current-tab-index ()
+  "Return the zero-based index of the current tab."
+  (seq-position (funcall tab-bar-tabs-function)
+                'current-tab
+                (lambda (tab marker)
+                  (eq (car tab) marker))))
+
+(defun sz/tab-next-no-wrap ()
+  "Switch to the next tab without wrapping.
+Return non-nil when a tab was selected."
+  (let* ((tabs (funcall tab-bar-tabs-function))
+         (index (sz/current-tab-index)))
+    (when (and index (< index (1- (length tabs))))
+      (tab-bar-select-tab (+ index 2))
+      t)))
+
+(defun sz/tab-previous-no-wrap ()
+  "Switch to the previous tab without wrapping.
+Return non-nil when a tab was selected."
+  (let ((index (sz/current-tab-index)))
+    (when (and index (> index 0))
+      (tab-bar-select-tab index)
+      t)))
+
 (defun sz/move-or-switch-tab (direction)
   "Move to window in DIRECTION, or switch tabs when none exists.
 An active minibuffer counts as a window target so the movement keys
-can move focus back to minibuffer input."
+can move focus back to minibuffer input.  Tab switching does not wrap
+from the last tab to the first, or from the first tab to the last.
+Return non-nil when Emacs handled the movement."
   (let ((target (window-in-direction direction)))
-    (if target
+    (cond
+     (target
       (select-window target)
+      t)
+     ((memq direction '(right below))
+      (sz/tab-next-no-wrap))
+     (t
+      (sz/tab-previous-no-wrap)))))
 
-      (if (memq direction '(right below))
-        (tab-next)
-        (tab-previous)))))
+(defun sz/sway-nav (direction)
+  "Handle Sway-dispatched directional navigation inside Emacs.
+Return non-nil when Emacs moved to another window or non-wrapping tab.
+Return nil when Sway should fall back to its own directional focus."
+  (sz/move-or-switch-tab direction))
 
 (defun sz/below-or-tab-next ()
   (interactive)

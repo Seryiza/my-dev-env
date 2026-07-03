@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction=${1:-}
+
+case "$direction" in
+  h|left)
+    sway_direction=left
+    emacs_direction=left
+    ;;
+  j|down)
+    sway_direction=down
+    emacs_direction=below
+    ;;
+  k|up)
+    sway_direction=up
+    emacs_direction=above
+    ;;
+  l|right)
+    sway_direction=right
+    emacs_direction=right
+    ;;
+  *)
+    printf 'usage: %s {h|j|k|l|left|down|up|right}\n' "$0" >&2
+    exit 64
+    ;;
+esac
+
+focused_app_is_emacs() {
+  swaymsg -t get_tree \
+    | jq -e '
+      ..
+      | objects
+      | select(.focused == true)
+      | (
+          (.app_id? == "emacs")
+          or ((.window_properties?.class? // "") | test("^[Ee]macs$"))
+          or ((.window_properties?.instance? // "") | test("^[Ee]macs$"))
+        )
+    ' >/dev/null
+}
+
+if focused_app_is_emacs; then
+  if result=$(emacsclient --eval "(sz/sway-nav '$emacs_direction)" 2>/dev/null); then
+    if [[ "$result" == "t" ]]; then
+      exit 0
+    fi
+  fi
+fi
+
+exec swaymsg "focus $sway_direction" >/dev/null

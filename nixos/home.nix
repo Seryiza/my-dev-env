@@ -144,6 +144,12 @@ in {
       force = true;
     };
 
+    ".local/bin/sway-smart-focus" = {
+      source = ../scripts/sway-smart-focus;
+      executable = true;
+      force = true;
+    };
+
     # ".npmrc".text = ''
     #   registry=https://registry.npmjs.org/
     #   prefix=${config.home.homeDirectory}/.cache/npm/global
