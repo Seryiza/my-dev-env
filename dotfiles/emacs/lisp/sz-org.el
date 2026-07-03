@@ -10,8 +10,6 @@
                          "~/org/areas"
                          "~/org/projects"))
 
-(defconst sz/org-projects-directory "~/org/projects")
-
 (defun workdayp (date)
   "Return non-nil when DATE is a workday (Monday through Friday)."
   (memq (calendar-day-of-week date) '(1 2 3 4 5)))
@@ -65,10 +63,42 @@ data."
         (org-display-inline-images nil t beg (point)))
     (yank arg)))
 
+(defun sz/org-files-in-directory (directory)
+  "Return Org files under DIRECTORY recursively."
+  (let ((directory (expand-file-name directory)))
+    (when (file-directory-p directory)
+      (directory-files-recursively directory "\\.org\\'"))))
+
+(defun sz/org-refile-area-files ()
+  "Return Org refile files from areas."
+  (sz/org-files-in-directory "~/org/areas"))
+
+(defun sz/org-refile-project-files ()
+  "Return Org refile files from projects."
+  (sz/org-files-in-directory "~/org/projects"))
+
+(defun sz/org-area-or-project-file-p (file)
+  "Return non-nil when FILE is in Org areas or projects."
+  (and (stringp file)
+       (let ((file (expand-file-name file)))
+         (or (file-in-directory-p file (expand-file-name "~/org/areas/"))
+             (file-in-directory-p file (expand-file-name "~/org/projects/"))))))
+
+(defun sz/org-filter-refile-targets (targets)
+  "Drop bare file targets for Org areas/projects."
+  (delq nil
+        (mapcar (lambda (target)
+                  (unless (and (null (nth 2 target))
+                               (null (nth 3 target))
+                               (sz/org-area-or-project-file-p (nth 1 target)))
+                    target))
+                targets)))
+
 (defun sz/org-project-files ()
-  "Return direct Org files from `sz/org-projects-directory'."
-  (when (file-directory-p sz/org-projects-directory)
-    (directory-files sz/org-projects-directory t "\\.org\\'")))
+  "Return direct Org files from projects."
+  (let ((directory (expand-file-name "~/org/projects")))
+    (when (file-directory-p directory)
+      (directory-files directory t "\\.org\\'"))))
 
 (defun sz/org-project-top3-todo-blocks ()
   "Return agenda blocks with up to 3 TODO items per project file."
@@ -219,7 +249,13 @@ data."
         '((sequence "TODO(t)" "NEXT(n)" "STRT(s!)" "WAIT(w!)" "|" "DONE(d)" "CANX(c)")))
 
   (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-use-outline-path 'file)
+  (setq org-refile-use-outline-path 'full-file-path)
+  (setopt org-refile-targets
+          '((nil . (:level . 1))
+            (sz/org-refile-area-files . (:level . 1))
+            (sz/org-refile-project-files . (:level . 1))))
+  (advice-remove 'org-refile-get-targets #'sz/org-filter-refile-targets)
+  (advice-add 'org-refile-get-targets :filter-return #'sz/org-filter-refile-targets)
   (setq org-link-descriptive nil)
 
   (setq org-log-into-drawer "LOGBOOK")
