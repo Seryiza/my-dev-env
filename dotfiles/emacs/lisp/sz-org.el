@@ -208,9 +208,6 @@ data."
     (todo "STRT"
           ((org-agenda-overriding-header "STRT")
            (org-agenda-skip-function nil)))
-    (todo "NEXT"
-          ((org-agenda-overriding-header "NEXT")
-           (org-agenda-skip-function nil)))
     (todo "WAIT"
           ((org-agenda-overriding-header "WAIT")
            (org-agenda-skip-function nil)))))
@@ -222,8 +219,7 @@ data."
   :hook
   ((org-mode . visual-line-mode)
    (org-agenda-mode . hl-line-mode)
-   (org-mode . org-indent-mode)
-   (org-mode . howm-mode))
+   (org-mode . org-indent-mode))
 
   :bind
   (("C-c j a" . org-agenda)
@@ -404,6 +400,7 @@ ARG is passed to `org-agenda-redo-all'."
   :hook
   (howm-view-contents-mode . howm-org-font-lock-minor-mode)
   (howm-view-summary-mode . howm-org-font-lock-minor-mode)
+  (org-mode . howm-mode)
 
   :init
   (setq howm-view-title-header "*")

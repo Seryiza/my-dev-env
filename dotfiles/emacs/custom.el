@@ -7,13 +7,14 @@
    '("a75fc55d480accd6f651d1bae492b7ab4c5b28894350b63ef39bf947bb8fd453"
      default))
  '(package-selected-packages
-   '(activities add-node-modules-path agent-shell all-the-icons cape
-                cider claude-code compat consult corfu-terminal eat
-                elfeed-org flycheck-clj-kondo gntp howm json-mode
-                kind-icon log4e magit markdown-mode meow modus-themes
-                mu4e nix-mode orderless org-download
-                org-repeat-by-cron projectile rg super-save telega
-                tempel verb vertico vtab vterm yaml-mode))
+   '(add-node-modules-path agent-shell all-the-icons cape cider consult
+                           corfu-terminal eat elfeed-org
+                           flycheck-clj-kondo howm inheritenv
+                           json-mode kind-icon magit markdown-mode
+                           meow modus-themes mu4e nix-mode orderless
+                           org-download org-repeat-by-cron projectile
+                           rg super-save telega tempel verb vertico
+                           vterm yaml-mode))
  '(package-vc-selected-packages
    '((claude-code :url "https://github.com/stevemolitor/claude-code.el"))))
 
