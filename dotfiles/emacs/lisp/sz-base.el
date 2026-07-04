@@ -204,6 +204,17 @@ Return nil when Sway should fall back to its own directional focus."
   (interactive)
   (sz/move-or-switch-tab 'right))
 
+(defun sz/sway-close ()
+  "Handle Sway-dispatched close action inside Emacs.
+Close the current tab when more than one tab exists in the selected
+frame.  When this is the frame's only tab, close the selected frame
+instead.  Return non-nil when Emacs handled the close request."
+  (let ((tabs (funcall tab-bar-tabs-function)))
+    (if (> (length tabs) 1)
+        (tab-close)
+      (delete-frame nil t)))
+  t)
+
 ;; === Packages
 
 ;; Dired is built-in, so use :ensure nil.

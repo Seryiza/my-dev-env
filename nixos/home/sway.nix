@@ -66,7 +66,7 @@
           "${modifier}+Alt+l" = "workspace next";
           "${modifier}+Return" = "exec alacritty";
           "${modifier}+Escape" = "exec swaylock -c 000000";
-          "${modifier}+u" = "kill";
+          "${modifier}+u" = lib.mkForce "exec sway-smart-close";
           "${modifier}+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
           "${modifier}+Alt+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
           "${modifier}+m" = "exec emacsclient -c";
