@@ -4,8 +4,6 @@ set -eu
 SYSTEMCTL="${SYSTEMCTL:-/run/current-system/sw/bin/systemctl}"
 EMACSCLIENT="${EMACSCLIENT:-/run/current-system/sw/bin/emacsclient}"
 EMACS_SERVICE="${EMACS_SERVICE:-emacs.service}"
-PLACEHOLDER="${PLACEHOLDER:-no clock}"
-
 # Only query the Emacs daemon managed by the systemd user service.
 # Do not pass emacsclient -a/--alternate-editor: that would spawn a new Emacs
 # daemon when the service/socket is unavailable.
@@ -27,7 +25,7 @@ else
 fi
 
 case "$out" in
-  nil|"") printf '%s\n\n%s\n' "$PLACEHOLDER" "no-clock"; exit 0 ;;
+  nil|"") printf '\n\n\n'; exit 0 ;;
   \"*\") out=${out#\"}; out=${out%\"} ;;
 esac
 

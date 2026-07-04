@@ -132,6 +132,7 @@
           format = "{text}";
           max-length = 60;
           escape = true;
+          hide-empty-text = true;
         };
 
         "custom/org_clock" = {
@@ -140,6 +141,7 @@
           format = "{text}";
           max-length = 60;
           escape = true;
+          hide-empty-text = true;
         };
       }
     ];
