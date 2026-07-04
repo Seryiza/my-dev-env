@@ -204,6 +204,13 @@ Return nil when Sway should fall back to its own directional focus."
   (interactive)
   (sz/move-or-switch-tab 'right))
 
+(defun sz/sway-new-tab ()
+  "Handle Sway-dispatched new-Emacs action inside Emacs.
+Open a new tab in the current frame.  Return non-nil when Emacs
+handled the request."
+  (tab-new)
+  t)
+
 (defun sz/sway-close ()
   "Handle Sway-dispatched close action inside Emacs.
 Close the current tab when more than one tab exists in the selected

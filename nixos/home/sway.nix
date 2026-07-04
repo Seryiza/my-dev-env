@@ -69,7 +69,8 @@
           "${modifier}+u" = lib.mkForce "exec sway-smart-close";
           "${modifier}+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
           "${modifier}+Alt+n" = ''exec wmenu-run -i -b -l 10 -f "Iosevka 14"'';
-          "${modifier}+m" = "exec emacsclient -c";
+          "${modifier}+m" = lib.mkForce "exec sway-smart-open";
+          "${modifier}+Alt+m" = lib.mkForce "exec emacsclient -c";
           "${modifier}+Shift+b" = "exec run-work-browser";
           "${modifier}+Alt+space" = "sticky toggle";
           "${modifier}+e" = "exec swaymsg exec -- QT_QPA_PLATFORM=xcb Enpass";

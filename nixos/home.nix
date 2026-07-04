@@ -156,6 +156,12 @@ in {
       force = true;
     };
 
+    ".local/bin/sway-smart-open" = {
+      source = ../scripts/sway-smart-open;
+      executable = true;
+      force = true;
+    };
+
     # ".npmrc".text = ''
     #   registry=https://registry.npmjs.org/
     #   prefix=${config.home.homeDirectory}/.cache/npm/global
